@@ -28,8 +28,6 @@ export default class TagEntityView extends React.Component {
   static contextType = NerdletStateContext;
   state = {
     firstTagKey: 'account',
-    secondTagKey: 'accountId',
-    thirdTagKey: undefined,
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: []
@@ -39,8 +37,6 @@ export default class TagEntityView extends React.Component {
     const urlState = this.context || {};
     this.setState({
       firstTagKey: urlState.entityViewFirstTagKey || 'account',
-      secondTagKey: urlState.entityViewSecondTagKey || 'accountId',
-      thirdTagKey: urlState.entityViewThirdTagKey,
       [`table_column_${urlState.entityViewSortColumn || 1}`]:
         urlState.entityViewSortDirection ||
         TableHeaderCell.SORTING_TYPE.ASCENDING
@@ -67,16 +63,6 @@ export default class TagEntityView extends React.Component {
     nerdlet.setUrlState({ entityViewFirstTagKey: firstTagKey });
   };
 
-  updateSecondTagKey = secondTagKey => {
-    this.setState({ secondTagKey });
-    nerdlet.setUrlState({ entityViewSecondTagKey: secondTagKey });
-  };
-
-  updateThirdTagKey = thirdTagKey => {
-    this.setState({ thirdTagKey });
-    nerdlet.setUrlState({ entityViewThirdTagKey: thirdTagKey });
-  };
-
   getTagKeys = () => {
     const { tagHierarchy } = this.props;
     return Object.keys(tagHierarchy).sort();
@@ -84,7 +70,7 @@ export default class TagEntityView extends React.Component {
 
   getTableData = () => {
     const { tagHierarchy } = this.props;
-    const { firstTagKey, secondTagKey, thirdTagKey } = this.state;
+    const { firstTagKey } = this.state;
 
     const entities = {};
     for (const tagData of Object.values(tagHierarchy)) {
@@ -94,9 +80,7 @@ export default class TagEntityView extends React.Component {
             entities[entity.guid] = {
               entityName: entity.name,
               entityGuid: entity.guid,
-              firstTagValue: this.findTagValue(entity, firstTagKey),
-              secondTagValue: this.findTagValue(entity, secondTagKey),
-              thirdTagValue: this.findTagValue(entity, thirdTagKey)
+              firstTagValue: this.findTagValue(entity, firstTagKey)
             };
           }
         }
@@ -128,11 +112,9 @@ export default class TagEntityView extends React.Component {
   };
 
   render() {
-    const { updateFirstTagKey, updateSecondTagKey, updateThirdTagKey } = this;
+    const { updateFirstTagKey } = this;
     const {
       firstTagKey,
-      secondTagKey,
-      thirdTagKey,
       selectedEntities,
       selectedEntityIds
     } = this.state;
@@ -150,7 +132,7 @@ export default class TagEntityView extends React.Component {
         >
           <div>
             <div>
-              Show these tags in the table:
+              Show values for this tag in the table:
               <Dropdown
                 style={{ display: 'inline', margin: '0 1em' }}
                 title={firstTagKey}
@@ -165,44 +147,6 @@ export default class TagEntityView extends React.Component {
                   <DropdownItem
                     key={`d-${index}`}
                     onClick={() => updateFirstTagKey(item)}
-                  >
-                    {item}
-                  </DropdownItem>
-                )}
-              </Dropdown>
-              <Dropdown
-                style={{ display: 'inline', margin: '0 1em' }}
-                title={secondTagKey}
-                items={tagKeys}
-                style={{
-                  display: 'inline-block',
-                  margin: '0 .5em',
-                  verticalAlign: 'middle'
-                }}
-              >
-                {({ item, index }) => (
-                  <DropdownItem
-                    key={`d-${index}`}
-                    onClick={() => updateSecondTagKey(item)}
-                  >
-                    {item}
-                  </DropdownItem>
-                )}
-              </Dropdown>
-              <Dropdown
-                style={{ display: 'inline', margin: '0 1em' }}
-                title={thirdTagKey}
-                items={tagKeys}
-                style={{
-                  display: 'inline-block',
-                  margin: '0 .5em',
-                  verticalAlign: 'middle'
-                }}
-              >
-                {({ item, index }) => (
-                  <DropdownItem
-                    key={`d-${index}`}
-                    onClick={() => updateThirdTagKey(item)}
                   >
                     {item}
                   </DropdownItem>
@@ -290,24 +234,6 @@ export default class TagEntityView extends React.Component {
               >
                 {firstTagKey}
               </TableHeaderCell>
-              <TableHeaderCell
-                value={({ item }) => item.secondTagValue}
-                sortable
-                sortingType={this.state.table_column_2}
-                sortingOrder={3}
-                onClick={this.setSortingColumn.bind(this, 2)}
-              >
-                {secondTagKey}
-              </TableHeaderCell>
-              <TableHeaderCell
-                value={({ item }) => item.thirdTagValue}
-                sortable
-                sortingType={this.state.table_column_3}
-                sortingOrder={3}
-                onClick={this.setSortingColumn.bind(this, 3)}
-              >
-                {thirdTagKey}
-              </TableHeaderCell>
             </TableHeader>
 
             {({ item }) => (
@@ -318,8 +244,6 @@ export default class TagEntityView extends React.Component {
                   </Link>
                 </TableRowCell>
                 <TableRowCell>{item.firstTagValue}</TableRowCell>
-                <TableRowCell>{item.secondTagValue}</TableRowCell>
-                <TableRowCell>{item.thirdTagValue}</TableRowCell>
               </TableRow>
             )}
           </Table>
