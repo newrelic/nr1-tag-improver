@@ -1,20 +1,20 @@
-import React from "react";
+import React from 'react';
 import {
   HeadingText,
   PlatformStateContext,
   BlockText,
   Button,
-  NerdGraphMutation,
-} from "nr1";
-import Autocomplete from "./autocomplete";
+  NerdGraphMutation
+} from 'nr1';
+import Autocomplete from './autocomplete';
 
-const emptyTagPlaceholderKey = "🏷️helloIAmTag";
+const emptyTagPlaceholderKey = '🏷️helloIAmTag';
 
 const ENTITY_UPDATE_STATUS = {
   NONE: 0,
   UPDATING: 1,
   SUCCESS: 2,
-  ERROR: 3,
+  ERROR: 3
 };
 
 export default class TagBulkAdd extends React.Component {
@@ -23,8 +23,8 @@ export default class TagBulkAdd extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      tagsToAdd: { [emptyTagPlaceholderKey]: "" },
-      entityStatuses: {},
+      tagsToAdd: { [emptyTagPlaceholderKey]: '' },
+      entityStatuses: {}
     };
   }
 
@@ -33,7 +33,7 @@ export default class TagBulkAdd extends React.Component {
     const { tagsToAdd, entityStatuses } = this.state;
     const tagsForGql = Object.entries(tagsToAdd).map(([tagKey, tagValue]) => ({
       key: tagKey,
-      values: [tagValue],
+      values: [tagValue]
     }));
     const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
       taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
@@ -53,7 +53,7 @@ export default class TagBulkAdd extends React.Component {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
-    entitiesToUpdate.forEach((entityId) => {
+    entitiesToUpdate.forEach(entityId => {
       if (!statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
@@ -72,13 +72,13 @@ export default class TagBulkAdd extends React.Component {
             {
               entityStatuses: {
                 ...this.state.entityStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
-              },
+                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
+              }
             },
             () => {
               if (
                 Object.values(this.state.entityStatuses).every(
-                  (status) => status === ENTITY_UPDATE_STATUS.SUCCESS
+                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
                 )
               ) {
                 this.props.reloadTagsFn(selectedEntityIds);
@@ -87,12 +87,12 @@ export default class TagBulkAdd extends React.Component {
           );
         }
       } catch (error) {
-        console.log("Add tag error for " + entityId, error);
+        console.log(`Add tag error for ${entityId}`, error);
         this.setState({
           entityStatuses: {
             ...this.state.entityStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR,
-          },
+            [entityId]: ENTITY_UPDATE_STATUS.ERROR
+          }
         });
       }
     });
@@ -100,12 +100,12 @@ export default class TagBulkAdd extends React.Component {
 
   changeTag = (fromTag, toTag) => {
     const newTags = { ...this.state.tagsToAdd };
-    newTags[toTag] = newTags[fromTag] || "";
+    newTags[toTag] = newTags[fromTag] || '';
     delete newTags[fromTag];
     this.setState({ tagsToAdd: newTags });
   };
 
-  removeTag = (tag) => {
+  removeTag = tag => {
     const newTags = { ...this.state.tagsToAdd };
     delete newTags[tag];
     this.setState({ tagsToAdd: newTags });
@@ -119,7 +119,7 @@ export default class TagBulkAdd extends React.Component {
   addNewTag = () => {
     const { tagsToAdd } = this.state;
     this.setState({
-      tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: "" },
+      tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: '' }
     });
   };
 
@@ -129,7 +129,7 @@ export default class TagBulkAdd extends React.Component {
     const currentTagList = Object.keys(tagsToAdd);
     const existingTags = Object.keys(tagHierarchy);
     const availableTagsList = existingTags
-      .filter((tag) => !currentTagList.includes(tag))
+      .filter(tag => !currentTagList.includes(tag))
       .sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
     const availableTagsDictionary = availableTagsList.reduce(
       (accumulator, tag) => ((accumulator[tag] = tag), accumulator),
@@ -164,8 +164,8 @@ export default class TagBulkAdd extends React.Component {
                     className="add-tag-autocomplete"
                     choices={availableTagsDictionary}
                     onChange={(_, toTag) => this.changeTag(tagKey, toTag)}
-                    placeholder={"Tag"}
-                    value={tagKey === emptyTagPlaceholderKey ? "" : tagKey}
+                    placeholder="Tag"
+                    value={tagKey === emptyTagPlaceholderKey ? '' : tagKey}
                   />
 
                   <Autocomplete
@@ -192,7 +192,7 @@ export default class TagBulkAdd extends React.Component {
                       onClick={() => this.removeTag(tagKey)}
                     />
                   ) : (
-                    <div style={{ width: 32 }}></div>
+                    <div style={{ width: 32 }} />
                   )}
                 </div>
                 {isNewTag && <div className="tag-detail-label">New tag</div>}
@@ -226,7 +226,7 @@ export default class TagBulkAdd extends React.Component {
             <Button
               type={Button.TYPE.PRIMARY}
               disabled={
-                currentTagList.every((tag) => tag === emptyTagPlaceholderKey) ||
+                currentTagList.every(tag => tag === emptyTagPlaceholderKey) ||
                 loadingEntities.length > 0 ||
                 allSucceeded
               }
@@ -234,10 +234,10 @@ export default class TagBulkAdd extends React.Component {
               loading={loadingEntities.length > 0}
             >
               {errorEntities.length > 0
-                ? "Retry"
+                ? 'Retry'
                 : allSucceeded
-                ? "Tags Added!"
-                : "Add tags"}
+                ? 'Tags Added!'
+                : 'Add tags'}
             </Button>
           </div>
         </div>

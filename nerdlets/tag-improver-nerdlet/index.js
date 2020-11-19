@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   HeadingText,
   NerdGraphQuery,
@@ -11,14 +11,14 @@ import {
   AccountStorageQuery,
   UserStorageQuery,
   AccountStorageMutation,
-  UserStorageMutation,
-} from "nr1";
+  UserStorageMutation
+} from 'nr1';
 
-import { SCHEMA, ENFORCEMENT_PRIORITY } from "./tag-schema";
+import { SCHEMA, ENFORCEMENT_PRIORITY } from './tag-schema';
 
-import TagCoverageView from "./components/tag-coverage";
-import TagEntityView from "./components/tag-entity-view";
-import TaggingPolicy from "./components/tag-policy";
+import TagCoverageView from './components/tag-coverage';
+import TagEntityView from './components/tag-entity-view';
+import TaggingPolicy from './components/tag-policy';
 
 export default class TagVisualizer extends React.Component {
   static contextType = PlatformStateContext;
@@ -40,8 +40,8 @@ export default class TagVisualizer extends React.Component {
       accountPicker: true,
       accountPickerValues: [
         nerdlet.ACCOUNT_PICKER_VALUE.CROSS_ACCOUNT,
-        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES,
-      ],
+        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES
+      ]
     });
     this.setState({ accountId: this.context.accountId }, () => {
       this.getTaggingPolicy();
@@ -51,14 +51,15 @@ export default class TagVisualizer extends React.Component {
 
   componentDidUpdate() {
     if (this.context.accountId !== this.state.accountId) {
-      this.setState({ accountId: this.context.accountId, taggingPolicy: null }, () =>
-        this.getTaggingPolicy(),
+      this.setState(
+        { accountId: this.context.accountId, taggingPolicy: null },
+        () => this.getTaggingPolicy(),
         this.startLoadingEntityTags()
       );
     }
   }
 
-  onChangeTab = (newTab) => {
+  onChangeTab = newTab => {
     nerdlet.setUrlState({ tab: newTab });
   };
 
@@ -75,10 +76,10 @@ export default class TagVisualizer extends React.Component {
 
     return (
       <NerdletStateContext.Consumer>
-        {(nerdletState) => (
+        {nerdletState => (
           <>
             {doneLoading ? null : (
-              <div className='status'>
+              <div className="status">
                 Loading tags... ({loadedEntities} / {entityCount} entities
                 examined)
                 <Spinner inline />
@@ -86,7 +87,7 @@ export default class TagVisualizer extends React.Component {
             )}
 
             <Tabs
-              defaultValue={(nerdletState || {}).tab || "overview-tab"}
+              defaultValue={(nerdletState || {}).tab || 'overview-tab'}
               onChange={this.onChangeTab}
             >
               <TabsItem value="policy-tab" label="Policy">
@@ -143,7 +144,7 @@ export default class TagVisualizer extends React.Component {
         loadedEntities: 0,
         doneLoading: false,
         loadError: undefined,
-        queryCursor: undefined,
+        queryCursor: undefined
       },
       () => {
         loadEntityBatch();
@@ -154,7 +155,7 @@ export default class TagVisualizer extends React.Component {
   loadEntityBatch = () => {
     const {
       processEntityQueryResults,
-      state: { queryCursor, accountId },
+      state: { queryCursor, accountId }
     } = this;
 
     const query = `
@@ -181,10 +182,10 @@ export default class TagVisualizer extends React.Component {
     `;
     const variables = {
       queryString: `domain in ('APM', 'MOBILE', 'BROWSER')${
-        accountId && accountId !== "cross-account"
+        accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
-          : ""
-      }`,
+          : ''
+      }`
     };
     if (queryCursor) {
       variables.nextCursor = queryCursor;
@@ -192,7 +193,7 @@ export default class TagVisualizer extends React.Component {
 
     NerdGraphQuery.query({
       query,
-      variables,
+      variables
     })
       .then(({ loading, data, errors }) => {
         if (data) {
@@ -202,21 +203,22 @@ export default class TagVisualizer extends React.Component {
             data.actor.entitySearch.results.nextCursor
           );
         } else {
-          console.log("data is NOT truthy", data);
+          console.log('data is NOT truthy', data);
         }
         if (errors) {
-          console.log("Entity query error", errors);
+          console.log('Entity query error', errors);
         }
       })
-      .catch((err) => {
+      .catch(err => {
         this.setState({ loadError: err.toString() });
       });
   };
+
   // TODO: Need state overhaul to handle removing tags properly, and update entity view state correctly
-  reloadEntities = (entities) => {
+  reloadEntities = entities => {
     const {
       processEntityQueryResults,
-      state: { queryCursor, accountId },
+      state: { queryCursor, accountId }
     } = this;
 
     if (entities.length > 200) {
@@ -241,13 +243,13 @@ export default class TagVisualizer extends React.Component {
     }
     `;
     const variables = {
-      entities,
+      entities
     };
 
     this.setState({ doneLoading: false });
     NerdGraphQuery.query({
       query,
-      variables,
+      variables
     })
       .then(({ loading, data, errors }) => {
         if (data) {
@@ -257,15 +259,15 @@ export default class TagVisualizer extends React.Component {
           );
           this.setState({ doneLoading: true });
         } else {
-          console.log("data is NOT truthy", data);
+          console.log('data is NOT truthy', data);
           this.setState({ doneLoading: true });
         }
         if (errors) {
-          console.log("Entity query error", errors);
+          console.log('Entity query error', errors);
           this.setState({ doneLoading: true });
         }
       })
-      .catch((err) => {
+      .catch(err => {
         this.setState({ loadError: err.toString(), doneLoading: true });
       });
   };
@@ -274,20 +276,20 @@ export default class TagVisualizer extends React.Component {
     const {
       loadEntityBatch,
       setState,
-      state: { loadedEntities, tagHierarchy, accountId },
+      state: { loadedEntities, tagHierarchy, accountId }
     } = this;
     if (accountId !== this.state.accountId) {
       return;
     }
     let entityCount = 0;
     let entities = [];
-    let nextCursor = undefined;
+    let nextCursor;
     try {
       entityCount = count;
       entities = entitiesToProcess || [];
       nextCursor = ngCursor || undefined;
     } catch (err) {
-      console.log("Error parsing results", err);
+      console.log('Error parsing results', err);
     }
     this.processLoadedEntityTags(entities);
 
@@ -296,7 +298,7 @@ export default class TagVisualizer extends React.Component {
         queryCursor: nextCursor,
         entityCount,
         loadedEntities: loadedEntities + entities.length,
-        doneLoading: !nextCursor,
+        doneLoading: !nextCursor
       },
       () => {
         if (nextCursor && accountId === this.state.accountId) {
@@ -306,7 +308,7 @@ export default class TagVisualizer extends React.Component {
     );
   };
 
-  processLoadedEntityTags = (entities) => {
+  processLoadedEntityTags = entities => {
     const { tagHierarchy, entityTagsMap } = this.state;
     entities.reduce((acc, entity) => {
       // get all the tags
@@ -316,7 +318,7 @@ export default class TagVisualizer extends React.Component {
       tags.forEach(({ tagKey, tagValues }) => {
         if (!acc[tagKey]) acc[tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
-        tagValues.forEach((value) => {
+        tagValues.forEach(value => {
           if (!acc[tagKey][value]) acc[tagKey][value] = [];
           acc[tagKey][value].push(entity);
         });
@@ -330,35 +332,39 @@ export default class TagVisualizer extends React.Component {
   getTaggingPolicy = () => {
     this.setState({ loadingPolicy: true });
     UserStorageQuery.query({
-      collection: "nr1-tag-improver",
-      documentId: "tagging-policy",
+      collection: 'nr1-tag-improver',
+      documentId: 'tagging-policy'
     })
       .then(({ data }) => {
         this.setState({
           taggingPolicy: sortedPolicy(data.policy),
           loadingPolicy: false,
-          policyLoadErrored: false,
+          policyLoadErrored: false
         });
       })
-      .catch((error) => {
+      .catch(error => {
         this.setState({
           taggingPolicy: sortedPolicy(SCHEMA),
           loadingPolicy: false,
-          policyLoadErrored: true,
+          policyLoadErrored: true
         });
       });
   };
 
-  updatePolicy = (policy) => {
+  updatePolicy = policy => {
     this.setState({ taggingPolicy: sortedPolicy(policy) });
-  }
+  };
 }
 
 function sortedPolicy(policy) {
-  const p = (policy && policy.length > 0) ? policy : SCHEMA
+  const p = policy && policy.length > 0 ? policy : SCHEMA;
   return p.sort((a, b) => {
     const pa = ENFORCEMENT_PRIORITY[a.enforcement] || 99;
     const pb = ENFORCEMENT_PRIORITY[b.enforcement] || 99;
-    return (pa < pb) ? 1 : (pa > pb) ? -1 : a.key.localeCompare(b.key, undefined, {sensitivity: 'base'});
+    return pa < pb
+      ? 1
+      : pa > pb
+      ? -1
+      : a.key.localeCompare(b.key, undefined, { sensitivity: 'base' });
   });
 }

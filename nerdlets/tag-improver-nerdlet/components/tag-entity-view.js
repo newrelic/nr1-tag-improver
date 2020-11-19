@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   Button,
   Dropdown,
@@ -14,36 +14,36 @@ import {
   TableRowCell,
   navigation,
   NerdletStateContext,
-  nerdlet,
-} from "nr1";
+  nerdlet
+} from 'nr1';
 
-import ModalButton from "./modal-button";
-import TagBulkAdd from "./tag-bulk-add";
-import TagBulkRename from "./tag-bulk-rename";
-import TagBulkEdit from "./tag-bulk-edit";
-import TagBulkDelete from "./tag-bulk-delete";
+import ModalButton from './modal-button';
+import TagBulkAdd from './tag-bulk-add';
+import TagBulkRename from './tag-bulk-rename';
+import TagBulkEdit from './tag-bulk-edit';
+import TagBulkDelete from './tag-bulk-delete';
 
 export default class TagEntityView extends React.Component {
   flushSelectedEntitiesTimeout = null;
   static contextType = NerdletStateContext;
   state = {
-    firstTagKey: "account",
-    secondTagKey: "accountId",
+    firstTagKey: 'account',
+    secondTagKey: 'accountId',
     thirdTagKey: undefined,
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
-    selectedEntityIds: [],
+    selectedEntityIds: []
   };
 
   componentDidMount() {
     const urlState = this.context || {};
     this.setState({
-      firstTagKey: urlState.entityViewFirstTagKey || "account",
-      secondTagKey: urlState.entityViewSecondTagKey || "accountId",
+      firstTagKey: urlState.entityViewFirstTagKey || 'account',
+      secondTagKey: urlState.entityViewSecondTagKey || 'accountId',
       thirdTagKey: urlState.entityViewThirdTagKey,
       [`table_column_${urlState.entityViewSortColumn || 1}`]:
         urlState.entityViewSortDirection ||
-        TableHeaderCell.SORTING_TYPE.ASCENDING,
+        TableHeaderCell.SORTING_TYPE.ASCENDING
     });
   }
 
@@ -54,7 +54,7 @@ export default class TagEntityView extends React.Component {
       if (column === columnId) {
         nerdlet.setUrlState({
           entityViewSortColumn: column,
-          entityViewSortDirection: sortingData.nextSortingType,
+          entityViewSortDirection: sortingData.nextSortingType
         });
       }
       return acc;
@@ -62,17 +62,17 @@ export default class TagEntityView extends React.Component {
     this.setState(updates);
   };
 
-  updateFirstTagKey = (firstTagKey) => {
+  updateFirstTagKey = firstTagKey => {
     this.setState({ firstTagKey });
     nerdlet.setUrlState({ entityViewFirstTagKey: firstTagKey });
   };
 
-  updateSecondTagKey = (secondTagKey) => {
+  updateSecondTagKey = secondTagKey => {
     this.setState({ secondTagKey });
     nerdlet.setUrlState({ entityViewSecondTagKey: secondTagKey });
   };
 
-  updateThirdTagKey = (thirdTagKey) => {
+  updateThirdTagKey = thirdTagKey => {
     this.setState({ thirdTagKey });
     nerdlet.setUrlState({ entityViewThirdTagKey: thirdTagKey });
   };
@@ -96,7 +96,7 @@ export default class TagEntityView extends React.Component {
               entityGuid: entity.guid,
               firstTagValue: this.findTagValue(entity, firstTagKey),
               secondTagValue: this.findTagValue(entity, secondTagKey),
-              thirdTagValue: this.findTagValue(entity, thirdTagKey),
+              thirdTagValue: this.findTagValue(entity, thirdTagKey)
             };
           }
         }
@@ -107,9 +107,9 @@ export default class TagEntityView extends React.Component {
 
   findTagValue = (entity, tagKey) => {
     const tag =
-      ((entity.tags || []).find((t) => t.tagKey === tagKey) || {}).tagValues ||
+      ((entity.tags || []).find(t => t.tagKey === tagKey) || {}).tagValues ||
       [];
-    return tag.join(", ");
+    return tag.join(', ');
   };
 
   onSelectEntity = (evt, { item }) => {
@@ -120,7 +120,7 @@ export default class TagEntityView extends React.Component {
       this.setState({
         selectedEntityIds: Object.entries(selectedEntities)
           .filter(([entityId, checked]) => checked)
-          .map(([entityId, checked]) => entityId),
+          .map(([entityId, checked]) => entityId)
       });
 
       this.flushSelectedEntitiesTimeout = null;
@@ -134,26 +134,31 @@ export default class TagEntityView extends React.Component {
       secondTagKey,
       thirdTagKey,
       selectedEntities,
-      selectedEntityIds,
+      selectedEntityIds
     } = this.state;
     const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
     const tagKeys = this.getTagKeys();
     const entities = this.getTableData();
-    const operableEntities = Object.keys(entityTagsMap).filter(entityId => selectedEntityIds.includes(entityId));
+    const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
+      selectedEntityIds.includes(entityId)
+    );
     return (
       <Grid className="primary-grid">
-        <GridItem className="primary-content-container entity-view-header-bar" columnSpan={12}>
+        <GridItem
+          className="primary-content-container entity-view-header-bar"
+          columnSpan={12}
+        >
           <div>
             <div>
               Show these tags in the table:
               <Dropdown
-                style={{ display: "inline", margin: "0 1em" }}
+                style={{ display: 'inline', margin: '0 1em' }}
                 title={firstTagKey}
                 items={tagKeys}
                 style={{
-                  display: "inline-block",
-                  margin: "0 .5em",
-                  verticalAlign: "middle",
+                  display: 'inline-block',
+                  margin: '0 .5em',
+                  verticalAlign: 'middle'
                 }}
               >
                 {({ item, index }) => (
@@ -165,15 +170,14 @@ export default class TagEntityView extends React.Component {
                   </DropdownItem>
                 )}
               </Dropdown>
-              
               <Dropdown
-                style={{ display: "inline", margin: "0 1em" }}
+                style={{ display: 'inline', margin: '0 1em' }}
                 title={secondTagKey}
                 items={tagKeys}
                 style={{
-                  display: "inline-block",
-                  margin: "0 .5em",
-                  verticalAlign: "middle",
+                  display: 'inline-block',
+                  margin: '0 .5em',
+                  verticalAlign: 'middle'
                 }}
               >
                 {({ item, index }) => (
@@ -185,15 +189,14 @@ export default class TagEntityView extends React.Component {
                   </DropdownItem>
                 )}
               </Dropdown>
-              
               <Dropdown
-                style={{ display: "inline", margin: "0 1em" }}
+                style={{ display: 'inline', margin: '0 1em' }}
                 title={thirdTagKey}
                 items={tagKeys}
                 style={{
-                  display: "inline-block",
-                  margin: "0 .5em",
-                  verticalAlign: "middle",
+                  display: 'inline-block',
+                  margin: '0 .5em',
+                  verticalAlign: 'middle'
                 }}
               >
                 {({ item, index }) => (

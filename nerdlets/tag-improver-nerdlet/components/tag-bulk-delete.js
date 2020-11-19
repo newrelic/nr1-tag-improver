@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 import {
   HeadingText,
   PlatformStateContext,
@@ -6,17 +6,17 @@ import {
   Button,
   NerdGraphMutation,
   Select,
-  SelectItem,
-} from "nr1";
-import Autocomplete from "./autocomplete";
+  SelectItem
+} from 'nr1';
+import Autocomplete from './autocomplete';
 
-const emptyTagPlaceholderKey = "🏷️helloIAmTag";
+const emptyTagPlaceholderKey = '🏷️helloIAmTag';
 
 const ENTITY_UPDATE_STATUS = {
   NONE: 0,
   UPDATING: 1,
   SUCCESS: 2,
-  ERROR: 3,
+  ERROR: 3
 };
 
 export default class TagBulkDelete extends React.Component {
@@ -26,7 +26,7 @@ export default class TagBulkDelete extends React.Component {
     super(props);
     this.state = {
       tagsToDelete: { [emptyTagPlaceholderKey]: 1 },
-      entityStatuses: {},
+      entityStatuses: {}
     };
   }
 
@@ -54,7 +54,7 @@ export default class TagBulkDelete extends React.Component {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
-    entitiesToUpdate.forEach((entityId) => {
+    entitiesToUpdate.forEach(entityId => {
       if (!statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
@@ -69,29 +69,31 @@ export default class TagBulkDelete extends React.Component {
         } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
           throw result.data.taggingDeleteTagFromEntity.errors;
         } else {
-          this.setState({
-            entityStatuses: {
-              ...this.state.entityStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
+          this.setState(
+            {
+              entityStatuses: {
+                ...this.state.entityStatuses,
+                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
+              }
             },
-          },
-          () => {
-            if (
-              Object.values(this.state.entityStatuses).every(
-                (status) => status === ENTITY_UPDATE_STATUS.SUCCESS
-              )
-            ) {
-              this.props.reloadTagsFn(selectedEntityIds);
+            () => {
+              if (
+                Object.values(this.state.entityStatuses).every(
+                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
+                )
+              ) {
+                this.props.reloadTagsFn(selectedEntityIds);
+              }
             }
-          });
+          );
         }
       } catch (error) {
-        console.log("Add tag error for " + entityId, error);
+        console.log(`Add tag error for ${entityId}`, error);
         this.setState({
           entityStatuses: {
             ...this.state.entityStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR,
-          },
+            [entityId]: ENTITY_UPDATE_STATUS.ERROR
+          }
         });
       }
     });
@@ -104,7 +106,7 @@ export default class TagBulkDelete extends React.Component {
     this.setState({ tagsToDelete: newTags });
   };
 
-  removeTag = (tag) => {
+  removeTag = tag => {
     const newTags = { ...this.state.tagsToDelete };
     delete newTags[tag];
     this.setState({ tagsToDelete: newTags });
@@ -113,7 +115,7 @@ export default class TagBulkDelete extends React.Component {
   addNewTag = () => {
     const { tagsToDelete } = this.state;
     this.setState({
-      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 },
+      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 }
     });
   };
 
@@ -123,7 +125,7 @@ export default class TagBulkDelete extends React.Component {
     const currentTagList = Object.keys(tagsToDelete);
     const tagsOnEntities = Array.from(
       selectedEntityIds.reduce((accumulator, entityGuid) => {
-        (entityTagsMap[entityGuid] || []).forEach((tag) =>
+        (entityTagsMap[entityGuid] || []).forEach(tag =>
           accumulator.add(tag.tagKey)
         );
         return accumulator;
@@ -149,14 +151,12 @@ export default class TagBulkDelete extends React.Component {
           <HeadingText type={HeadingText.TYPE.HEADING_1}>
             Remove tags
           </HeadingText>
-          <BlockText style={{ margin: "16px 0" }}>
+          <BlockText style={{ margin: '16px 0' }}>
             Choose tags to remove from the selected entities. This action cannot
             be undone, though you can always re-add tags to the entities at any
             time.
           </BlockText>
-          <div style={{ margin: "0 8px 8px 0" }}>
-            Select your tag
-          </div>
+          <div style={{ margin: '0 8px 8px 0' }}>Select your tag</div>
           {Object.keys(tagsToDelete).map((tagKey, index) => {
             return (
               <div key={`add-tag-row-${index}`}>
@@ -167,9 +167,9 @@ export default class TagBulkDelete extends React.Component {
                     onChange={(e, value) => this.changeTag(tagKey, value)}
                   >
                     <SelectItem disabled value={emptyTagPlaceholderKey}>
-                      {"Select tag"}
+                      Select tag
                     </SelectItem>
-                    {tagsOnEntities.map((tag) => {
+                    {tagsOnEntities.map(tag => {
                       return (
                         <SelectItem
                           key={`current-tag-select-${tag}`}
@@ -191,7 +191,7 @@ export default class TagBulkDelete extends React.Component {
                       onClick={() => this.removeTag(tagKey)}
                     />
                   ) : (
-                    <div style={{ width: 32 }}></div>
+                    <div style={{ width: 32 }} />
                   )}
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default class TagBulkDelete extends React.Component {
             <Button
               type={Button.TYPE.DESTRUCTIVE}
               disabled={
-                currentTagList.every((tag) => tag === emptyTagPlaceholderKey) ||
+                currentTagList.every(tag => tag === emptyTagPlaceholderKey) ||
                 loadingEntities.length > 0 ||
                 allSucceeded
               }
@@ -232,10 +232,10 @@ export default class TagBulkDelete extends React.Component {
               loading={loadingEntities.length > 0}
             >
               {errorEntities.length > 0
-                ? "Retry"
+                ? 'Retry'
                 : allSucceeded
-                ? "Tags Removed!"
-                : "Remove tags"}
+                ? 'Tags Removed!'
+                : 'Remove tags'}
             </Button>
           </div>
         </div>

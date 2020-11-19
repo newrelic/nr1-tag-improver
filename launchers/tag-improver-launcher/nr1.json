@@ -2,6 +2,6 @@
     "schemaType": "LAUNCHER",
     "id": "tag-improver-launcher",
     "displayName": "Tag Improver",
-    "description": "Describe me",
+    "description": "Achieve tagging best practices to get the most from New Relic One",
     "rootNerdletId": "tag-improver-nerdlet"
 }

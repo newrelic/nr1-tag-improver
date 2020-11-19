@@ -5,23 +5,24 @@ import {
   TableHeaderCell,
   TableRow,
   TableRowCell
-} from 'nr1'
+} from 'nr1';
 
 export default class TagValueTable extends React.Component {
   constructor(props) {
-    super(props)
+    super(props);
     this.state = {
       value_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
-    }
+    };
   }
 
   setSortingColumn = (columnId, event, sortingData) => {
-    const updates = [0,1].reduce((acc, column) => {
-        acc[`value_column_${column}`] = (column === columnId) ? sortingData.nextSortingType : undefined
-        return acc
-      }, {})
+    const updates = [0, 1].reduce((acc, column) => {
+      acc[`value_column_${column}`] =
+        column === columnId ? sortingData.nextSortingType : undefined;
+      return acc;
+    }, {});
     this.setState(updates);
-  }
+  };
 
   render() {
     return (
@@ -33,7 +34,7 @@ export default class TagValueTable extends React.Component {
             sortingType={this.state.value_column_0}
             sortingOrder={1}
             onClick={this.setSortingColumn.bind(this, 0)}
-            >
+          >
             Tag name
           </TableHeaderCell>
           <TableHeaderCell
@@ -54,6 +55,6 @@ export default class TagValueTable extends React.Component {
           </TableRow>
         )}
       </Table>
-    )
+    );
   }
 }
