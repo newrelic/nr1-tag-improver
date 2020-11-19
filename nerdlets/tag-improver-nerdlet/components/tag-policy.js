@@ -17,9 +17,7 @@ import {
 import { TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY } from '../tag-schema';
 import Autocomplete from './autocomplete';
 
-const coverageTooltipText = `For required tags, less than 50 percent coverage changes the state to red, between 50 to 80 percent changes the state to yellow, and over 80 percent changes the state to green.
-
-For recommended tags, less than 33 percent coverage changes the state to red, between 33 to 60 percent changes the state to yellow, and over 60 percent changes the state to green.`;
+const coverageTooltipText = `For required tags, less than 50 percent coverage changes the state to red, between 50 to 80 percent changes the state to yellow, and over 80 percent changes the state to green.`;
 
 const COLOR_BREAKS = {
   required: [
@@ -27,17 +25,11 @@ const COLOR_BREAKS = {
     [50, 'yellow'],
     [0, '#ff9090']
   ],
-  recommended: [
-    [66, '#90ff90'],
-    [33, 'yellow'],
-    [0, '#ff9090']
-  ],
   default: [[0, '#f0f0f0']]
 };
 
 const SCHEMA_ENFORCEMENT_LABELS = {
   [TAG_SCHEMA_ENFORCEMENT.required]: 'Required',
-  [TAG_SCHEMA_ENFORCEMENT.recommended]: 'Recommended',
   [TAG_SCHEMA_ENFORCEMENT.optional]: 'Optional'
 };
 

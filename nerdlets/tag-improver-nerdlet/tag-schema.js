@@ -1,6 +1,5 @@
 const TAG_SCHEMA_ENFORCEMENT = {
   required: 'required',
-  recommended: 'recommended',
   optional: 'optional',
   deprecated: 'deprecated', // reserved for future use
   prohibited: 'prohibited' // reserved for future use
@@ -8,10 +7,9 @@ const TAG_SCHEMA_ENFORCEMENT = {
 
 const ENFORCEMENT_PRIORITY = {
   [TAG_SCHEMA_ENFORCEMENT.required]: 0,
-  [TAG_SCHEMA_ENFORCEMENT.recommended]: 1,
-  [TAG_SCHEMA_ENFORCEMENT.optional]: 2,
-  [TAG_SCHEMA_ENFORCEMENT.deprecated]: 3,
-  [TAG_SCHEMA_ENFORCEMENT.prohibited]: 4
+  [TAG_SCHEMA_ENFORCEMENT.optional]: 1,
+  [TAG_SCHEMA_ENFORCEMENT.deprecated]: 2,
+  [TAG_SCHEMA_ENFORCEMENT.prohibited]: 3
 };
 
 const SCHEMA = [
@@ -33,14 +31,14 @@ const SCHEMA = [
     label: 'Owning VP',
     key: 'VP',
     purpose: '',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.recommended,
+    enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   },
   {
     label: 'Source code repo',
     key: 'Project',
     purpose: '',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.recommended,
+    enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   },
   {
