@@ -223,10 +223,10 @@ export default class TaggingPolicy extends React.Component {
       let coverage = 0;
       const tagHistogram = tagHierarchy[rule.key];
       if (tagHistogram) {
-        count = Object.keys(tagHistogram).reduce(
-          (acc, v) => acc + tagHistogram[v].length,
-          0
-        );
+        count = Object.keys(tagHistogram).reduce((acc, v) => {
+          tagHistogram[v].map(e => acc.add(e.guid));
+          return acc;
+        }, new Set()).size;
         coverage = Math.floor((count * 100) / entityCount);
       }
 
