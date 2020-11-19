@@ -1,0 +1,7 @@
+{
+    "schemaType": "LAUNCHER",
+    "id": "tag-improver-launcher",
+    "displayName": "Tag Improver",
+    "description": "Describe me",
+    "rootNerdletId": "tag-improver-nerdlet"
+}

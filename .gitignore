@@ -5,4 +5,11 @@ node_modules
 coverage
 tmp
 *.tar.gz
+*.tgz
 .DS_Store
+.npm
+.eslintcache
+.vscode
+.env
+.env.test
+.cache

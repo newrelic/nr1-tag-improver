@@ -1,0 +1,71 @@
+@import "./components/autocomplete.scss";
+
+div.status {
+    float: right;
+    border-bottom: 1px solid #EEEFEF;
+    font-size: 12px;
+    height: 33px;
+    line-height: 30px;
+    vertical-align: middle;
+    margin-right: 1em;
+
+    div {
+        margin-left: 1em;
+    }
+}
+
+.tag-rule-traffic-light {
+    border: solid 1px #ccc;
+    border-radius: 6px;
+    margin: 6px;
+    height: 4em;
+    text-align: center;
+    padding: 0.5em 1em;
+}
+div[class$='-wnd-TabContent'] {
+    padding-top: 1em;
+}
+
+.add-tag-row {
+    width: 100%;
+    margin: 8px 8px 8px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.remove-tag-row {
+    width: 100%;
+    margin: 8px 8px 8px 0;
+    display: flex;
+    flex-direction: row;
+}
+
+
+.tag-detail-label {
+    color: #8c9393;
+    margin: 8px 8px 8px 0;
+}
+
+.full-height-modal {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.button-section {
+    display: flex;
+    flex-direction: row;
+    justify-content: flex-end;
+    button {
+        margin-left: 8px;
+    }
+}
+
+.entity-view-header-bar {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+}

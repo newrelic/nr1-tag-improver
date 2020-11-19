@@ -1,0 +1,17 @@
+.autocomplete-menu {
+  position: absolute;
+  background: #efefef;
+  padding: 4px 0px;
+  max-height: 320px;
+  overflow-y: auto;
+  z-index: 10;
+  box-shadow: 0 4px 4px 4px rgba(2,3,3,.02), 0 8px 16px 8px rgba(34,48,48,.05);
+}
+
+.autocomplete-item {
+  cursor: pointer;
+  padding: 4px 8px;
+  &:hover {
+    background-color: lightgrey;
+  }
+}

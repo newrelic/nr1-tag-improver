@@ -1,8 +1,8 @@
 {
     "private": true,
-    "name": "{{ NERDPACK_NAME }}",
+    "name": "tag-improver",
     "description": "Nerdpack template",
-    "version": "0.1.0",
+    "version": "0.31.0",
     "scripts": {
         "start": "nr1 nerdpack:serve",
         "test": "exit 0",
@@ -10,7 +10,7 @@
         "eslint-fix": "eslint nerdlets/ --fix"
     },
     "bugs": {
-        "email": "opensource+{{ NERDPACK_NAME }}@newrelic.com"
+        "email": "opensource+nr1-tag-improver@newrelic.com"
     },
     "dependencies": {
         "@newrelic/nr1-community": "latest",
