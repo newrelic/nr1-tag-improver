@@ -109,7 +109,7 @@ export default class TagVisualizer extends React.Component {
                   doneLoading={doneLoading}
                 />
               </TabsItem>
-              <TabsItem value="entity-tab" label="Bulk tagging">
+              <TabsItem value="entity-tab" label="Entities">
                 <TagEntityView
                   tagHierarchy={tagHierarchy}
                   entityCount={entityCount}
