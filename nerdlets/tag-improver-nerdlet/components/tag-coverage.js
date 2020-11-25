@@ -53,6 +53,7 @@ export default class TagCoverageView extends React.Component {
       Object.keys(tagHierarchy[currentTagGroup]).length > 0;
 
     return (
+      <div className="split">
       <Grid className="primary-grid">
         <GridItem className="primary-content-container" columnSpan={7}>
           <HeadingText type={HeadingText.TYPE.HEADING_4}>
@@ -88,22 +89,27 @@ export default class TagCoverageView extends React.Component {
         </GridItem>
 
         <GridItem className="primary-content-container" columnSpan={7}>
+          <div className="left">
           <TagTable
             getTableData={() => getTagTableData()}
             selectTag={tagKey => updateCurrentTagGroup(tagKey)}
           />
+          </div>
         </GridItem>
         <GridItem className="primary-content-container" columnSpan={1}>
           <></>
         </GridItem>
         <GridItem className="primary-content-container" columnSpan={4}>
           {currentTagGroupIsPopulated ? (
+            <div className="right">
             <TagValueTable getTableData={() => getValueTableData()} />
+            </div>
           ) : (
             <></>
           )}
         </GridItem>
       </Grid>
+      </div>
     );
   }
 }

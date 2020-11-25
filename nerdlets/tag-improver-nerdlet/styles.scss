@@ -69,3 +69,17 @@ div[class$='-wnd-TabContent'] {
     justify-content: space-between;
     align-items: center;
 }
+
+.split {
+    width: 100%;
+    height: 1200px;
+    display: flex;
+}
+.left {
+    height: 100%;
+    overflow-y: scroll;
+}
+.right {
+    height: 100%;
+    overflow-y: scroll;
+}
