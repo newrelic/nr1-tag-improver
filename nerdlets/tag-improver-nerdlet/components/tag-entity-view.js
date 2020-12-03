@@ -1,11 +1,11 @@
 import React from 'react';
 import {
   Button,
+  Checkbox,
   Dropdown,
   DropdownItem,
   Grid,
   GridItem,
-  HeadingText,
   Link,
   Table,
   TableHeader,
@@ -22,6 +22,9 @@ import TagBulkAdd from './tag-bulk-add';
 import TagBulkRename from './tag-bulk-rename';
 import TagBulkEdit from './tag-bulk-edit';
 import TagBulkDelete from './tag-bulk-delete';
+import TagListing from './tag-listing';
+
+import { COMPLIANCEBANDS } from '../tag-schema';
 
 export default class TagEntityView extends React.Component {
   flushSelectedEntitiesTimeout = null;
@@ -30,7 +33,8 @@ export default class TagEntityView extends React.Component {
     firstTagKey: 'account',
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
-    selectedEntityIds: []
+    selectedEntityIds: [],
+    includeDefinedTags: false
   };
 
   componentDidMount() {
@@ -80,7 +84,10 @@ export default class TagEntityView extends React.Component {
             entities[entity.guid] = {
               entityName: entity.name,
               entityGuid: entity.guid,
-              firstTagValue: this.findTagValue(entity, firstTagKey)
+              firstTagValue: this.findTagValue(entity, firstTagKey),
+              complianceScore: entity.complianceScore,
+              mandatoryTags: entity.mandatoryTags,
+              optionalTags: entity.optionalTags,
             };
           }
         }
@@ -111,12 +118,19 @@ export default class TagEntityView extends React.Component {
     }, 500);
   };
 
+  onCheckboxChange = event => {
+    const includeDefinedTags = event.target.checked;
+
+    this.setState({ includeDefinedTags });
+  }
+
   render() {
     const { updateFirstTagKey } = this;
     const {
       firstTagKey,
       selectedEntities,
-      selectedEntityIds
+      selectedEntityIds,
+      includeDefinedTags
     } = this.state;
     const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
     const tagKeys = this.getTagKeys();
@@ -124,6 +138,16 @@ export default class TagEntityView extends React.Component {
     const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
       selectedEntityIds.includes(entityId)
     );
+    const getBand = (score) => {
+      if (score >= COMPLIANCEBANDS.highBand.lowerLimit) 
+        return 'high__band';
+      else if (
+        COMPLIANCEBANDS.midBand.lowerLimit <= score &&
+        score < COMPLIANCEBANDS.midBand.upperLimit
+      )
+        return 'mid__band';
+      else return 'low__band';
+    };
     return (
       <Grid className="primary-grid">
         <GridItem
@@ -153,6 +177,13 @@ export default class TagEntityView extends React.Component {
                 )}
               </Dropdown>
             </div>
+          </div>
+          <div>
+            <Checkbox
+              checked={this.state.includeDefinedTags}
+              onChange={this.onCheckboxChange}
+              label="Include Defined Tags"
+            />
           </div>
           <div className="button-section" style={{ padding: 8 }}>
             <ModalButton
@@ -218,6 +249,7 @@ export default class TagEntityView extends React.Component {
             <TableHeader>
               <TableHeaderCell
                 value={({ item }) => item.entityName}
+                width="3fr"
                 sortable
                 sortingType={this.state.table_column_0}
                 sortingOrder={1}
@@ -227,12 +259,29 @@ export default class TagEntityView extends React.Component {
               </TableHeaderCell>
               <TableHeaderCell
                 value={({ item }) => item.firstTagValue}
+                width="3fr"
                 sortable
                 sortingType={this.state.table_column_1}
                 sortingOrder={2}
                 onClick={this.setSortingColumn.bind(this, 1)}
               >
                 {firstTagKey}
+              </TableHeaderCell>
+              <TableHeaderCell
+                value={({ item }) => item.complianceScore}
+                width="1fr"
+                sortable
+                sortingType={this.state.table_column_2}
+                sortingOrder={3}
+                onClick={this.setSortingColumn.bind(this, 2)}
+              >
+                Score
+              </TableHeaderCell>
+              <TableHeaderCell width="6fr">
+                {includeDefinedTags ? '' : 'Undefined'} Mandatory Tags
+              </TableHeaderCell>
+              <TableHeaderCell width="7fr">
+              {includeDefinedTags ? '' : 'Undefined'} Optional Tags
               </TableHeaderCell>
             </TableHeader>
 
@@ -244,6 +293,19 @@ export default class TagEntityView extends React.Component {
                   </Link>
                 </TableRowCell>
                 <TableRowCell>{item.firstTagValue}</TableRowCell>
+                <TableRowCell
+                  width="1"
+                  textAlign="center"
+                  className={`score ${getBand(item.complianceScore)}`}
+                >
+                  {`${item.complianceScore.toFixed(2)}%`}
+                </TableRowCell>
+                <TableRowCell>
+                  <TagListing type="mandatory" tags={item.mandatoryTags} includeDefinedTags={includeDefinedTags} />
+                </TableRowCell>
+                <TableRowCell>
+                  <TagListing type="optional" tags={item.optionalTags} includeDefinedTags={includeDefinedTags} />
+                </TableRowCell>
               </TableRow>
             )}
           </Table>
