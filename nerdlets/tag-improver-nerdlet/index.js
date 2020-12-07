@@ -1,5 +1,7 @@
 import React from 'react';
 import {
+  Dropdown,
+  DropdownItem,
   HeadingText,
   NerdGraphQuery,
   Spinner,
@@ -24,7 +26,10 @@ export default class TagVisualizer extends React.Component {
   static contextType = PlatformStateContext;
   state = {
     tagHierarchy: {},
+    activeTagHierarchy: {},
     entityTagsMap: {},
+    entityTypesMap: {},
+    entityTypesEntityCount: {},
     entityCount: 0,
     loadedEntities: 0,
     doneLoading: false,
@@ -32,7 +37,8 @@ export default class TagVisualizer extends React.Component {
     queryCursor: undefined,
     accountId: null,
     taggingPolicy: null,
-    mandatoryTagCount: 0
+    mandatoryTagCount: 0,
+    selectedEntityType: { id: 'all', name: "All Entity Types", value: "ALL_ENTITIES" },
   };
 
   componentDidMount() {
@@ -64,18 +70,63 @@ export default class TagVisualizer extends React.Component {
     nerdlet.setUrlState({ tab: newTab });
   };
 
+  updateSelectedEntityType = entityType => {
+    const { selectedEntityType, tagHierarchy, entityTypesMap, entityTypesEntityCount } = this.state;
+    
+    this.setState({ 
+      selectedEntityType: entityType,
+      activeTagHierarchy: entityType.id === "all" 
+        ? tagHierarchy 
+        : entityTypesMap[entityType.value] ? entityTypesMap[entityType.value] : {},
+      entityCount: entityTypesEntityCount[entityType]
+    });
+  }
+
   render() {
     const {
       doneLoading,
       entityCount,
       loadedEntities,
       tagHierarchy,
+      activeTagHierarchy,
       entityTagsMap,
+      entityTypesMap,
+      entityTypesEntityCount,
       taggingPolicy,
-      accountId
+      accountId,
+      selectedEntityType
     } = this.state;
 
+    const entityTypes = [
+      { id: "all", name: "All Entity Types", value: "ALL_ENTITIES" },
+      { id: "apm", name: "Application", value: "APM_APPLICATION_ENTITY" },
+      { id: "browser", name: "Browser", value: "BROWSER_APPLICATION_ENTITY" },
+      { id: "mobile", name: "Mobile", value: "MOBILE_APPLICATION_ENTITY" },
+      { id: "infra", name: "Infrastructure", value: "INFRASTRUCTURE_HOST_ENTITY" },
+      { id: "synth", name: "Synthetic", value: "SYNTHETIC_MONITOR_ENTITY" },
+      { id: "dashboard", name: "Dashboard", value: "DASHBOARD_ENTITY" },
+      { id: "workload", name: "Workload", value: "WORKLOAD_ENTITY" }
+    ];
+
     return (
+      <>
+      <div style={{marginLeft: "15px"}}>
+        Filter by entity Type:
+        <Dropdown
+          title={selectedEntityType.name}
+          items={entityTypes}
+        >
+          {({ item, index }) => (
+            <DropdownItem
+              // style={{backgroundColor: `${selectedEntityTypes.find(e => e.value === item.value) ? "lightgreen" : "white"}`}}
+              key={`e-${index}`}
+              onClick={() => this.updateSelectedEntityType(item)}
+            >
+              {item.name}
+            </DropdownItem>
+          )}
+        </Dropdown>
+      </div>
       <NerdletStateContext.Consumer>
         {nerdletState => (
           <>
@@ -94,8 +145,10 @@ export default class TagVisualizer extends React.Component {
               <TabsItem value="policy-tab" label="Policy">
                 <TaggingPolicy
                   accountId={accountId}
-                  tagHierarchy={tagHierarchy}
-                  entityCount={entityCount}
+                  // tagHierarchy={tagHierarchy}
+                  tagHierarchy={activeTagHierarchy}
+                  selectedEntityType={selectedEntityType}
+                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
                   loadedEntities={loadedEntities}
                   doneLoading={doneLoading}
                   schema={taggingPolicy}
@@ -104,16 +157,20 @@ export default class TagVisualizer extends React.Component {
               </TabsItem>
               <TabsItem value="coverage-tab" label="Tag analyzer">
                 <TagCoverageView
-                  tagHierarchy={tagHierarchy}
-                  entityCount={entityCount}
+                  // tagHierarchy={tagHierarchy}
+                  tagHierarchy={activeTagHierarchy}
+                  selectedEntityType={selectedEntityType}
+                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
                   loadedEntities={loadedEntities}
                   doneLoading={doneLoading}
                 />
               </TabsItem>
               <TabsItem value="entity-tab" label="Entities">
                 <TagEntityView
-                  tagHierarchy={tagHierarchy}
-                  entityCount={entityCount}
+                  // tagHierarchy={tagHierarchy}
+                  tagHierarchy={activeTagHierarchy}
+                  selectedEntityType={selectedEntityType}
+                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
                   loadedEntities={loadedEntities}
                   doneLoading={doneLoading}
                   entityTagsMap={entityTagsMap}
@@ -124,6 +181,7 @@ export default class TagVisualizer extends React.Component {
           </>
         )}
       </NerdletStateContext.Consumer>
+      </>
     );
   }
 
@@ -141,6 +199,7 @@ export default class TagVisualizer extends React.Component {
       {
         tagHierarchy: {},
         entityTagsMap: {},
+        entityTypesMap: {},
         entityCount: 0,
         loadedEntities: 0,
         doneLoading: false,
@@ -305,26 +364,38 @@ export default class TagVisualizer extends React.Component {
         if (nextCursor && accountId === this.state.accountId) {
           loadEntityBatch();
         }
+        else {
+          this.setState({ activeTagHierarchy: tagHierarchy});
+        }
       }
     );
   };
 
   processLoadedEntityTags = entities => {
-    const { tagHierarchy, entityTagsMap, taggingPolicy, mandatoryTagCount } = this.state;
+    const { tagHierarchy, entityTagsMap, taggingPolicy, mandatoryTagCount, entityTypesMap, entityTypesEntityCount } = this.state;
     entities.reduce((acc, entity) => {
       // get all the tags
-      const { guid, tags } = entity;
+      const { guid, tags, entityType } = entity;
       entityTagsMap[guid] = [...tags];
+      
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
+      
+      if (!entityTypesMap[entityType]) entityTypesMap[entityType] = [];
+      if (!entityTypesEntityCount[entityType]) entityTypesEntityCount[entityType] = 0;
+
       // for each tag, if it doesn't make an empty object
       tags.forEach(({ tagKey, tagValues }) => {
         if (!acc[tagKey]) acc[tagKey] = {};
+        if (!entityTypesMap[entityType][tagKey]) entityTypesMap[entityType][tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
         tagValues.forEach(value => {
           if (!acc[tagKey][value]) acc[tagKey][value] = [];
+          if (!entityTypesMap[entityType][tagKey][value]) entityTypesMap[entityType][tagKey][value] = [];
           acc[tagKey][value].push(entity);
+          entityTypesMap[entityType][tagKey][value].push(entity);
         });
       });
+      entityTypesEntityCount[entityType] += 1;
       return acc;
     }, tagHierarchy);
 
