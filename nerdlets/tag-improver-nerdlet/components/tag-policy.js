@@ -270,43 +270,43 @@ export default class TaggingPolicy extends React.Component {
           <TableHeader>
             <TableHeaderCell
               width="200px"
-              sortable
+              sortable={!isEditMode}
               sortingOrder={4}
               value={({ item }) => item.label}
               onClick={this.onClickTableHeaderCell('label')}
-              sortingType={tableSorting.label}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.label}
             >
               Name
             </TableHeaderCell>
             <TableHeaderCell
               width="150px"
-              sortable
+              sortable={!isEditMode}
               sortingOrder={3}
               value={({ item }) => item.key}
               onClick={this.onClickTableHeaderCell('key')}
-              sortingType={tableSorting.key}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.key}
             >
               Tag key
             </TableHeaderCell>
             <TableHeaderCell
               width="200px"
-              sortable
+              sortable={!isEditMode}
               sortingOrder={0}
               value={({ item }) => ENFORCEMENT_PRIORITY[item.enforcement]}
               onClick={this.onClickTableHeaderCell('enforcement')}
-              sortingType={tableSorting.enforcement}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.enforcement}
             >
               Enforcement level
             </TableHeaderCell>
             <TableHeaderCell
               width="100px"
-              sortable
+              sortable={!isEditMode}
               sortingOrder={1}
               value={({ item }) =>
                 (coverageAndCountsPerTag[item.key] || {}).coverage || 0
               }
               onClick={this.onClickTableHeaderCell('coverage')}
-              sortingType={tableSorting.coverage}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.coverage}
             >
               <Tooltip
                 text={coverageTooltipText}
@@ -317,22 +317,22 @@ export default class TaggingPolicy extends React.Component {
             </TableHeaderCell>
             <TableHeaderCell
               width="100px"
-              sortable
+              sortable={!isEditMode}
               sortingOrder={2}
               value={({ item }) =>
                 (coverageAndCountsPerTag[item.key] || {}).count || 0
               }
               onClick={this.onClickTableHeaderCell('count')}
-              sortingType={tableSorting.count}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.count}
             >
               Entities
             </TableHeaderCell>
             <TableHeaderCell
-              sortable
+              sortable={!isEditMode}
               sortingOrder={5}
               value={({ item }) => item.purpose}
               onClick={this.onClickTableHeaderCell('purpose')}
-              sortingType={tableSorting.purpose}
+              sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.purpose}
             >
               Purpose
             </TableHeaderCell>
