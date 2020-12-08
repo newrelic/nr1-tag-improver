@@ -371,9 +371,8 @@ function sortedPolicy(policy) {
 }
 
 function tagsObject(policy) {
-  return (policy || []).reduce((acc, cur) => {
-    if (!(cur.enforcement in acc)) acc[cur.enforcement] = [];
-    acc[cur.enforcement].push(cur.key);
-    return acc;
-  }, {});
+  return (policy || []).reduce(
+    (acc, cur) => Object.assign(acc, acc[cur.enforcement].push(cur.key)),
+    { required: [], optional: [] }
+  );
 }

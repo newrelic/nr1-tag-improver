@@ -65,29 +65,31 @@ export default class TagEntityView extends React.Component {
   };
 
   getTagKeys = () => {
-    const { tagHierarchy, orderedTags, tagsObject } = this.props;
+    const { tagHierarchy, tagsObject } = this.props;
 
     let tagsForDropdown = [];
-    tagsForDropdown.push({
-      title: 'required',
-      array: tagsObject.required,
-      items: []
-    });
-    tagsForDropdown.push({
-      title: 'optional',
-      array: tagsObject.optional,
-      items: []
-    });
-    tagsForDropdown.push({title: 'not in policy', array: [], items: []});
-    const lastTypeIdx = 2;
+    tagsForDropdown.push({ title: 'required', array: tagsObject.required });
+    tagsForDropdown.push({ title: 'optional', array: tagsObject.optional });
+    tagsForDropdown.push({ title: 'not in policy', array: [] });
 
-    Object.keys(tagHierarchy).map(tag => {
-      let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
-      if (idx < 0) idx = lastTypeIdx;
-      tagsForDropdown[idx].items.push(tag);
-    });
+    const items = Object.keys(tagHierarchy)
+      .reduce(
+        (acc, tag) => {
+          let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
+          if (idx < 0) idx = 2; //push into 'not in policy'
+          acc[idx].push(tag);
+          return acc;
+        },
+        [[], [], []]
+      )
+      .map(tags =>
+        tags.sort((tag1, tag2) =>
+          tag1.toLowerCase().localeCompare(tag2.toLowerCase())
+        )
+      );
 
-    tagsForDropdown.map(tagType => tagType.items = tagType.items.sort());
+    tagsForDropdown.map((section, i) => tagsForDropdown[i]['items'] = items[i]);
+    
     return tagsForDropdown;
   };
 
