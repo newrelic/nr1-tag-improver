@@ -71,14 +71,14 @@ export default class TagVisualizer extends React.Component {
   };
 
   updateSelectedEntityType = entityType => {
-    const { selectedEntityType, tagHierarchy, entityTypesMap, entityTypesEntityCount } = this.state;
+    const { selectedEntityType, tagHierarchy, loadedEntities, entityTypesMap, entityTypesEntityCount } = this.state;
     
     this.setState({ 
       selectedEntityType: entityType,
       activeTagHierarchy: entityType.id === "all" 
         ? tagHierarchy 
         : entityTypesMap[entityType.value] ? entityTypesMap[entityType.value] : {},
-      entityCount: entityTypesEntityCount[entityType]
+      entityCount: entityType.id === "all" ? loadedEntities : entityTypesEntityCount[entityType]
     });
   }
 
@@ -110,26 +110,25 @@ export default class TagVisualizer extends React.Component {
 
     return (
       <>
-      <div style={{marginLeft: "15px"}}>
-        Filter by entity Type:
-        <Dropdown
-          title={selectedEntityType.name}
-          items={entityTypes}
-        >
-          {({ item, index }) => (
-            <DropdownItem
-              // style={{backgroundColor: `${selectedEntityTypes.find(e => e.value === item.value) ? "lightgreen" : "white"}`}}
-              key={`e-${index}`}
-              onClick={() => this.updateSelectedEntityType(item)}
-            >
-              {item.name}
-            </DropdownItem>
-          )}
-        </Dropdown>
-      </div>
       <NerdletStateContext.Consumer>
         {nerdletState => (
           <>
+          <div className="status" style={{height: "24px", lineHeight: "24px", paddingBottom: "9px"}}>
+            Entity type:
+            <Dropdown style={{marginLeft: "0"}}
+              title={selectedEntityType.name}
+              items={entityTypes}
+            >
+              {({ item, index }) => (
+                <DropdownItem
+                  key={`e-${index}`}
+                  onClick={() => this.updateSelectedEntityType(item)}
+                >
+                  {item.name}
+                </DropdownItem>
+              )}
+            </Dropdown>
+          </div>
             {doneLoading ? null : (
               <div className="status">
                 Loading tags... ({loadedEntities} / {entityCount} entities
@@ -145,7 +144,6 @@ export default class TagVisualizer extends React.Component {
               <TabsItem value="policy-tab" label="Policy">
                 <TaggingPolicy
                   accountId={accountId}
-                  // tagHierarchy={tagHierarchy}
                   tagHierarchy={activeTagHierarchy}
                   selectedEntityType={selectedEntityType}
                   entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
@@ -157,7 +155,6 @@ export default class TagVisualizer extends React.Component {
               </TabsItem>
               <TabsItem value="coverage-tab" label="Tag analyzer">
                 <TagCoverageView
-                  // tagHierarchy={tagHierarchy}
                   tagHierarchy={activeTagHierarchy}
                   selectedEntityType={selectedEntityType}
                   entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
@@ -167,7 +164,6 @@ export default class TagVisualizer extends React.Component {
               </TabsItem>
               <TabsItem value="entity-tab" label="Entities">
                 <TagEntityView
-                  // tagHierarchy={tagHierarchy}
                   tagHierarchy={activeTagHierarchy}
                   selectedEntityType={selectedEntityType}
                   entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
@@ -365,7 +361,7 @@ export default class TagVisualizer extends React.Component {
           loadEntityBatch();
         }
         else {
-          this.setState({ activeTagHierarchy: tagHierarchy});
+          this.setState({activeTagHierarchy: tagHierarchy});
         }
       }
     );
