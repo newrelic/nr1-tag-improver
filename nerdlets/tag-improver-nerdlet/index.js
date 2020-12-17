@@ -171,6 +171,7 @@ export default class TagVisualizer extends React.Component {
                   doneLoading={doneLoading}
                   entityTagsMap={entityTagsMap}
                   reloadTagsFn={this.startLoadingEntityTags}
+                  tagsObject={tagsObject(taggingPolicy)}
                 />
               </TabsItem>
             </Tabs>
@@ -463,4 +464,11 @@ function sortedPolicy(policy) {
       ? -1
       : a.key.localeCompare(b.key, undefined, { sensitivity: 'base' });
   });
+}
+
+function tagsObject(policy) {
+  return (policy || []).reduce(
+    (acc, cur) => Object.assign(acc, acc[cur.enforcement].push(cur.key)),
+    { required: [], optional: [] }
+  );
 }

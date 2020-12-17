@@ -3,6 +3,7 @@ import {
   Button,
   Checkbox,
   Dropdown,
+  DropdownSection,
   DropdownItem,
   Grid,
   GridItem,
@@ -68,8 +69,32 @@ export default class TagEntityView extends React.Component {
   };
 
   getTagKeys = () => {
-    const { tagHierarchy } = this.props;
-    return Object.keys(tagHierarchy).sort();
+    const { tagHierarchy, tagsObject } = this.props;
+
+    let tagsForDropdown = [];
+    tagsForDropdown.push({ title: 'required', array: tagsObject.required });
+    tagsForDropdown.push({ title: 'optional', array: tagsObject.optional });
+    tagsForDropdown.push({ title: 'not in policy', array: [] });
+
+    const items = Object.keys(tagHierarchy)
+      .reduce(
+        (acc, tag) => {
+          let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
+          if (idx < 0) idx = 2; //push into 'not in policy'
+          acc[idx].push(tag);
+          return acc;
+        },
+        [[], [], []]
+      )
+      .map(tags =>
+        tags.sort((tag1, tag2) =>
+          tag1.toLowerCase().localeCompare(tag2.toLowerCase())
+        )
+      );
+
+    tagsForDropdown.map((section, i) => tagsForDropdown[i]['items'] = items[i]);
+    
+    return tagsForDropdown;
   };
 
   getTableData = () => {
@@ -158,7 +183,6 @@ export default class TagEntityView extends React.Component {
             <div>
               Show values for this tag in the table:
               <Dropdown
-                style={{ display: 'inline', margin: '0 1em' }}
                 title={firstTagKey}
                 items={tagKeys}
                 style={{
@@ -166,14 +190,23 @@ export default class TagEntityView extends React.Component {
                   margin: '0 .5em',
                   verticalAlign: 'middle'
                 }}
+                sectioned
               >
-                {({ item, index }) => (
-                  <DropdownItem
-                    key={`d-${index}`}
-                    onClick={() => updateFirstTagKey(item)}
+                {({ item: section, index }) => (
+                  <DropdownSection
+                    key={index}
+                    title={section.title}
+                    items={section.items}
                   >
-                    {item}
-                  </DropdownItem>
+                    {({ item, index }) => (
+                        <DropdownItem
+                          key={`d-${index}`}
+                          onClick={() => updateFirstTagKey(item)}
+                        >
+                          {item}
+                        </DropdownItem>
+                    )}
+                  </DropdownSection>
                 )}
               </Dropdown>
             </div>
