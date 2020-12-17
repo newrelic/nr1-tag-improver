@@ -38,6 +38,9 @@ $low-band-color: rgb(191, 0, 22);
   display: inline-flex;
   // display: block;
   align-items: center;
+  label {
+    margin-left: 4px;
+  }
 }
 
 .tags__tag__status {
