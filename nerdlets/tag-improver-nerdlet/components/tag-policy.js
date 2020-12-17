@@ -325,7 +325,7 @@ export default class TaggingPolicy extends React.Component {
               onClick={this.onClickTableHeaderCell('count')}
               sortingType={isEditMode ? TableHeaderCell.SORTING_TYPE.NONE : tableSorting.count}
             >
-              Entities
+              Entity count
             </TableHeaderCell>
             <TableHeaderCell
               sortable={!isEditMode}
