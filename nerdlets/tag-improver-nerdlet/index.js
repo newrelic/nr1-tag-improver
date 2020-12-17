@@ -407,7 +407,7 @@ export default class TagVisualizer extends React.Component {
       const found = entity.tags.find((tag) => tag.tagKey === tagPolicy.key);
       const entityTag = {
         tagKey: tagPolicy.key,
-        tagValues: found ? found.tagValues : ['<undefined>'],
+        tagValues: found ? found.tagValues : ['---'],
       }
 
       if (tagPolicy.enforcement === 'required') {
