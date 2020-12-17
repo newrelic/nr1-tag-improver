@@ -12,6 +12,13 @@ const ENFORCEMENT_PRIORITY = {
   [TAG_SCHEMA_ENFORCEMENT.prohibited]: 3
 };
 
+const COMPLIANCEBANDS = {
+  // rule: the loverlimit always falls within the range
+  highBand: { upperLimit: 100, lowerLimit: 67,  color: "seagreen"},
+  midBand: { upperLimit: 67, lowerLimit: 33, color: "sandybrown"},
+  lowBand: { upperLimit: 33, lowerLimit: 0, color: "orangered"},
+};
+
 const SCHEMA = [
   {
     label: 'Owning team',
@@ -50,4 +57,4 @@ const SCHEMA = [
   }
 ];
 
-export { SCHEMA, TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY };
+export { SCHEMA, TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY, COMPLIANCEBANDS };

@@ -1,0 +1,62 @@
+$high-band-color: rgb(17, 166, 0);
+$mid-band-color: rgb(232, 183, 12);
+$low-band-color: rgb(191, 0, 22);
+
+// .entity__table__panel {
+//     background-color: #fff;
+//     padding: 1rem;
+//     border: 1px solid #e3e4e4;
+//     box-shadow: 0 1px 3px 0 rgba(203, 226, 226, 0.34);
+
+//     .score {
+//         font-weight: 600;
+//     }
+// }
+
+.score {
+    font-weight: 600;
+}
+
+.tags__title {
+  font-size: .75rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.tags__list {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.tags__tag {
+  border: 1px solid #e3e4e4;
+  box-shadow: 0 1px 3px 0 rgba(203, 226, 226, 0.34);
+  font-size: .75rem;
+  padding: .15rem .25rem;
+  margin-left: .25rem;
+  margin-bottom: .25rem;
+  display: inline-flex;
+  // display: block;
+  align-items: center;
+}
+
+.tags__tag__status {
+  font-weight: 800;
+  font-size: .75rem;
+  padding-right: .3rem;
+}
+
+.low__band {
+    color: $low-band-color;
+    background-color: rgba(191, 0, 22, 0.05);
+  }
+  
+  .mid__band {
+    color: $mid-band-color;
+    background-color: rgba(241, 206, 80, 0.06);
+  }
+  
+  .high__band {
+    color: $high-band-color;
+    background-color: rgba(17, 166, 0, 0.05);
+  }
