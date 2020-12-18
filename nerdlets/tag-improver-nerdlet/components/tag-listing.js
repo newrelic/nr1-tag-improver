@@ -10,7 +10,7 @@ const TagListing = ({ type, tags, includeDefinedTags }) => {
   const fails = []
 
   tags.forEach(tag => {
-    const hasValue = tag.tagValues && tag.tagValues.find((v) => v !== '<undefined>');
+    const hasValue = tag.tagValues && tag.tagValues.find((v) => v !== '---');
     if (hasValue) {
       tag.status = 'high__band';
       passes.push(tag);
