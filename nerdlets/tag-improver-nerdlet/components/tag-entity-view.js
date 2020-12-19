@@ -35,7 +35,7 @@ export default class TagEntityView extends React.Component {
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
-    includeDefinedTags: false
+    showAllTags: false
   };
 
   componentDidMount() {
@@ -144,9 +144,9 @@ export default class TagEntityView extends React.Component {
   };
 
   onCheckboxChange = event => {
-    const includeDefinedTags = event.target.checked;
+    const showAllTags = event.target.checked;
 
-    this.setState({ includeDefinedTags });
+    this.setState({ showAllTags });
   }
 
   render() {
@@ -155,7 +155,7 @@ export default class TagEntityView extends React.Component {
       firstTagKey,
       selectedEntities,
       selectedEntityIds,
-      includeDefinedTags
+      showAllTags
     } = this.state;
     const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
     const tagKeys = this.getTagKeys();
@@ -213,9 +213,9 @@ export default class TagEntityView extends React.Component {
           </div>
           <div>
             <Checkbox
-              checked={this.state.includeDefinedTags}
+              checked={this.state.showAllTags}
               onChange={this.onCheckboxChange}
-              label="Include Defined Tags"
+              label="Show all policy tags"
             />
           </div>
           <div className="button-section" style={{ padding: 8 }}>
@@ -311,10 +311,10 @@ export default class TagEntityView extends React.Component {
                 Score
               </TableHeaderCell>
               <TableHeaderCell width="6fr">
-                {includeDefinedTags ? '' : 'Undefined'} Mandatory Tags
+                {showAllTags ? '' : 'Undefined'} Mandatory Tags
               </TableHeaderCell>
               <TableHeaderCell width="7fr">
-              {includeDefinedTags ? '' : 'Undefined'} Optional Tags
+              {showAllTags ? '' : 'Undefined'} Optional Tags
               </TableHeaderCell>
             </TableHeader>
 
@@ -333,11 +333,11 @@ export default class TagEntityView extends React.Component {
                 >
                   {`${item.complianceScore.toFixed(2)}%`}
                 </TableRowCell>
-                <TableRowCell>
-                  <TagListing type="mandatory" tags={item.mandatoryTags} includeDefinedTags={includeDefinedTags} />
+                <TableRowCell className="tag_nowrap_table_cell">
+                  <TagListing type="mandatory" tags={item.mandatoryTags} showAllTags={showAllTags} />
                 </TableRowCell>
-                <TableRowCell>
-                  <TagListing type="optional" tags={item.optionalTags} includeDefinedTags={includeDefinedTags} />
+                <TableRowCell className="tag_nowrap_table_cell">
+                  <TagListing type="optional" tags={item.optionalTags} showAllTags={showAllTags} />
                 </TableRowCell>
               </TableRow>
             )}
