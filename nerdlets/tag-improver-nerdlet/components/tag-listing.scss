@@ -25,7 +25,13 @@ $low-band-color: rgb(191, 0, 22);
 
 .tags__list {
   display: flex;
-  flex-wrap: wrap;
+  // flex-wrap: wrap;
+}
+
+.tag_nowrap_table_cell {
+  div {
+    text-overflow: clip;
+  }
 }
 
 .tags__tag {

@@ -5,7 +5,7 @@ import PropTypes from 'prop-types';
 import bang from './exclamation.svg';
 import check from './green-checkmark.svg';
 
-const TagListing = ({ type, tags, includeDefinedTags }) => {
+const TagListing = ({ type, tags, showAllTags }) => {
   const passes = []
   const fails = []
 
@@ -65,7 +65,7 @@ const TagListing = ({ type, tags, includeDefinedTags }) => {
       {/* <label className="tags__title">{type}</label> */}
       <div className="tags__list">
         {renderTags(fails)}
-        {includeDefinedTags ? renderTags(passes) : ''}
+        {showAllTags ? renderTags(passes) : ''}
       </div>
     </div>
   );
@@ -74,7 +74,7 @@ const TagListing = ({ type, tags, includeDefinedTags }) => {
 TagListing.propTypes = {
   type: PropTypes.string.isRequired,
   tags: PropTypes.array.isRequired,
-  includeDefinedTags: PropTypes.bool.isRequired,
+  showAllTags: PropTypes.bool.isRequired,
 };
 
 export default TagListing;
