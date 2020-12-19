@@ -160,6 +160,7 @@ export default class TagVisualizer extends React.Component {
                   entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
                   loadedEntities={loadedEntities}
                   doneLoading={doneLoading}
+                  height={this.props.height}
                 />
               </TabsItem>
               <TabsItem value="entity-tab" label="Entities">
