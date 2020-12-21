@@ -57,4 +57,21 @@ const SCHEMA = [
   }
 ];
 
-export { SCHEMA, TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY, COMPLIANCEBANDS };
+const ENTITY_TYPES = [
+  // { id: "all", name: "All Entity Types", value: "ALL_ENTITIES" },
+  { id: "APM", name: "Application", value: "APM_APPLICATION_ENTITY" },
+  { id: "BROWSER", name: "Browser", value: "BROWSER_APPLICATION_ENTITY" },
+  { id: "MOBILE", name: "Mobile", value: "MOBILE_APPLICATION_ENTITY" },
+  { id: "INFRA", name: "Infrastructure", value: "INFRASTRUCTURE_HOST_ENTITY" },
+  { id: "SYNTH", name: "Synthetic", value: "SYNTHETIC_MONITOR_ENTITY" },
+  { id: "VIZ", name: "Dashboard", value: "DASHBOARD_ENTITY" },
+  { id: "NR1", name: "Workload", value: "WORKLOAD_ENTITY" }
+];
+
+export {
+  SCHEMA,
+  TAG_SCHEMA_ENFORCEMENT,
+  ENFORCEMENT_PRIORITY,
+  COMPLIANCEBANDS,
+  ENTITY_TYPES
+};
