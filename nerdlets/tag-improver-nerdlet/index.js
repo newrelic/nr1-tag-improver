@@ -16,7 +16,7 @@ import {
   UserStorageMutation
 } from 'nr1';
 
-import { SCHEMA, ENFORCEMENT_PRIORITY } from './tag-schema';
+import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
 
 import TagCoverageView from './components/tag-coverage';
 import TagEntityView from './components/tag-entity-view';
@@ -38,7 +38,7 @@ export default class TagVisualizer extends React.Component {
     accountId: null,
     taggingPolicy: null,
     mandatoryTagCount: 0,
-    selectedEntityType: { id: 'all', name: "All Entity Types", value: "ALL_ENTITIES" },
+    selectedEntityType: { id: "APM", name: "Application", value: "APM_APPLICATION_ENTITY" },
   };
 
   componentDidMount() {
@@ -78,7 +78,22 @@ export default class TagVisualizer extends React.Component {
       activeTagHierarchy: entityType.id === "all" 
         ? tagHierarchy 
         : entityTypesMap[entityType.value] ? entityTypesMap[entityType.value] : {},
-      entityCount: entityType.id === "all" ? loadedEntities : entityTypesEntityCount[entityType]
+      entityCount: entityType.id === "all" ? loadedEntities : entityTypesEntityCount[entityType],
+
+      // reset all variables to load fresh data for newly selected entity type
+      tagHierarchy: {},
+      activeTagHierarchy: {},
+      entityTagsMap: {},
+      entityTypesMap: {},
+      entityTypesEntityCount: {},
+      entityCount: 0,
+      loadedEntities: 0,
+      doneLoading: false,
+      loadError: undefined,
+      queryCursor: undefined,
+      accountId: null,
+      taggingPolicy: null,
+      mandatoryTagCount: 0,
     });
   }
 
@@ -97,16 +112,6 @@ export default class TagVisualizer extends React.Component {
       selectedEntityType
     } = this.state;
 
-    const entityTypes = [
-      { id: "all", name: "All Entity Types", value: "ALL_ENTITIES" },
-      { id: "apm", name: "Application", value: "APM_APPLICATION_ENTITY" },
-      { id: "browser", name: "Browser", value: "BROWSER_APPLICATION_ENTITY" },
-      { id: "mobile", name: "Mobile", value: "MOBILE_APPLICATION_ENTITY" },
-      { id: "infra", name: "Infrastructure", value: "INFRASTRUCTURE_HOST_ENTITY" },
-      { id: "synth", name: "Synthetic", value: "SYNTHETIC_MONITOR_ENTITY" },
-      { id: "dashboard", name: "Dashboard", value: "DASHBOARD_ENTITY" },
-      { id: "workload", name: "Workload", value: "WORKLOAD_ENTITY" }
-    ];
 
     return (
       <>
@@ -117,7 +122,7 @@ export default class TagVisualizer extends React.Component {
             Entity type:
             <Dropdown style={{marginLeft: "0"}}
               title={selectedEntityType.name}
-              items={entityTypes}
+              items={ENTITY_TYPES}
             >
               {({ item, index }) => (
                 <DropdownItem
@@ -213,7 +218,7 @@ export default class TagVisualizer extends React.Component {
   loadEntityBatch = () => {
     const {
       processEntityQueryResults,
-      state: { queryCursor, accountId }
+      state: { queryCursor, accountId, selectedEntityType }
     } = this;
 
     const query = `
@@ -239,7 +244,8 @@ export default class TagVisualizer extends React.Component {
     }
     `;
     const variables = {
-      queryString: `domain in ('APM', 'MOBILE', 'BROWSER')${
+      // queryString: `domain in ('APM', 'MOBILE', 'BROWSER', 'DASHBOARD', 'WORKLOAD')${
+      queryString: `domain = '${selectedEntityType.id}' ${
         accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
           : ''
@@ -473,3 +479,4 @@ function tagsObject(policy) {
     { required: [], optional: [] }
   );
 }
+
