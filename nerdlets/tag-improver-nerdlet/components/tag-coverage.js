@@ -53,8 +53,8 @@ export default class TagCoverageView extends React.Component {
       Object.keys(tagHierarchy[currentTagGroup]).length > 0;
 
     return (
-      <div className="split">
-      <Grid className="primary-grid">
+      <div className="split" style={{ height: (this.props.height || 1200) - 120 }}>
+      <Grid className="primary-grid" style={{alignContent: "start"}}>
         <GridItem className="primary-content-container" columnSpan={7}>
           <HeadingText type={HeadingText.TYPE.HEADING_4}>
             Tags in use
@@ -87,6 +87,10 @@ export default class TagCoverageView extends React.Component {
             breakdown
           </HeadingText>
         </GridItem>
+
+        <GridItem className="primary-content-container" columnSpan={12}>
+          <hr/>
+              </GridItem>
 
         <GridItem className="primary-content-container" columnSpan={7}>
           <div className="left">
