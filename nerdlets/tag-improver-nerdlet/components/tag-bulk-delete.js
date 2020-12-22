@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   HeadingText,
   PlatformStateContext,
@@ -8,7 +10,6 @@ import {
   Select,
   SelectItem
 } from 'nr1';
-import Autocomplete from './autocomplete';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
 
@@ -20,7 +21,11 @@ const ENTITY_UPDATE_STATUS = {
 };
 
 export default class TagBulkDelete extends React.Component {
-  static contextType = PlatformStateContext;
+  static propTypes = {
+    selectedEntityIds: PropTypes.array,
+    reloadTagsFn: PropTypes.func,
+    entityTagsMap: PropTypes.object
+  };
 
   constructor(props) {
     super(props);
@@ -29,6 +34,8 @@ export default class TagBulkDelete extends React.Component {
       entityStatuses: {}
     };
   }
+
+  static contextType = PlatformStateContext;
 
   deleteTagsFromEntities = async () => {
     const { selectedEntityIds } = this.props;
@@ -47,8 +54,7 @@ export default class TagBulkDelete extends React.Component {
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
       entitiesToUpdate = statusEntries.filter(
-        ([entityId, entityStatus]) =>
-          entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
       );
     } else {
       entitiesToUpdate = selectedEntityIds;
@@ -60,7 +66,7 @@ export default class TagBulkDelete extends React.Component {
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async (entityId, index) => {
+    await entitiesToUpdate.map(async entityId => {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
@@ -69,10 +75,11 @@ export default class TagBulkDelete extends React.Component {
         } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
           throw result.data.taggingDeleteTagFromEntity.errors;
         } else {
+          const previousStatuses = this.state.entityStatuses;
           this.setState(
             {
               entityStatuses: {
-                ...this.state.entityStatuses,
+                ...previousStatuses,
                 [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
               }
             },
@@ -88,10 +95,10 @@ export default class TagBulkDelete extends React.Component {
           );
         }
       } catch (error) {
-        console.log(`Add tag error for ${entityId}`, error);
+        const previousStatuses = this.state.entityStatuses;
         this.setState({
           entityStatuses: {
-            ...this.state.entityStatuses,
+            ...previousStatuses,
             [entityId]: ENTITY_UPDATE_STATUS.ERROR
           }
         });
@@ -100,6 +107,7 @@ export default class TagBulkDelete extends React.Component {
   };
 
   changeTag = (fromTag, toTag) => {
+    // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToDelete };
     newTags[toTag] = newTags[fromTag] || 1;
     delete newTags[fromTag];
@@ -107,6 +115,7 @@ export default class TagBulkDelete extends React.Component {
   };
 
   removeTag = tag => {
+    // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToDelete };
     delete newTags[tag];
     this.setState({ tagsToDelete: newTags });
@@ -136,15 +145,25 @@ export default class TagBulkDelete extends React.Component {
       !currentTagList.includes(emptyTagPlaceholderKey);
     const statusEntries = Object.entries(entityStatuses);
     const loadingEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.UPDATING)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.UPDATING)
+      .map(([entityId]) => entityId);
     const successEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
+      .map(([entityId]) => entityId);
     const errorEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.ERROR)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.ERROR)
+      .map(([entityId]) => entityId);
     const allSucceeded = successEntities.length === selectedEntityIds.length;
+
+    let resultText = '';
+    if (errorEntities.length > 0) {
+      resultText = 'Retry';
+    } else if (allSucceeded) {
+      resultText = 'Tags removed!';
+    } else {
+      resultText = 'Remove tags';
+    }
+
     return (
       <div className="full-height-modal">
         <div>
@@ -231,11 +250,7 @@ export default class TagBulkDelete extends React.Component {
               onClick={this.deleteTagsFromEntities}
               loading={loadingEntities.length > 0}
             >
-              {errorEntities.length > 0
-                ? 'Retry'
-                : allSucceeded
-                ? 'Tags Removed!'
-                : 'Remove tags'}
+              {resultText}
             </Button>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   Dropdown,
   DropdownItem,
-  HeadingText,
   NerdGraphQuery,
   Spinner,
   Tabs,
@@ -10,10 +11,8 @@ import {
   nerdlet,
   PlatformStateContext,
   NerdletStateContext,
-  AccountStorageQuery,
   UserStorageQuery,
-  AccountStorageMutation,
-  UserStorageMutation
+  logger
 } from 'nr1';
 
 import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
@@ -23,7 +22,10 @@ import TagEntityView from './components/tag-entity-view';
 import TaggingPolicy from './components/tag-policy';
 
 export default class TagVisualizer extends React.Component {
-  static contextType = PlatformStateContext;
+  static propTypes = {
+    height: PropTypes.number
+  };
+
   state = {
     tagHierarchy: {},
     activeTagHierarchy: {},
@@ -33,12 +35,15 @@ export default class TagVisualizer extends React.Component {
     entityCount: 0,
     loadedEntities: 0,
     doneLoading: false,
-    loadError: undefined,
     queryCursor: undefined,
     accountId: null,
     taggingPolicy: null,
     mandatoryTagCount: 0,
-    selectedEntityType: { id: "APM", name: "Application", value: "APM_APPLICATION_ENTITY" },
+    selectedEntityType: {
+      id: 'APM',
+      name: 'Application',
+      value: 'APM_APPLICATION_ENTITY'
+    }
   };
 
   componentDidMount() {
@@ -66,127 +71,47 @@ export default class TagVisualizer extends React.Component {
     }
   }
 
+  static contextType = PlatformStateContext;
+
   onChangeTab = newTab => {
     nerdlet.setUrlState({ tab: newTab });
   };
 
   updateSelectedEntityType = entityType => {
-    const { selectedEntityType, tagHierarchy, loadedEntities, entityTypesMap, entityTypesEntityCount } = this.state;
-    
-    this.setState({ 
+    const {
+      tagHierarchy,
+      loadedEntities,
+      entityTypesMap,
+      entityTypesEntityCount
+    } = this.state;
+
+    this.setState({
       selectedEntityType: entityType,
-      activeTagHierarchy: entityType.id === "all" 
-        ? tagHierarchy 
-        : entityTypesMap[entityType.value] ? entityTypesMap[entityType.value] : {},
-      entityCount: entityType.id === "all" ? loadedEntities : entityTypesEntityCount[entityType],
+      activeTagHierarchy:
+        // eslint-disable-next-line no-nested-ternary
+        entityType.id === 'all'
+          ? tagHierarchy
+          : entityTypesMap[entityType.value]
+          ? entityTypesMap[entityType.value]
+          : {},
+      entityCount:
+        entityType.id === 'all'
+          ? loadedEntities
+          : entityTypesEntityCount[entityType],
 
       // reset all variables to load fresh data for newly selected entity type
       tagHierarchy: {},
-      activeTagHierarchy: {},
       entityTagsMap: {},
       entityTypesMap: {},
       entityTypesEntityCount: {},
-      entityCount: 0,
       loadedEntities: 0,
       doneLoading: false,
-      loadError: undefined,
       queryCursor: undefined,
       accountId: null,
       taggingPolicy: null,
-      mandatoryTagCount: 0,
+      mandatoryTagCount: 0
     });
-  }
-
-  render() {
-    const {
-      doneLoading,
-      entityCount,
-      loadedEntities,
-      tagHierarchy,
-      activeTagHierarchy,
-      entityTagsMap,
-      entityTypesMap,
-      entityTypesEntityCount,
-      taggingPolicy,
-      accountId,
-      selectedEntityType
-    } = this.state;
-
-
-    return (
-      <>
-      <NerdletStateContext.Consumer>
-        {nerdletState => (
-          <>
-          <div className="status" style={{height: "24px", lineHeight: "24px", paddingBottom: "9px"}}>
-            Entity type:
-            <Dropdown style={{marginLeft: "0"}}
-              title={selectedEntityType.name}
-              items={ENTITY_TYPES}
-            >
-              {({ item, index }) => (
-                <DropdownItem
-                  key={`e-${index}`}
-                  onClick={() => this.updateSelectedEntityType(item)}
-                >
-                  {item.name}
-                </DropdownItem>
-              )}
-            </Dropdown>
-          </div>
-            {doneLoading ? null : (
-              <div className="status">
-                Loading tags... ({loadedEntities} / {entityCount} entities
-                examined)
-                <Spinner inline />
-              </div>
-            )}
-
-            <Tabs
-              defaultValue={(nerdletState || {}).tab || 'overview-tab'}
-              onChange={this.onChangeTab}
-            >
-              <TabsItem value="policy-tab" label="Policy">
-                <TaggingPolicy
-                  accountId={accountId}
-                  tagHierarchy={activeTagHierarchy}
-                  selectedEntityType={selectedEntityType}
-                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
-                  loadedEntities={loadedEntities}
-                  doneLoading={doneLoading}
-                  schema={taggingPolicy}
-                  updatePolicy={this.updatePolicy}
-                />
-              </TabsItem>
-              <TabsItem value="coverage-tab" label="Tag analyzer">
-                <TagCoverageView
-                  tagHierarchy={activeTagHierarchy}
-                  selectedEntityType={selectedEntityType}
-                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
-                  loadedEntities={loadedEntities}
-                  doneLoading={doneLoading}
-                  height={this.props.height}
-                />
-              </TabsItem>
-              <TabsItem value="entity-tab" label="Entities">
-                <TagEntityView
-                  tagHierarchy={activeTagHierarchy}
-                  selectedEntityType={selectedEntityType}
-                  entityCount={selectedEntityType.id === "all" ? entityCount : entityTypesEntityCount[selectedEntityType.value]}
-                  loadedEntities={loadedEntities}
-                  doneLoading={doneLoading}
-                  entityTagsMap={entityTagsMap}
-                  reloadTagsFn={this.startLoadingEntityTags}
-                  tagsObject={tagsObject(taggingPolicy)}
-                />
-              </TabsItem>
-            </Tabs>
-          </>
-        )}
-      </NerdletStateContext.Consumer>
-      </>
-    );
-  }
+  };
 
   /**
    * Loading the tagset for all entities is a bit of a chore.
@@ -206,7 +131,6 @@ export default class TagVisualizer extends React.Component {
         entityCount: 0,
         loadedEntities: 0,
         doneLoading: false,
-        loadError: undefined,
         queryCursor: undefined
       },
       () => {
@@ -259,7 +183,7 @@ export default class TagVisualizer extends React.Component {
       query,
       variables
     })
-      .then(({ loading, data, errors }) => {
+      .then(({ data, errors }) => {
         if (data) {
           processEntityQueryResults(
             data.actor.entitySearch.results.entities,
@@ -267,79 +191,20 @@ export default class TagVisualizer extends React.Component {
             data.actor.entitySearch.results.nextCursor
           );
         } else {
-          console.log('data is NOT truthy', data);
+          logger.log('data is NOT truthy %O', data);
         }
         if (errors) {
-          console.log('Entity query error', errors);
+          logger.error('Entity query error %O', errors);
         }
       })
       .catch(err => {
-        this.setState({ loadError: err.toString() });
-      });
-  };
-
-  // TODO: Need state overhaul to handle removing tags properly, and update entity view state correctly
-  reloadEntities = entities => {
-    const {
-      processEntityQueryResults,
-      state: { queryCursor, accountId }
-    } = this;
-
-    if (entities.length > 200) {
-      this.startLoadingEntityTags();
-      return;
-    }
-
-    const query = `
-    query EntitiesReloadQuery($entities: [EntityGuid!]!) {
-      actor {
-        entities(guids: $entities) {
-          name
-          entityType
-          guid
-          accountId
-          tags {
-            tagKey: key
-            tagValues: values
-          }
-        }
-      }
-    }
-    `;
-    const variables = {
-      entities
-    };
-
-    this.setState({ doneLoading: false });
-    NerdGraphQuery.query({
-      query,
-      variables
-    })
-      .then(({ loading, data, errors }) => {
-        if (data) {
-          processEntityQueryResults(
-            data.actor.entities,
-            data.actor.entities.length
-          );
-          this.setState({ doneLoading: true });
-        } else {
-          console.log('data is NOT truthy', data);
-          this.setState({ doneLoading: true });
-        }
-        if (errors) {
-          console.log('Entity query error', errors);
-          this.setState({ doneLoading: true });
-        }
-      })
-      .catch(err => {
-        this.setState({ loadError: err.toString(), doneLoading: true });
+        logger.error(err.toString());
       });
   };
 
   processEntityQueryResults = (entitiesToProcess, count, ngCursor) => {
     const {
       loadEntityBatch,
-      setState,
       state: { loadedEntities, tagHierarchy, accountId }
     } = this;
     if (accountId !== this.state.accountId) {
@@ -353,7 +218,7 @@ export default class TagVisualizer extends React.Component {
       entities = entitiesToProcess || [];
       nextCursor = ngCursor || undefined;
     } catch (err) {
-      console.log('Error parsing results', err);
+      logger.error('Error parsing results %O', err);
     }
     this.processLoadedEntityTags(entities);
 
@@ -367,34 +232,43 @@ export default class TagVisualizer extends React.Component {
       () => {
         if (nextCursor && accountId === this.state.accountId) {
           loadEntityBatch();
-        }
-        else {
-          this.setState({activeTagHierarchy: tagHierarchy});
+        } else {
+          this.setState({ activeTagHierarchy: tagHierarchy });
         }
       }
     );
   };
 
   processLoadedEntityTags = entities => {
-    const { tagHierarchy, entityTagsMap, taggingPolicy, mandatoryTagCount, entityTypesMap, entityTypesEntityCount } = this.state;
+    const {
+      tagHierarchy,
+      entityTagsMap,
+      taggingPolicy,
+      mandatoryTagCount,
+      entityTypesMap,
+      entityTypesEntityCount
+    } = this.state;
     entities.reduce((acc, entity) => {
       // get all the tags
       const { guid, tags, entityType } = entity;
       entityTagsMap[guid] = [...tags];
-      
+
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
-      
+
       if (!entityTypesMap[entityType]) entityTypesMap[entityType] = [];
-      if (!entityTypesEntityCount[entityType]) entityTypesEntityCount[entityType] = 0;
+      if (!entityTypesEntityCount[entityType])
+        entityTypesEntityCount[entityType] = 0;
 
       // for each tag, if it doesn't make an empty object
       tags.forEach(({ tagKey, tagValues }) => {
         if (!acc[tagKey]) acc[tagKey] = {};
-        if (!entityTypesMap[entityType][tagKey]) entityTypesMap[entityType][tagKey] = {};
+        if (!entityTypesMap[entityType][tagKey])
+          entityTypesMap[entityType][tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
         tagValues.forEach(value => {
           if (!acc[tagKey][value]) acc[tagKey][value] = [];
-          if (!entityTypesMap[entityType][tagKey][value]) entityTypesMap[entityType][tagKey][value] = [];
+          if (!entityTypesMap[entityType][tagKey][value])
+            entityTypesMap[entityType][tagKey][value] = [];
           acc[tagKey][value].push(entity);
           entityTypesMap[entityType][tagKey][value].push(entity);
         });
@@ -412,11 +286,11 @@ export default class TagVisualizer extends React.Component {
     entity.optionalTags = [];
     let compliance = 0;
     taggingPolicy.forEach(tagPolicy => {
-      const found = entity.tags.find((tag) => tag.tagKey === tagPolicy.key);
+      const found = entity.tags.find(tag => tag.tagKey === tagPolicy.key);
       const entityTag = {
         tagKey: tagPolicy.key,
-        tagValues: found ? found.tagValues : ['---'],
-      }
+        tagValues: found ? found.tagValues : ['---']
+      };
 
       if (tagPolicy.enforcement === 'required') {
         entity.mandatoryTags.push(entityTag);
@@ -425,11 +299,12 @@ export default class TagVisualizer extends React.Component {
         entity.optionalTags.push(entityTag);
       }
     });
-    entity.complianceScore = compliance ? (compliance / mandatoryTagCount) * 100 : 0;
+    entity.complianceScore = compliance
+      ? (compliance / mandatoryTagCount) * 100
+      : 0;
   }
 
   getTaggingPolicy = () => {
-    this.setState({ loadingPolicy: true });
     UserStorageQuery.query({
       collection: 'nr1-tag-improver',
       documentId: 'tagging-policy'
@@ -437,17 +312,16 @@ export default class TagVisualizer extends React.Component {
       .then(({ data }) => {
         this.setState({
           taggingPolicy: sortedPolicy(data.policy),
-          mandatoryTagCount: data.policy.filter(tag => tag.enforcement === 'required').length || 0,
-          loadingPolicy: false,
-          policyLoadErrored: false
+          mandatoryTagCount:
+            data.policy.filter(tag => tag.enforcement === 'required').length ||
+            0
         });
       })
-      .catch(error => {
+      .catch(() => {
         this.setState({
           taggingPolicy: sortedPolicy(SCHEMA),
-          mandatoryTagCount: SCHEMA.filter(tag => tag.enforcement === 'required').length || 0,
-          loadingPolicy: false,
-          policyLoadErrored: true
+          mandatoryTagCount:
+            SCHEMA.filter(tag => tag.enforcement === 'required').length || 0
         });
       });
   };
@@ -455,9 +329,118 @@ export default class TagVisualizer extends React.Component {
   updatePolicy = policy => {
     this.setState({
       taggingPolicy: sortedPolicy(policy),
-      mandatoryTagCount: policy.filter(tag => tag.enforcement === 'required').length || 0,
+      mandatoryTagCount:
+        policy.filter(tag => tag.enforcement === 'required').length || 0
     });
   };
+
+  render() {
+    const {
+      doneLoading,
+      entityCount,
+      loadedEntities,
+      activeTagHierarchy,
+      entityTagsMap,
+      entityTypesEntityCount,
+      taggingPolicy,
+      accountId,
+      selectedEntityType
+    } = this.state;
+
+    return (
+      <>
+        <NerdletStateContext.Consumer>
+          {nerdletState => (
+            <>
+              <div
+                className="status"
+                style={{
+                  height: '24px',
+                  lineHeight: '24px',
+                  paddingBottom: '9px'
+                }}
+              >
+                Entity type:
+                <Dropdown
+                  style={{ marginLeft: '0' }}
+                  title={selectedEntityType.name}
+                  items={ENTITY_TYPES}
+                >
+                  {({ item, index }) => (
+                    <DropdownItem
+                      key={`e-${index}`}
+                      onClick={() => this.updateSelectedEntityType(item)}
+                    >
+                      {item.name}
+                    </DropdownItem>
+                  )}
+                </Dropdown>
+              </div>
+              {doneLoading ? null : (
+                <div className="status">
+                  Loading tags... ({loadedEntities} / {entityCount} entities
+                  examined)
+                  <Spinner inline />
+                </div>
+              )}
+
+              <Tabs
+                defaultValue={(nerdletState || {}).tab || 'overview-tab'}
+                onChange={this.onChangeTab}
+              >
+                <TabsItem value="policy-tab" label="Policy">
+                  <TaggingPolicy
+                    accountId={accountId}
+                    tagHierarchy={activeTagHierarchy}
+                    selectedEntityType={selectedEntityType}
+                    entityCount={
+                      selectedEntityType.id === 'all'
+                        ? entityCount
+                        : entityTypesEntityCount[selectedEntityType.value]
+                    }
+                    loadedEntities={loadedEntities}
+                    doneLoading={doneLoading}
+                    schema={taggingPolicy}
+                    updatePolicy={this.updatePolicy}
+                  />
+                </TabsItem>
+                <TabsItem value="coverage-tab" label="Tag analyzer">
+                  <TagCoverageView
+                    tagHierarchy={activeTagHierarchy}
+                    selectedEntityType={selectedEntityType}
+                    entityCount={
+                      selectedEntityType.id === 'all'
+                        ? entityCount
+                        : entityTypesEntityCount[selectedEntityType.value]
+                    }
+                    loadedEntities={loadedEntities}
+                    doneLoading={doneLoading}
+                    height={this.props.height}
+                  />
+                </TabsItem>
+                <TabsItem value="entity-tab" label="Entities">
+                  <TagEntityView
+                    tagHierarchy={activeTagHierarchy}
+                    selectedEntityType={selectedEntityType}
+                    entityCount={
+                      selectedEntityType.id === 'all'
+                        ? entityCount
+                        : entityTypesEntityCount[selectedEntityType.value]
+                    }
+                    loadedEntities={loadedEntities}
+                    doneLoading={doneLoading}
+                    entityTagsMap={entityTagsMap}
+                    reloadTagsFn={this.startLoadingEntityTags}
+                    tagsObject={tagsObject(taggingPolicy)}
+                  />
+                </TabsItem>
+              </Tabs>
+            </>
+          )}
+        </NerdletStateContext.Consumer>
+      </>
+    );
+  }
 }
 
 function sortedPolicy(policy) {
@@ -465,11 +448,9 @@ function sortedPolicy(policy) {
   return p.sort((a, b) => {
     const pa = ENFORCEMENT_PRIORITY[a.enforcement] || 99;
     const pb = ENFORCEMENT_PRIORITY[b.enforcement] || 99;
-    return pa < pb
-      ? 1
-      : pa > pb
-      ? -1
-      : a.key.localeCompare(b.key, undefined, { sensitivity: 'base' });
+    if (pa < pb) return 1;
+    if (pa > pb) return -1;
+    return a.key.localeCompare(b.key, undefined, { sensitivity: 'base' });
   });
 }
 
@@ -479,4 +460,3 @@ function tagsObject(policy) {
     { required: [], optional: [] }
   );
 }
-

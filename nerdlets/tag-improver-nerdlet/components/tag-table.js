@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   Table,
   TableHeader,
@@ -8,6 +10,11 @@ import {
 } from 'nr1';
 
 export default class TagTable extends React.Component {
+  static propTypes = {
+    getTableData: PropTypes.func,
+    selectTag: PropTypes.func
+  };
+
   state = {
     tag_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
   };
@@ -22,6 +29,8 @@ export default class TagTable extends React.Component {
   };
 
   render() {
+    const { setSortingColumn } = this;
+
     return (
       <Table items={this.props.getTableData()}>
         <TableHeader>
@@ -30,7 +39,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_0}
             sortingOrder={1}
-            onClick={this.setSortingColumn.bind(this, 0)}
+            onClick={setSortingColumn(0)}
           >
             Tag name
           </TableHeaderCell>
@@ -39,7 +48,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_1}
             sortingOrder={2}
-            onClick={this.setSortingColumn.bind(this, 1)}
+            onClick={setSortingColumn(1)}
           >
             Distinct values
           </TableHeaderCell>
@@ -48,7 +57,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_2}
             sortingOrder={3}
-            onClick={this.setSortingColumn.bind(this, 2)}
+            onClick={setSortingColumn(2)}
           >
             Tagged entities
           </TableHeaderCell>
@@ -57,7 +66,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_3}
             sortingOrder={4}
-            onClick={this.setSortingColumn.bind(this, 3)}
+            onClick={setSortingColumn(3)}
           >
             % coverage
           </TableHeaderCell>

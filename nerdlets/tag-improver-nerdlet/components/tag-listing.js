@@ -1,4 +1,3 @@
-/* eslint-disable no-nested-ternary */
 import React from 'react';
 import PropTypes from 'prop-types';
 
@@ -6,11 +5,11 @@ import bang from './exclamation.svg';
 import check from './green-checkmark.svg';
 
 const TagListing = ({ type, tags, showAllTags }) => {
-  const passes = []
-  const fails = []
+  const passes = [];
+  const fails = [];
 
   tags.forEach(tag => {
-    const hasValue = tag.tagValues && tag.tagValues.find((v) => v !== '---');
+    const hasValue = tag.tagValues && tag.tagValues.find(v => v !== '---');
     if (hasValue) {
       tag.status = 'high__band';
       passes.push(tag);
@@ -25,16 +24,13 @@ const TagListing = ({ type, tags, showAllTags }) => {
     }
   });
 
-
-  const renderTags = (typedTags) => {
-
-    const getTagStatusIcon = (tag) => {
-        if (tag.status === 'high__band')
-            // return '✓'
-            return <img src={check}/>
-        else
-            return <img src={bang}/>
-    }
+  const renderTags = typedTags => {
+    const getTagStatusIcon = tag => {
+      if (tag.status === 'high__band')
+        // return '✓'
+        return <img src={check} />;
+      else return <img src={bang} />;
+    };
 
     return (
       <>
@@ -57,8 +53,8 @@ const TagListing = ({ type, tags, showAllTags }) => {
           );
         })}
       </>
-    )
-  }
+    );
+  };
 
   return (
     <div>
@@ -74,7 +70,7 @@ const TagListing = ({ type, tags, showAllTags }) => {
 TagListing.propTypes = {
   type: PropTypes.string.isRequired,
   tags: PropTypes.array.isRequired,
-  showAllTags: PropTypes.bool.isRequired,
+  showAllTags: PropTypes.bool.isRequired
 };
 
 export default TagListing;
