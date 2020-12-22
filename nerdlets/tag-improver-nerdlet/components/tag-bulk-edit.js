@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   HeadingText,
   PlatformStateContext,
-  BlockText,
   Button,
   NerdGraphMutation,
   Select,
@@ -20,7 +21,12 @@ const ENTITY_UPDATE_STATUS = {
 };
 
 export default class TagBulkEdit extends React.Component {
-  static contextType = PlatformStateContext;
+  static propTypes = {
+    selectedEntityIds: PropTypes.array,
+    tagHierarchy: PropTypes.object,
+    entityTagsMap: PropTypes.object,
+    reloadTagsFn: PropTypes.func
+  };
 
   constructor(props) {
     super(props);
@@ -31,6 +37,8 @@ export default class TagBulkEdit extends React.Component {
       entityStatuses: {}
     };
   }
+
+  static contextType = PlatformStateContext;
 
   applyChangeValueToEntities = async () => {
     const { selectedEntityIds, entityTagsMap } = this.props;
@@ -60,8 +68,7 @@ export default class TagBulkEdit extends React.Component {
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
       entitiesToUpdate = statusEntries.filter(
-        ([entityId, entityStatus]) =>
-          entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
       );
     } else {
       entitiesToUpdate = selectedEntityIds;
@@ -73,7 +80,7 @@ export default class TagBulkEdit extends React.Component {
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async (entityId, index) => {
+    await entitiesToUpdate.map(async entityId => {
       let addSuccess = false;
       if (statusObject[entityId] < ENTITY_UPDATE_STATUS.REMOVING) {
         try {
@@ -95,19 +102,20 @@ export default class TagBulkEdit extends React.Component {
             throw result.data.taggingAddTagsToEntity.errors;
           } else {
             addSuccess = true;
+            const previousStatuses = this.state.entityStatuses;
             this.setState({
               entityStatuses: {
-                ...this.state.entityStatuses,
+                ...previousStatuses,
                 [entityId]: ENTITY_UPDATE_STATUS.REMOVING
               }
             });
           }
         } catch (error) {
           addSuccess = false;
-          console.log(`Add tag error for ${entityId}`, error);
+          const previousStatuses = this.state.entityStatuses;
           this.setState({
             entityStatuses: {
-              ...this.state.entityStatuses,
+              ...previousStatuses,
               [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR
             }
           });
@@ -120,11 +128,6 @@ export default class TagBulkEdit extends React.Component {
         this.state.entityStatuses[entityId] < ENTITY_UPDATE_STATUS.SUCCESS
       ) {
         try {
-          console.log(
-            entityTagsMap[entityId].find(
-              tag => tag.tagKey === selectedCurrentTag
-            )
-          );
           const tagsToDeleteForEntity = selectedCurrentTagValue
             ? [{ key: selectedCurrentTag, value: selectedCurrentTagValue }]
             : (
@@ -155,10 +158,11 @@ export default class TagBulkEdit extends React.Component {
             ) {
               throw result.data.taggingDeleteTagValuesFromEntity.errors;
             } else {
+              const previousStatuses = this.state.entityStatuses;
               this.setState(
                 {
                   entityStatuses: {
-                    ...this.state.entityStatuses,
+                    ...previousStatuses,
                     [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
                   }
                 },
@@ -176,10 +180,10 @@ export default class TagBulkEdit extends React.Component {
           }
         } catch (error) {
           addSuccess = false;
-          console.log(`Delete tag error for ${entityId}`, error);
+          const previousStatuses = this.state.entityStatuses;
           this.setState({
             entityStatuses: {
-              ...this.state.entityStatuses,
+              ...previousStatuses,
               [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR
             }
           });
@@ -213,10 +217,10 @@ export default class TagBulkEdit extends React.Component {
     ).sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
     const currentValuesForTag = selectedCurrentTag
       ? Object.entries(tagHierarchy[selectedCurrentTag] || {})
-          .filter(([tagKey, entities]) =>
+          .filter(([, entities]) =>
             entities.some(entity => selectedEntityIds.includes(entity.guid))
           )
-          .map(([tagKey, entities]) => tagKey)
+          .map(([tagKey]) => tagKey)
       : [];
     const tagValueSuggestions = selectedCurrentTag
       ? Object.keys(tagHierarchy[selectedCurrentTag] || {}).reduce(
@@ -228,28 +232,36 @@ export default class TagBulkEdit extends React.Component {
       : {};
     const statusEntries = Object.entries(entityStatuses);
     const loadingEntities = statusEntries
-      .filter(([entityId, status]) =>
+      .filter(([, status]) =>
         [ENTITY_UPDATE_STATUS.ADDING, ENTITY_UPDATE_STATUS.REMOVING].includes(
           status
         )
       )
-      .map(([entityId, status]) => entityId);
+      .map(([entityId]) => entityId);
     const addSuccessEntities = statusEntries
-      .filter(([entityId, status]) => status > ENTITY_UPDATE_STATUS.ADD_ERROR)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status > ENTITY_UPDATE_STATUS.ADD_ERROR)
+      .map(([entityId]) => entityId);
     const deleteSuccessEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
+      .map(([entityId]) => entityId);
     const addErrorEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.ADD_ERROR)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.ADD_ERROR)
+      .map(([entityId]) => entityId);
     const deleteErrorEntities = statusEntries
-      .filter(
-        ([entityId, status]) => status === ENTITY_UPDATE_STATUS.REMOVE_ERROR
-      )
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.REMOVE_ERROR)
+      .map(([entityId]) => entityId);
     const allSucceeded =
       deleteSuccessEntities.length === selectedEntityIds.length;
+
+    let resultText = '';
+    if (!!addErrorEntities.length || !!deleteErrorEntities.length) {
+      resultText = 'Retry';
+    } else if (allSucceeded) {
+      resultText = 'Tags changed!';
+    } else {
+      resultText = 'Change value';
+    }
+
     return (
       <div className="full-height-modal">
         <div>
@@ -341,11 +353,7 @@ export default class TagBulkEdit extends React.Component {
                 allSucceeded
               }
             >
-              {!!addErrorEntities.length || !!deleteErrorEntities.length
-                ? 'Retry'
-                : allSucceeded
-                ? 'Done!'
-                : 'Change value'}
+              {resultText}
             </Button>
           </div>
         </div>

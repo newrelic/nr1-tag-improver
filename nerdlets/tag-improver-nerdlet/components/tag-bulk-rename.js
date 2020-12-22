@@ -1,8 +1,9 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   HeadingText,
   PlatformStateContext,
-  BlockText,
   Button,
   NerdGraphMutation,
   Select,
@@ -20,7 +21,12 @@ const ENTITY_UPDATE_STATUS = {
 };
 
 export default class TagBulkRename extends React.Component {
-  static contextType = PlatformStateContext;
+  static propTypes = {
+    selectedEntityIds: PropTypes.array,
+    tagHierarchy: PropTypes.object,
+    entityTagsMap: PropTypes.object,
+    reloadTagsFn: PropTypes.func
+  };
 
   constructor(props) {
     super(props);
@@ -30,6 +36,8 @@ export default class TagBulkRename extends React.Component {
       selectedNewTag: ''
     };
   }
+
+  static contextType = PlatformStateContext;
 
   applyRenameToEntities = async () => {
     const { selectedEntityIds, entityTagsMap } = this.props;
@@ -54,8 +62,7 @@ export default class TagBulkRename extends React.Component {
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
       entitiesToUpdate = statusEntries.filter(
-        ([entityId, entityStatus]) =>
-          entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
       );
     } else {
       entitiesToUpdate = selectedEntityIds;
@@ -67,7 +74,7 @@ export default class TagBulkRename extends React.Component {
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await selectedEntityIds.map(async (entityId, index) => {
+    await selectedEntityIds.map(async entityId => {
       let addSuccess = false;
       if (statusObject[entityId] < ENTITY_UPDATE_STATUS.REMOVING) {
         try {
@@ -92,19 +99,20 @@ export default class TagBulkRename extends React.Component {
             throw result.data.taggingAddTagsToEntity.errors;
           } else {
             addSuccess = true;
+            const previousStatuses = this.state.entityStatuses;
             this.setState({
               entityStatuses: {
-                ...this.state.entityStatuses,
+                ...previousStatuses,
                 [entityId]: ENTITY_UPDATE_STATUS.REMOVING
               }
             });
           }
         } catch (error) {
           addSuccess = false;
-          console.log(`Add tag error for ${entityId}`, error);
+          const previousStatuses = this.state.entityStatuses;
           this.setState({
             entityStatuses: {
-              ...this.state.entityStatuses,
+              ...previousStatuses,
               [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR
             }
           });
@@ -130,10 +138,11 @@ export default class TagBulkRename extends React.Component {
           } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
             throw result.data.taggingDeleteTagFromEntity.errors;
           } else {
+            const previousStatuses = this.state.entityStatuses;
             this.setState(
               {
                 entityStatuses: {
-                  ...this.state.entityStatuses,
+                  ...previousStatuses,
                   [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
                 }
               },
@@ -150,10 +159,10 @@ export default class TagBulkRename extends React.Component {
           }
         } catch (error) {
           addSuccess = false;
-          console.log(`Delete tag error for ${entityId}`, error);
+          const previousStatuses = this.state.entityStatuses;
           this.setState({
             entityStatuses: {
-              ...this.state.entityStatuses,
+              ...previousStatuses,
               [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR
             }
           });
@@ -187,28 +196,36 @@ export default class TagBulkRename extends React.Component {
     const isNewTag = selectedNewTag && !existingTags.includes(selectedNewTag);
     const statusEntries = Object.entries(entityStatuses);
     const loadingEntities = statusEntries
-      .filter(([entityId, status]) =>
+      .filter(([, status]) =>
         [ENTITY_UPDATE_STATUS.ADDING, ENTITY_UPDATE_STATUS.REMOVING].includes(
           status
         )
       )
-      .map(([entityId, status]) => entityId);
+      .map(([entityId]) => entityId);
     const addSuccessEntities = statusEntries
-      .filter(([entityId, status]) => status > ENTITY_UPDATE_STATUS.ADD_ERROR)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status > ENTITY_UPDATE_STATUS.ADD_ERROR)
+      .map(([entityId]) => entityId);
     const deleteSuccessEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.SUCCESS)
+      .map(([entityId]) => entityId);
     const addErrorEntities = statusEntries
-      .filter(([entityId, status]) => status === ENTITY_UPDATE_STATUS.ADD_ERROR)
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.ADD_ERROR)
+      .map(([entityId]) => entityId);
     const deleteErrorEntities = statusEntries
-      .filter(
-        ([entityId, status]) => status === ENTITY_UPDATE_STATUS.REMOVE_ERROR
-      )
-      .map(([entityId, status]) => entityId);
+      .filter(([, status]) => status === ENTITY_UPDATE_STATUS.REMOVE_ERROR)
+      .map(([entityId]) => entityId);
     const allSucceeded =
       deleteSuccessEntities.length === selectedEntityIds.length;
+
+    let resultText = '';
+    if (!!addErrorEntities.length || !!deleteErrorEntities.length) {
+      resultText = 'Retry';
+    } else if (allSucceeded) {
+      resultText = 'Tags changed!';
+    } else {
+      resultText = 'Rename tag';
+    }
+
     return (
       <div className="full-height-modal">
         <div>
@@ -284,11 +301,7 @@ export default class TagBulkRename extends React.Component {
                 allSucceeded
               }
             >
-              {!!addErrorEntities.length || !!deleteErrorEntities.length
-                ? 'Retry'
-                : allSucceeded
-                ? 'Done!'
-                : 'Rename tag'}
+              {resultText}
             </Button>
           </div>
         </div>

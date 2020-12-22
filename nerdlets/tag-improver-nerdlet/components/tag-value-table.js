@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   Table,
   TableHeader,
@@ -8,6 +10,10 @@ import {
 } from 'nr1';
 
 export default class TagValueTable extends React.Component {
+  static propTypes = {
+    getTableData: PropTypes.func
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -25,6 +31,8 @@ export default class TagValueTable extends React.Component {
   };
 
   render() {
+    const { setSortingColumn } = this;
+
     return (
       <Table items={this.props.getTableData()}>
         <TableHeader>
@@ -33,7 +41,7 @@ export default class TagValueTable extends React.Component {
             sortable
             sortingType={this.state.value_column_0}
             sortingOrder={1}
-            onClick={this.setSortingColumn.bind(this, 0)}
+            onClick={setSortingColumn(0)}
           >
             Tag value
           </TableHeaderCell>
@@ -42,7 +50,7 @@ export default class TagValueTable extends React.Component {
             sortable
             sortingType={this.state.value_column_1}
             sortingOrder={2}
-            onClick={this.setSortingColumn.bind(this, 1)}
+            onClick={setSortingColumn(1)}
           >
             Tagged entities
           </TableHeaderCell>

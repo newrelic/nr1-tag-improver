@@ -1,7 +1,19 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import { TextField } from 'nr1';
 
 export default class Autocomplete extends React.Component {
+  static propTypes = {
+    disabled: PropTypes.bool,
+    onChange: PropTypes.func,
+    choices: PropTypes.array,
+    placeholder: PropTypes.string,
+    value: PropTypes.string,
+    className: PropTypes.string,
+    style: PropTypes.object
+  };
+
   constructor(props) {
     super(props);
     this.state = {
@@ -9,8 +21,7 @@ export default class Autocomplete extends React.Component {
       dropDownY: null,
       width: null,
       menuOpen: false,
-      justPicked: false,
-      menuHasMouse: false
+      justPicked: false
     };
   }
 
@@ -20,28 +31,22 @@ export default class Autocomplete extends React.Component {
     this.setState({ menuOpen: true, dropDownX: x, dropDownY: y, width });
   };
 
-  onBlurTextField = event => {
-    this.setState({ menuOpen: false, menuHasMouse: false });
+  onBlurTextField = () => {
+    this.setState({ menuOpen: false });
   };
 
   onKeyDownTextField = event => {
     if (event.keyCode === 13) {
-      this.setState({ menuOpen: false, menuHasMouse: false });
+      this.setState({ menuOpen: false });
     }
   };
 
-  onMouseEnterMenu = event => {
-    this.setState({ menuHasMouse: true });
+  onMouseEnterMenu = () => {
     this.menuTimer && clearTimeout(this.menuTimer);
   };
 
-  onMouseLeaveMenu = event => {
-    this.setState({ menuHasMouse: false }, () => {
-      this.menuTimer = setTimeout(
-        () => this.setState({ menuOpen: false }),
-        1000
-      );
-    });
+  onMouseLeaveMenu = () => {
+    this.menuTimer = setTimeout(() => this.setState({ menuOpen: false }), 1000);
   };
 
   updateValue = (e, value, justPicked) => {
@@ -60,7 +65,7 @@ export default class Autocomplete extends React.Component {
     } = this.props;
     const { menuOpen, dropDownX, dropDownY, justPicked, width } = this.state;
     const choiceEntries = Object.entries(choices).filter(
-      ([choiceKey, choice]) =>
+      ([, choice]) =>
         !value ||
         justPicked ||
         (choice || '').toLowerCase().includes((value || '').toLowerCase())
