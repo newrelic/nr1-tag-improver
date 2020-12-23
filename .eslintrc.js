@@ -25,6 +25,8 @@ module.exports = {
         "prettier"
     ],
     "rules": {
-        "prettier/prettier": "error"
+        "prettier/prettier": "error",
+        "no-sequences": "warn",
+        "react/no-did-update-set-state": "warn"
     }
 };

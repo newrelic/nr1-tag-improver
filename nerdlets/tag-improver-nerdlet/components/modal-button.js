@@ -1,7 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import { Modal, Button } from 'nr1';
 
 export default class ModalButton extends React.Component {
+  static propTypes = {
+    disabled: PropTypes.bool,
+    children: PropTypes.object,
+    buttonText: PropTypes.string,
+    buttonType: PropTypes.string,
+    className: PropTypes.string,
+    style: PropTypes.object
+  };
+
   constructor(props) {
     super(props);
     this.state = {

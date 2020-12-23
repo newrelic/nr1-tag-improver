@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   Button,
   Checkbox,
@@ -28,8 +30,13 @@ import TagListing from './tag-listing';
 import { COMPLIANCEBANDS } from '../tag-schema';
 
 export default class TagEntityView extends React.Component {
-  flushSelectedEntitiesTimeout = null;
-  static contextType = NerdletStateContext;
+  static propTypes = {
+    tagsObject: PropTypes.object,
+    tagHierarchy: PropTypes.object,
+    entityTagsMap: PropTypes.object,
+    reloadTagsFn: PropTypes.func
+  };
+
   state = {
     firstTagKey: 'account',
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
@@ -47,6 +54,9 @@ export default class TagEntityView extends React.Component {
         TableHeaderCell.SORTING_TYPE.ASCENDING
     });
   }
+
+  static contextType = NerdletStateContext;
+  flushSelectedEntitiesTimeout = null;
 
   setSortingColumn = (columnId, event, sortingData) => {
     const updates = [0, 1, 2, 3].reduce((acc, column) => {
@@ -71,7 +81,7 @@ export default class TagEntityView extends React.Component {
   getTagKeys = () => {
     const { tagHierarchy, tagsObject } = this.props;
 
-    let tagsForDropdown = [];
+    const tagsForDropdown = [];
     tagsForDropdown.push({ title: 'required', array: tagsObject.required });
     tagsForDropdown.push({ title: 'optional', array: tagsObject.optional });
     tagsForDropdown.push({ title: 'not in policy', array: [] });
@@ -80,7 +90,7 @@ export default class TagEntityView extends React.Component {
       .reduce(
         (acc, tag) => {
           let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
-          if (idx < 0) idx = 2; //push into 'not in policy'
+          if (idx < 0) idx = 2; // push into 'not in policy'
           acc[idx].push(tag);
           return acc;
         },
@@ -92,8 +102,8 @@ export default class TagEntityView extends React.Component {
         )
       );
 
-    tagsForDropdown.map((section, i) => tagsForDropdown[i]['items'] = items[i]);
-    
+    tagsForDropdown.map((section, i) => (tagsForDropdown[i].items = items[i]));
+
     return tagsForDropdown;
   };
 
@@ -112,7 +122,7 @@ export default class TagEntityView extends React.Component {
               firstTagValue: this.findTagValue(entity, firstTagKey),
               complianceScore: entity.complianceScore,
               mandatoryTags: entity.mandatoryTags,
-              optionalTags: entity.optionalTags,
+              optionalTags: entity.optionalTags
             };
           }
         }
@@ -129,14 +139,14 @@ export default class TagEntityView extends React.Component {
   };
 
   onSelectEntity = (evt, { item }) => {
-    const { selectedEntities, selectedEntityIds } = this.state;
+    const { selectedEntities } = this.state;
     selectedEntities[item.entityGuid] = evt.target.checked;
     clearTimeout(this.flushSelectedEntitiesTimeout);
     this.flushSelectedEntitiesTimeout = setTimeout(() => {
       this.setState({
         selectedEntityIds: Object.entries(selectedEntities)
-          .filter(([entityId, checked]) => checked)
-          .map(([entityId, checked]) => entityId)
+          .filter(([, checked]) => checked)
+          .map(([entityId]) => entityId)
       });
 
       this.flushSelectedEntitiesTimeout = null;
@@ -147,10 +157,10 @@ export default class TagEntityView extends React.Component {
     const showAllTags = event.target.checked;
 
     this.setState({ showAllTags });
-  }
+  };
 
   render() {
-    const { updateFirstTagKey } = this;
+    const { updateFirstTagKey, setSortingColumn } = this;
     const {
       firstTagKey,
       selectedEntities,
@@ -163,9 +173,8 @@ export default class TagEntityView extends React.Component {
     const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
       selectedEntityIds.includes(entityId)
     );
-    const getBand = (score) => {
-      if (score >= COMPLIANCEBANDS.highBand.lowerLimit) 
-        return 'high__band';
+    const getBand = score => {
+      if (score >= COMPLIANCEBANDS.highBand.lowerLimit) return 'high__band';
       else if (
         COMPLIANCEBANDS.midBand.lowerLimit <= score &&
         score < COMPLIANCEBANDS.midBand.upperLimit
@@ -199,12 +208,12 @@ export default class TagEntityView extends React.Component {
                     items={section.items}
                   >
                     {({ item, index }) => (
-                        <DropdownItem
-                          key={`d-${index}`}
-                          onClick={() => updateFirstTagKey(item)}
-                        >
-                          {item}
-                        </DropdownItem>
+                      <DropdownItem
+                        key={`d-${index}`}
+                        onClick={() => updateFirstTagKey(item)}
+                      >
+                        {item}
+                      </DropdownItem>
                     )}
                   </DropdownSection>
                 )}
@@ -286,7 +295,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_0}
                 sortingOrder={1}
-                onClick={this.setSortingColumn.bind(this, 0)}
+                onClick={(a, b) => setSortingColumn(0, a, b)}
               >
                 Entity
               </TableHeaderCell>
@@ -296,7 +305,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_1}
                 sortingOrder={2}
-                onClick={this.setSortingColumn.bind(this, 1)}
+                onClick={(a, b) => setSortingColumn(1, a, b)}
               >
                 {firstTagKey}
               </TableHeaderCell>
@@ -306,7 +315,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_2}
                 sortingOrder={3}
-                onClick={this.setSortingColumn.bind(this, 2)}
+                onClick={(a, b) => setSortingColumn(2, a, b)}
               >
                 Score
               </TableHeaderCell>
@@ -314,7 +323,7 @@ export default class TagEntityView extends React.Component {
                 {showAllTags ? '' : 'Undefined'} Mandatory Tags
               </TableHeaderCell>
               <TableHeaderCell width="7fr">
-              {showAllTags ? '' : 'Undefined'} Optional Tags
+                {showAllTags ? '' : 'Undefined'} Optional Tags
               </TableHeaderCell>
             </TableHeader>
 
@@ -334,10 +343,18 @@ export default class TagEntityView extends React.Component {
                   {`${item.complianceScore.toFixed(2)}%`}
                 </TableRowCell>
                 <TableRowCell className="tag_nowrap_table_cell">
-                  <TagListing type="mandatory" tags={item.mandatoryTags} showAllTags={showAllTags} />
+                  <TagListing
+                    type="mandatory"
+                    tags={item.mandatoryTags}
+                    showAllTags={showAllTags}
+                  />
                 </TableRowCell>
                 <TableRowCell className="tag_nowrap_table_cell">
-                  <TagListing type="optional" tags={item.optionalTags} showAllTags={showAllTags} />
+                  <TagListing
+                    type="optional"
+                    tags={item.optionalTags}
+                    showAllTags={showAllTags}
+                  />
                 </TableRowCell>
               </TableRow>
             )}
