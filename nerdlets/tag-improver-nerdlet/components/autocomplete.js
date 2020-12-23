@@ -7,7 +7,7 @@ export default class Autocomplete extends React.Component {
   static propTypes = {
     disabled: PropTypes.bool,
     onChange: PropTypes.func,
-    choices: PropTypes.array,
+    choices: PropTypes.object,
     placeholder: PropTypes.string,
     value: PropTypes.string,
     className: PropTypes.string,
