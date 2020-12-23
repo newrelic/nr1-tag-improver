@@ -6,7 +6,7 @@ import { Modal, Button } from 'nr1';
 export default class ModalButton extends React.Component {
   static propTypes = {
     disabled: PropTypes.bool,
-    children: PropTypes.array,
+    children: PropTypes.object,
     buttonText: PropTypes.string,
     buttonType: PropTypes.string,
     className: PropTypes.string,

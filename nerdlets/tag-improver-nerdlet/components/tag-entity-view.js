@@ -295,7 +295,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_0}
                 sortingOrder={1}
-                onClick={setSortingColumn(0)}
+                onClick={(a, b) => setSortingColumn(0, a, b)}
               >
                 Entity
               </TableHeaderCell>
@@ -305,7 +305,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_1}
                 sortingOrder={2}
-                onClick={setSortingColumn(1)}
+                onClick={(a, b) => setSortingColumn(1, a, b)}
               >
                 {firstTagKey}
               </TableHeaderCell>
@@ -315,7 +315,7 @@ export default class TagEntityView extends React.Component {
                 sortable
                 sortingType={this.state.table_column_2}
                 sortingOrder={3}
-                onClick={setSortingColumn(2)}
+                onClick={(a, b) => setSortingColumn(2, a, b)}
               >
                 Score
               </TableHeaderCell>

@@ -10,7 +10,7 @@ export default class TagCoverageView extends React.Component {
   static propTypes = {
     entityCount: PropTypes.number,
     tagHierarchy: PropTypes.object,
-    height: PropTypes.string
+    height: PropTypes.number
   };
 
   state = {

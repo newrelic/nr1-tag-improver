@@ -38,7 +38,7 @@ export default class TaggingPolicy extends React.Component {
   static propTypes = {
     updatePolicy: PropTypes.func,
     tagHierarchy: PropTypes.object,
-    schema: PropTypes.object,
+    schema: PropTypes.array,
     entityCount: PropTypes.number
   };
 
