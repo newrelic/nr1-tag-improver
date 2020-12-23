@@ -23,35 +23,38 @@ const SCHEMA = [
   {
     label: 'Owning team',
     key: 'Team',
-    purpose: '',
+    purpose: 'What team owns this entity?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Region',
+    label: 'Environment',
     key: 'Environment',
-    purpose: '',
+    purpose:
+      'Is this entity part of your production, pre-prod, test, dev, or other environment?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Owning VP',
-    key: 'VP',
-    purpose: '',
+    label: 'Business application',
+    key: 'Application',
+    purpose: 'What business application/area/line is this entity part of?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Source code repo',
-    key: 'Project',
-    purpose: '',
+    label: 'Chat channel',
+    key: 'Chat',
+    purpose:
+      'What Slack/Teams/chat channel do I go to with questions about this entity?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Canary deploy',
-    key: 'Canary',
-    purpose: '',
+    label: 'Region / AZ / Datacenter',
+    key: 'Region',
+    purpose:
+      'What region/availability zone/datacenter is this entity deployed in?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   }
