@@ -20,9 +20,9 @@ export default class TagTable extends React.Component {
   };
 
   setSortingColumn = (columnId, event, sortingData) => {
+    const nextType = sortingData ? sortingData.nextSortingType : undefined;
     const updates = [0, 1, 2, 3].reduce((acc, column) => {
-      acc[`tag_column_${column}`] =
-        column === columnId ? sortingData.nextSortingType : undefined;
+      acc[`tag_column_${column}`] = column === columnId ? nextType : undefined;
       return acc;
     }, {});
     this.setState(updates);
@@ -39,7 +39,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_0}
             sortingOrder={1}
-            onClick={setSortingColumn(0)}
+            onClick={(a, b) => setSortingColumn(0, a, b)}
           >
             Tag name
           </TableHeaderCell>
@@ -48,7 +48,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_1}
             sortingOrder={2}
-            onClick={setSortingColumn(1)}
+            onClick={(a, b) => setSortingColumn(1, a, b)}
           >
             Distinct values
           </TableHeaderCell>
@@ -57,7 +57,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_2}
             sortingOrder={3}
-            onClick={setSortingColumn(2)}
+            onClick={(a, b) => setSortingColumn(2, a, b)}
           >
             Tagged entities
           </TableHeaderCell>
@@ -66,7 +66,7 @@ export default class TagTable extends React.Component {
             sortable
             sortingType={this.state.tag_column_3}
             sortingOrder={4}
-            onClick={setSortingColumn(3)}
+            onClick={(a, b) => setSortingColumn(3, a, b)}
           >
             % coverage
           </TableHeaderCell>
