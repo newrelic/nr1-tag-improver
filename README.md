@@ -2,38 +2,27 @@
 
 # nr1-tag-improver
 
-> This template includes advice on how to craft a great README for your app. This template is just a starting point: feel free to change or add sections to suit your project. A few sections are standard across all projects. Don't change the text of those sections, except to customize the Explorer's Hub URL and the Contributing email alias. The standard sections are: "Open source License," "Support," "Community," "Issues / enhancement requests," and "Contributing."
->
-> If you need advice creating your README, ping @hero in the [#documentation](https://newrelic.slack.com/messages/documentation) channel or contact the Open Source Office.
->
-> Before you publish, remove all the commments (the block quotes beginning with `>`), then follow the [standard Nerdpack README review process](https://docs.google.com/document/d/1xUg1NnNJriC0mrUE1hqcHcs5dqzyLoSYE25qjwBaWQE/edit).
-
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
 
 ## About this Nerdpack
 
-Tag Improver is here to help you get max value from New Relic One by simplifying the process of tagging your systems with critical business context.
+Tag Improver is here to help you get maximum value from New Relic One by simplifying the process of creating and managing a good tagging strategy.
 
-Define required and optional tags for your environment, report on rollout success, and view overall tag usage across everything you own.
+Define the important entity tags for your environment, report on coverage, and view overall tag usage across everything you own.
 
 ## What can Tag Improver do for you
 
-### Report on the coverage of key tags across your entire app portfolio based on an editable tag schema
+### Report on the coverage of key tags across your portfolio based on an editable tag schema
 
-![Tag compliance report](screenshots/tag-compliance-report.png)
-![Tag policy editing](screenshots/tag-schema.png)
+![View tag policy report](screenshots/tag-policy.png)
 
-### Show the current value of multiple tags for each of your apps
+### Report the tags in use (and missing) from each entity, and manually manage tags in bulk
 
-![View all entities with their tags](screenshots/entity-tag-view.png)
+![See entity tag status](screenshots/entity-tagging.png)
 
-### Bulk add, rename, edit, and delete tags from your entities
+### Explore the full set of tag key:values in use across your account
 
-![Rename tags on multiple applications](screenshots/tag-rename.png)
-
-### Explore all tags and values applied across your accounts
-
-![Explore all tags used across your accounts](screenshots/tag-coverage-explorer.png)
+![Explore all tags used across your accounts](screenshots/tag-analysis.png)
 
 ## Open source license
 
@@ -46,8 +35,6 @@ Access to New Relic One and a Full Stack Observability subscription.
 Editing tags requires a User-level account.
 
 ## Getting started
-
-> Include a step-by-step procedure on how to get your app installed and deployed. The clone and deploy steps are similar across all apps. If your app has additional steps required to get started, include them here or in their own section.
 
 1. Ensure that you have [Git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git) and [NPM](https://www.npmjs.com/get-npm) installed. If you're unsure whether you have one or both of them installed, run the following commands. (If you have them installed, these commands return a version number; if not, the commands aren't recognized.)
 ```bash
@@ -63,7 +50,7 @@ cd nr1-tag-improver
 nr1 nerdpack:serve
 ```
 
-Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local) to launch your app locally.
+Visit [https://one.newrelic.com/?nerdpacks=local](https://one.newrelic.com/?nerdpacks=local) to run the app locally.
 
 ## Deploying this Nerdpack
 
@@ -88,7 +75,7 @@ We encourage you to bring your experiences and questions to the [Explorers Hub](
 
 ## Community
 
-> Work with the Explorer's Hub team to create a tag for your app, then update the link below.
+> TODO Work with the Explorer's Hub team to create a tag for your app, then update the link below.
 
 New Relic hosts and moderates an online forum where customers can interact with New Relic employees as well as other customers to get help and share best practices. Like all official New Relic open source projects, there's a related Community topic in the New Relic Explorers Hub. You can find this project's topic/threads here:
 
@@ -107,32 +94,17 @@ If you believe you have found a security vulnerability in this project or any of
 
 # Contributing
 
-> Work with the Open Source Office to update the email alias below.
+> TODO Work with the Open Source Office to update the email alias below.
 
 Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](CONTRIBUTING.md).
 
 Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+{{ APP_NAME }}@newrelic.com.
 
-## Running and developing locally
-
-1. Be sure you have the latest [NR1 CLI installed](https://developer.newrelic.com/explore-docs/nr1-cli).
-
-2. Clone the nr1-tag-improver repo to your local machine.
-
-3. Run these commands in the nr1-tag-improver directory:
-
-```sh
-npm install
-nr1 nerdpack:serve
-```
-
-4. Visit https://one.newrelic.com/?nerdpacks=local and :sparkles:
-
 ## Customizing the Tag Policy
 
-The Policy report is driven by a policy schema defined in [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js)
+Users can edit the tagging policy in the New Relic One UI but those changes are only visible to the individual user. To customize the default policy, follow these instructions before deploying the app to your account(s).
 
-Users can edit the policy in the New Relic One UI but those changes are only visible to the individual user. To customize the default policy, follow these instructions before deploying the app to your account(s).
+The Policy report is driven by a policy schema defined in [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js)
 
 First, define the set of required and optional tags for your environment.
 Edit [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js) to reflect your policy.
@@ -144,4 +116,4 @@ Each object in the schema JSON should have:
 * `label` - human-readable name of the tag, generally the same or a more verbose version of `key`
 * `purpose` - optional, more detailed description of usage or provenance for the tag value
 
-When done, follow the usual instructions to [publish and deploy the Nerdpack](https://developer.newrelic.com/explore-docs/nr1-nerdpack#nr1-nerdpackpublish).
+When done, follow the instructions above under **Deploying this Nerdpack** to deploy your changes to your account.
