@@ -285,7 +285,11 @@ export default class TagVisualizer extends React.Component {
     entity.mandatoryTags = [];
     entity.optionalTags = [];
     let compliance = 0;
-    taggingPolicy.forEach(tagPolicy => {
+
+    if (!taggingPolicy) return;
+
+    for (const tagPolicy of taggingPolicy) {
+      if (!tagPolicy) continue;
       const found = entity.tags.find(tag => tag.tagKey === tagPolicy.key);
       const entityTag = {
         tagKey: tagPolicy.key,
@@ -298,7 +302,7 @@ export default class TagVisualizer extends React.Component {
       } else if (tagPolicy.enforcement === 'optional') {
         entity.optionalTags.push(entityTag);
       }
-    });
+    }
     entity.complianceScore = compliance
       ? (compliance / mandatoryTagCount) * 100
       : 0;
@@ -456,7 +460,10 @@ function sortedPolicy(policy) {
 
 function tagsObject(policy) {
   return (policy || []).reduce(
-    (acc, cur) => Object.assign(acc, acc[cur.enforcement].push(cur.key)),
+    (acc, cur) =>
+      acc[cur.enforcement] // cur.enforcement may not exist if a breaking change is made to the poliy schema and the user has a custom policy saved under the old schema
+        ? Object.assign(acc, acc[cur.enforcement].push(cur.key))
+        : acc,
     { required: [], optional: [] }
   );
 }
