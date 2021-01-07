@@ -1,5 +1,5 @@
 {
-  "tagline": "[30 characters]",
+  "tagline": "Get your entity tagging sorted",
   "repository": "https://github.com/newrelic/nr1-tag-improver.git",
   "details": "[]",
   "support": {
@@ -10,7 +10,7 @@
       "address": "opensource+nr1-tag-improver@newrelic.com"
     },
     "community": {
-      "url": "https://discuss.newrelic.com/t/[YOUR REPO SUPPORT TOPIC]"
+      "url": "https://discuss.newrelic.com/t/tag-improver-new-relic-one-nerdpack/125683"
     }
   },
   "whatsNew": "\n-Fix: One change that was made\n-Fix: Another change that was made\n-Feat: One feature that was added"
