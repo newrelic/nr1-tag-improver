@@ -331,11 +331,21 @@ export default class TagVisualizer extends React.Component {
   };
 
   updatePolicy = policy => {
-    this.setState({
-      taggingPolicy: sortedPolicy(policy),
-      mandatoryTagCount:
-        policy.filter(tag => tag.enforcement === 'required').length || 0
-    });
+    const reload = this.startLoadingEntityTags;
+    this.setState(
+      {
+        taggingPolicy: sortedPolicy(policy),
+        mandatoryTagCount:
+          policy.filter(tag => tag.enforcement === 'required').length || 0
+      },
+      () => {
+        // TODO it would be nice to do something like this: 
+        //   for (const entity of all_entities) { updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount) }
+        // but we're not storing an easily accessed array of all the entities.
+        // so for now we'll trigger a full re-load from the api
+        reload();
+      }
+    );
   };
 
   render() {
