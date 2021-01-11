@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.1...v1.0.2) (2021-01-11)
+
+
+### Bug Fixes
+
+* remove .gitkeep and force a new release ([362c794](https://github.com/newrelic/nr1-tag-improver/commit/362c794a5c76edb3c45d8fefc2d838372c2b65fa))
+
 ## [1.0.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.0...v1.0.1) (2021-01-06)
 
 
