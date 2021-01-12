@@ -14,7 +14,7 @@ Define the important entity tags for your environment, report on coverage, and v
 
 ## Open source license
 
-This project is distributed under the [Apache 2 license](LICENSE).
+This project is distributed under the [Apache 2 license](https://github.com/newrelic/nr1-tag-improver/blob/main/LICENSE).
 
 ## What do you need to make this work?
 
@@ -69,7 +69,7 @@ New Relic hosts and moderates an online forum where customers can interact with 
 
 ## Issues / enhancement requests
 
-Issues and enhancement requests can be submitted in the [Issues tab of this repository](../../issues). Please search for and review the existing open issues before submitting a new issue.
+Issues and enhancement requests can be submitted in the [Issues tab of this repository](https://github.com/newrelic/nr1-tag-improver/issues). Please search for and review the existing open issues before submitting a new issue.
 
 ## Security
 
@@ -79,7 +79,7 @@ If you believe you have found a security vulnerability in this project or any of
 
 # Contributing
 
-Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](CONTRIBUTING.md).
+Contributions are encouraged! If you submit an enhancement request, we'll invite you to contribute the change yourself. Please review our [Contributors Guide](https://github.com/newrelic/nr1-tag-improver/blob/main/CONTRIBUTING.md).
 
 Keep in mind that when you submit your pull request, you'll need to sign the CLA via the click-through using CLA-Assistant. If you'd like to execute our corporate CLA, or if you have any questions, please drop us an email at opensource+nr1-tag-imporover@newrelic.com.
 
@@ -87,10 +87,10 @@ Keep in mind that when you submit your pull request, you'll need to sign the CLA
 
 Users can edit the tagging policy in the New Relic One UI but those changes are only visible to the individual user. To customize the default policy, follow these instructions before deploying the app to your account(s).
 
-The Policy report is driven by a policy schema defined in [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js)
+The Policy report is driven by a policy schema defined in [tag-schema.js](https://github.com/newrelic/nr1-tag-improver/blob/main/nerdlets/tag-improver-nerdlet/tag-schema.js)
 
 First, define the set of required and optional tags for your environment.
-Edit [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js) to reflect your policy.
+Edit [tag-schema.js](https://github.com/newrelic/nr1-tag-improver/blob/main/nerdlets/tag-improver-nerdlet/tag-schema.js) to reflect your policy.
 
 Each object in the schema JSON should have:
 
