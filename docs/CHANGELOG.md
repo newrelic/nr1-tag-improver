@@ -1,3 +1,10 @@
+## [1.0.4](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.3...v1.0.4) (2021-01-12)
+
+
+### Bug Fixes
+
+* use absolute links ([d9fba5c](https://github.com/newrelic/nr1-tag-improver/commit/d9fba5c101c4a20cf75934f142f0074ddaf17788))
+
 ## [1.0.3](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.2...v1.0.3) (2021-01-11)
 
 
