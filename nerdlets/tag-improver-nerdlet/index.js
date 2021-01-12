@@ -28,10 +28,7 @@ export default class TagVisualizer extends React.Component {
 
   state = {
     tagHierarchy: {},
-    activeTagHierarchy: {},
     entityTagsMap: {},
-    entityTypesMap: {},
-    entityTypesEntityCount: {},
     entityCount: 0,
     loadedEntities: 0,
     doneLoading: false,
@@ -80,30 +77,15 @@ export default class TagVisualizer extends React.Component {
   updateSelectedEntityType = entityType => {
     const {
       tagHierarchy,
-      loadedEntities,
-      entityTypesMap,
-      entityTypesEntityCount
+      loadedEntities
     } = this.state;
 
     this.setState({
       selectedEntityType: entityType,
-      activeTagHierarchy:
-        // eslint-disable-next-line no-nested-ternary
-        entityType.id === 'all'
-          ? tagHierarchy
-          : entityTypesMap[entityType.value]
-          ? entityTypesMap[entityType.value]
-          : {},
-      entityCount:
-        entityType.id === 'all'
-          ? loadedEntities
-          : entityTypesEntityCount[entityType],
-
+      entityCount: loadedEntities,
       // reset all variables to load fresh data for newly selected entity type
       tagHierarchy: {},
       entityTagsMap: {},
-      entityTypesMap: {},
-      entityTypesEntityCount: {},
       loadedEntities: 0,
       doneLoading: false,
       queryCursor: undefined,
@@ -127,7 +109,6 @@ export default class TagVisualizer extends React.Component {
       {
         tagHierarchy: {},
         entityTagsMap: {},
-        entityTypesMap: {},
         entityCount: 0,
         loadedEntities: 0,
         doneLoading: false,
@@ -232,8 +213,6 @@ export default class TagVisualizer extends React.Component {
       () => {
         if (nextCursor && accountId === this.state.accountId) {
           loadEntityBatch();
-        } else {
-          this.setState({ activeTagHierarchy: tagHierarchy });
         }
       }
     );
@@ -245,8 +224,6 @@ export default class TagVisualizer extends React.Component {
       entityTagsMap,
       taggingPolicy,
       mandatoryTagCount,
-      entityTypesMap,
-      entityTypesEntityCount
     } = this.state;
     entities.reduce((acc, entity) => {
       // get all the tags
@@ -255,25 +232,15 @@ export default class TagVisualizer extends React.Component {
 
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
 
-      if (!entityTypesMap[entityType]) entityTypesMap[entityType] = [];
-      if (!entityTypesEntityCount[entityType])
-        entityTypesEntityCount[entityType] = 0;
-
       // for each tag, if it doesn't make an empty object
       tags.forEach(({ tagKey, tagValues }) => {
         if (!acc[tagKey]) acc[tagKey] = {};
-        if (!entityTypesMap[entityType][tagKey])
-          entityTypesMap[entityType][tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
         tagValues.forEach(value => {
           if (!acc[tagKey][value]) acc[tagKey][value] = [];
-          if (!entityTypesMap[entityType][tagKey][value])
-            entityTypesMap[entityType][tagKey][value] = [];
           acc[tagKey][value].push(entity);
-          entityTypesMap[entityType][tagKey][value].push(entity);
         });
       });
-      entityTypesEntityCount[entityType] += 1;
       return acc;
     }, tagHierarchy);
 
@@ -284,7 +251,7 @@ export default class TagVisualizer extends React.Component {
     // calculate entity tag compliance score
     entity.mandatoryTags = [];
     entity.optionalTags = [];
-    let compliance = 0;
+    let compliance = 0.0;
 
     if (!taggingPolicy) return;
 
@@ -303,7 +270,7 @@ export default class TagVisualizer extends React.Component {
         entity.optionalTags.push(entityTag);
       }
     }
-    entity.complianceScore = compliance
+    entity.complianceScore = (compliance && mandatoryTagCount)
       ? (compliance / mandatoryTagCount) * 100
       : 0;
   }
@@ -314,11 +281,10 @@ export default class TagVisualizer extends React.Component {
       documentId: 'tagging-policy'
     })
       .then(({ data }) => {
+        const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
         this.setState({
-          taggingPolicy: sortedPolicy(data.policy),
-          mandatoryTagCount:
-            data.policy.filter(tag => tag.enforcement === 'required').length ||
-            0
+          taggingPolicy: sortedPolicy(taggingPolicy),
+          mandatoryTagCount: taggingPolicy.filter(tag => tag.enforcement === 'required').length || 0
         });
       })
       .catch(() => {
@@ -335,17 +301,28 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy: sortedPolicy(policy),
       mandatoryTagCount:
         policy.filter(tag => tag.enforcement === 'required').length || 0
-    });
+    },
+      () => {
+        const { tagHierarchy, mandatoryTagCount } = this.state;
+        const { updateEntityTagCompliance } = this;
+        Object.entries(tagHierarchy).forEach(tagKey => {
+          Object.values(tagKey[1]).forEach(tagValue => {
+            tagValue.forEach(entity => {
+              updateEntityTagCompliance(entity, policy, mandatoryTagCount);
+            })
+          })
+        })
+      }
+    );
   };
 
   render() {
     const {
       doneLoading,
+      tagHierarchy,
       entityCount,
       loadedEntities,
-      activeTagHierarchy,
       entityTagsMap,
-      entityTypesEntityCount,
       taggingPolicy,
       accountId,
       selectedEntityType
@@ -395,13 +372,9 @@ export default class TagVisualizer extends React.Component {
                 <TabsItem value="policy-tab" label="Policy">
                   <TaggingPolicy
                     accountId={accountId}
-                    tagHierarchy={activeTagHierarchy}
+                    tagHierarchy={tagHierarchy}
                     selectedEntityType={selectedEntityType}
-                    entityCount={
-                      selectedEntityType.id === 'all'
-                        ? entityCount
-                        : entityTypesEntityCount[selectedEntityType.value]
-                    }
+                    entityCount={entityCount}
                     loadedEntities={loadedEntities}
                     doneLoading={doneLoading}
                     schema={taggingPolicy}
@@ -410,13 +383,9 @@ export default class TagVisualizer extends React.Component {
                 </TabsItem>
                 <TabsItem value="coverage-tab" label="Tag analyzer">
                   <TagCoverageView
-                    tagHierarchy={activeTagHierarchy}
+                    tagHierarchy={tagHierarchy}
                     selectedEntityType={selectedEntityType}
-                    entityCount={
-                      selectedEntityType.id === 'all'
-                        ? entityCount
-                        : entityTypesEntityCount[selectedEntityType.value]
-                    }
+                    entityCount={entityCount}
                     loadedEntities={loadedEntities}
                     doneLoading={doneLoading}
                     height={this.props.height}
@@ -424,13 +393,9 @@ export default class TagVisualizer extends React.Component {
                 </TabsItem>
                 <TabsItem value="entity-tab" label="Entities">
                   <TagEntityView
-                    tagHierarchy={activeTagHierarchy}
+                    tagHierarchy={tagHierarchy}
                     selectedEntityType={selectedEntityType}
-                    entityCount={
-                      selectedEntityType.id === 'all'
-                        ? entityCount
-                        : entityTypesEntityCount[selectedEntityType.value]
-                    }
+                    entityCount={entityCount}
                     loadedEntities={loadedEntities}
                     doneLoading={doneLoading}
                     entityTagsMap={entityTagsMap}
