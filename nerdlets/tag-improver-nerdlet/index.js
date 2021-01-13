@@ -75,10 +75,7 @@ export default class TagVisualizer extends React.Component {
   };
 
   updateSelectedEntityType = entityType => {
-    const {
-      tagHierarchy,
-      loadedEntities
-    } = this.state;
+    const { loadedEntities } = this.state;
 
     this.setState({
       selectedEntityType: entityType,
@@ -186,7 +183,7 @@ export default class TagVisualizer extends React.Component {
   processEntityQueryResults = (entitiesToProcess, count, ngCursor) => {
     const {
       loadEntityBatch,
-      state: { loadedEntities, tagHierarchy, accountId }
+      state: { loadedEntities, accountId }
     } = this;
     if (accountId !== this.state.accountId) {
       return;
@@ -223,11 +220,11 @@ export default class TagVisualizer extends React.Component {
       tagHierarchy,
       entityTagsMap,
       taggingPolicy,
-      mandatoryTagCount,
+      mandatoryTagCount
     } = this.state;
     entities.reduce((acc, entity) => {
       // get all the tags
-      const { guid, tags, entityType } = entity;
+      const { guid, tags } = entity;
       entityTagsMap[guid] = [...tags];
 
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
@@ -270,9 +267,10 @@ export default class TagVisualizer extends React.Component {
         entity.optionalTags.push(entityTag);
       }
     }
-    entity.complianceScore = (compliance && mandatoryTagCount)
-      ? (compliance / mandatoryTagCount) * 100
-      : 0;
+    entity.complianceScore =
+      compliance && mandatoryTagCount
+        ? (compliance / mandatoryTagCount) * 100
+        : 0;
   }
 
   getTaggingPolicy = () => {
@@ -284,7 +282,9 @@ export default class TagVisualizer extends React.Component {
         const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
         this.setState({
           taggingPolicy: sortedPolicy(taggingPolicy),
-          mandatoryTagCount: taggingPolicy.filter(tag => tag.enforcement === 'required').length || 0
+          mandatoryTagCount:
+            taggingPolicy.filter(tag => tag.enforcement === 'required')
+              .length || 0
         });
       })
       .catch(() => {
@@ -297,11 +297,12 @@ export default class TagVisualizer extends React.Component {
   };
 
   updatePolicy = policy => {
-    this.setState({
-      taggingPolicy: sortedPolicy(policy),
-      mandatoryTagCount:
-        policy.filter(tag => tag.enforcement === 'required').length || 0
-    },
+    this.setState(
+      {
+        taggingPolicy: sortedPolicy(policy),
+        mandatoryTagCount:
+          policy.filter(tag => tag.enforcement === 'required').length || 0
+      },
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
         const { updateEntityTagCompliance } = this;
@@ -309,9 +310,9 @@ export default class TagVisualizer extends React.Component {
           Object.values(tagKey[1]).forEach(tagValue => {
             tagValue.forEach(entity => {
               updateEntityTagCompliance(entity, policy, mandatoryTagCount);
-            })
-          })
-        })
+            });
+          });
+        });
       }
     );
   };
