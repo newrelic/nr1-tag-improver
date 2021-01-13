@@ -1,3 +1,10 @@
+## [1.0.5](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.4...v1.0.5) (2021-01-13)
+
+
+### Bug Fixes
+
+* policy update and remove logic for loading multiple entity types ([04969d4](https://github.com/newrelic/nr1-tag-improver/commit/04969d4c8988a0d8034d2ed533b3eccc555ed110))
+
 ## [1.0.4](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.3...v1.0.4) (2021-01-12)
 
 
