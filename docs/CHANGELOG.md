@@ -1,3 +1,10 @@
+## [1.0.6](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.5...v1.0.6) (2021-02-25)
+
+
+### Bug Fixes
+
+* removes code of conduct file ([9d1cab4](https://github.com/newrelic/nr1-tag-improver/commit/9d1cab43796761ad58a70c49104a7883404e4d79))
+
 ## [1.0.5](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.4...v1.0.5) (2021-01-13)
 
 
