@@ -42,7 +42,7 @@ export default class TagEntityView extends React.Component {
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
-    showAllTags: false
+    showAllTags: true
   };
 
   componentDidMount() {
