@@ -190,7 +190,7 @@ export default class TagBulkRename extends React.Component {
       a.toUpperCase() > b.toUpperCase() ? 1 : -1
     );
     const availableTagsDictionary = availableTagsList.reduce(
-      (accumulator, tag) => ((accumulator[tag] = tag), accumulator),
+      (accumulator, tag) => ((accumulator[tag] = tag), accumulator), // eslint-disable-line no-sequences
       {}
     );
     const isNewTag = selectedNewTag && !existingTags.includes(selectedNewTag);

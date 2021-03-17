@@ -211,7 +211,7 @@ export default class TaggingPolicy extends React.Component {
         .filter(tag => !currentTagList.includes(tag))
         .sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
       availableTagsDictionary = availableTagsList.reduce(
-        (accumulator, tag) => ((accumulator[tag] = tag), accumulator),
+        (accumulator, tag) => ((accumulator[tag] = tag), accumulator), // eslint-disable-line no-sequences
         {}
       );
     }

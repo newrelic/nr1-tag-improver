@@ -141,7 +141,7 @@ export default class TagBulkAdd extends React.Component {
       .filter(tag => !currentTagList.includes(tag))
       .sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
     const availableTagsDictionary = availableTagsList.reduce(
-      (accumulator, tag) => ((accumulator[tag] = tag), accumulator),
+      (accumulator, tag) => ((accumulator[tag] = tag), accumulator), // eslint-disable-line no-sequences
       {}
     );
     const canAddNewTag =
@@ -190,7 +190,7 @@ export default class TagBulkAdd extends React.Component {
                   <Autocomplete
                     choices={Object.keys(tagHierarchy[tagKey] || {}).reduce(
                       (accumulator, tag) => (
-                        (accumulator[tag] = tag), accumulator
+                        (accumulator[tag] = tag), accumulator // eslint-disable-line no-sequences, prettier/prettier
                       ),
                       {}
                     )}

@@ -225,7 +225,7 @@ export default class TagBulkEdit extends React.Component {
     const tagValueSuggestions = selectedCurrentTag
       ? Object.keys(tagHierarchy[selectedCurrentTag] || {}).reduce(
           (accumulator, tagValue) => (
-            (accumulator[tagValue] = tagValue), accumulator
+            (accumulator[tagValue] = tagValue), accumulator // eslint-disable-line no-sequences, prettier/prettier
           ),
           {}
         )
