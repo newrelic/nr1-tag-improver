@@ -16,12 +16,13 @@ export default class TagTable extends React.Component {
   };
 
   state = {
-    tag_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
+    tag_column_0: TableHeaderCell.SORTING_TYPE.NONE,
+    tag_column_1: TableHeaderCell.SORTING_TYPE.DESCENDING
   };
 
   setSortingColumn = (columnId, event, sortingData) => {
     const nextType = sortingData ? sortingData.nextSortingType : undefined;
-    const updates = [0, 1, 2, 3].reduce((acc, column) => {
+    const updates = [0, 1, 2, 3, 4].reduce((acc, column) => {
       acc[`tag_column_${column}`] = column === columnId ? nextType : undefined;
       return acc;
     }, {});
@@ -44,29 +45,38 @@ export default class TagTable extends React.Component {
             Tag name
           </TableHeaderCell>
           <TableHeaderCell
-            value={({ item }) => item.cardinality}
+            value={({ item }) => item.enforcement}
             sortable
             sortingType={this.state.tag_column_1}
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
+          >
+            Enforcement Level
+          </TableHeaderCell>
+          <TableHeaderCell
+            value={({ item }) => item.cardinality}
+            sortable
+            sortingType={this.state.tag_column_2}
+            sortingOrder={3}
+            onClick={(a, b) => setSortingColumn(2, a, b)}
           >
             Distinct values
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityCount}
             sortable
-            sortingType={this.state.tag_column_2}
-            sortingOrder={3}
-            onClick={(a, b) => setSortingColumn(2, a, b)}
+            sortingType={this.state.tag_column_3}
+            sortingOrder={4}
+            onClick={(a, b) => setSortingColumn(3, a, b)}
           >
             Tagged entities
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityPercent}
             sortable
-            sortingType={this.state.tag_column_3}
-            sortingOrder={4}
-            onClick={(a, b) => setSortingColumn(3, a, b)}
+            sortingType={this.state.tag_column_4}
+            sortingOrder={5}
+            onClick={(a, b) => setSortingColumn(4, a, b)}
           >
             % coverage
           </TableHeaderCell>
@@ -79,6 +89,7 @@ export default class TagTable extends React.Component {
             }}
           >
             <TableRowCell>{item.tagKey}</TableRowCell>
+            <TableRowCell>{item.enforcement}</TableRowCell>
             <TableRowCell>{item.cardinality}</TableRowCell>
             <TableRowCell>{item.entityCount}</TableRowCell>
             <TableRowCell>{item.entityPercent}</TableRowCell>

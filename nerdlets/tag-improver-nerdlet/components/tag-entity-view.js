@@ -34,6 +34,7 @@ export default class TagEntityView extends React.Component {
     tagsObject: PropTypes.object,
     tagHierarchy: PropTypes.object,
     entityTagsMap: PropTypes.object,
+    getTagKeys: PropTypes.object,
     reloadTagsFn: PropTypes.func
   };
 
@@ -76,35 +77,6 @@ export default class TagEntityView extends React.Component {
   updateFirstTagKey = firstTagKey => {
     this.setState({ firstTagKey });
     nerdlet.setUrlState({ entityViewFirstTagKey: firstTagKey });
-  };
-
-  getTagKeys = () => {
-    const { tagHierarchy, tagsObject } = this.props;
-
-    const tagsForDropdown = [];
-    tagsForDropdown.push({ title: 'required', array: tagsObject.required });
-    tagsForDropdown.push({ title: 'optional', array: tagsObject.optional });
-    tagsForDropdown.push({ title: 'not in policy', array: [] });
-
-    const items = Object.keys(tagHierarchy)
-      .reduce(
-        (acc, tag) => {
-          let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
-          if (idx < 0) idx = 2; // push into 'not in policy'
-          acc[idx].push(tag);
-          return acc;
-        },
-        [[], [], []]
-      )
-      .map(tags =>
-        tags.sort((tag1, tag2) =>
-          tag1.toLowerCase().localeCompare(tag2.toLowerCase())
-        )
-      );
-
-    tagsForDropdown.map((section, i) => (tagsForDropdown[i].items = items[i]));
-
-    return tagsForDropdown;
   };
 
   getTableData = () => {
@@ -168,7 +140,7 @@ export default class TagEntityView extends React.Component {
       showAllTags
     } = this.state;
     const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
-    const tagKeys = this.getTagKeys();
+    const tagKeys = this.props.getTagKeys;
     const entities = this.getTableData();
     const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
       selectedEntityIds.includes(entityId)
