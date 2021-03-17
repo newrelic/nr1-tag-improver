@@ -1,7 +1,14 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Dropdown, DropdownSection, DropdownItem, Grid, GridItem, HeadingText, Spinner } from 'nr1';
+import {
+  Dropdown,
+  DropdownSection,
+  DropdownItem,
+  Grid,
+  GridItem,
+  HeadingText
+} from 'nr1';
 
 import { ENFORCEMENT_PRIORITY } from '../tag-schema';
 
@@ -25,38 +32,46 @@ export default class TagCoverageView extends React.Component {
     this.setState({ currentTagGroup });
   };
 
-  getSortedTagKeys = (tags) => {
+  getSortedTagKeys = tags => {
     return tags.sort((a, b) => {
       const pa = a.enforcementPriority || 99;
       const pb = b.enforcementPriority || 99;
       if (pa < pb) return 1;
       if (pa > pb) return -1;
-      return a.tagKey.localeCompare(b.tagKey, undefined, { sensitivity: 'base' });
+      return a.tagKey.localeCompare(b.tagKey, undefined, {
+        sensitivity: 'base'
+      });
     });
-  }
+  };
 
   getTagTableData = () => {
     const { entityCount, tagHierarchy, taggingPolicy } = this.props;
     const { getSortedTagKeys } = this;
 
-    return getSortedTagKeys(Object.keys(tagHierarchy).map(k => {
-      const count = Object.keys(tagHierarchy[k]).reduce(
-        (acc, v) => acc + tagHierarchy[k][v].length,
-        0
-      );
-      const coverage = Math.floor((count * 100) / entityCount);
-      const enforcement = (taggingPolicy.find( schema => schema.key === k) || {}).enforcement || "Non-Policy";
-      const enforcementPriority = enforcement ? ENFORCEMENT_PRIORITY[enforcement] : -1;
+    return getSortedTagKeys(
+      Object.keys(tagHierarchy).map(k => {
+        const count = Object.keys(tagHierarchy[k]).reduce(
+          (acc, v) => acc + tagHierarchy[k][v].length,
+          0
+        );
+        const coverage = Math.floor((count * 100) / entityCount);
+        const enforcement =
+          (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
+          'Non-Policy';
+        const enforcementPriority = enforcement
+          ? ENFORCEMENT_PRIORITY[enforcement]
+          : -1;
 
-      return {
-        tagKey: k,
-        enforcement: enforcement,
-        enforcementPriority: enforcementPriority,
-        cardinality: Object.keys(tagHierarchy[k]).length,
-        entityCount: count,
-        entityPercent: coverage
-      };
-    }));
+        return {
+          tagKey: k,
+          enforcement: enforcement,
+          enforcementPriority: enforcementPriority,
+          cardinality: Object.keys(tagHierarchy[k]).length,
+          entityCount: count,
+          entityPercent: coverage
+        };
+      })
+    );
   };
 
   getValueTableData = () => {
