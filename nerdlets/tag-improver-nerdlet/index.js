@@ -60,6 +60,7 @@ export default class TagVisualizer extends React.Component {
 
   componentDidUpdate() {
     if (this.context.accountId !== this.state.accountId) {
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState(
         { accountId: this.context.accountId, taggingPolicy: null },
         () => this.getTaggingPolicy(),
@@ -437,10 +438,15 @@ function tagsObject(policy) {
 }
 
 function getTagKeys(tagHierarchy, policy) {
-
   const tagsForDropdown = [];
-  tagsForDropdown.push({ title: 'required', array: tagsObject(policy).required });
-  tagsForDropdown.push({ title: 'optional', array: tagsObject(policy).optional });
+  tagsForDropdown.push({
+    title: 'required',
+    array: tagsObject(policy).required
+  });
+  tagsForDropdown.push({
+    title: 'optional',
+    array: tagsObject(policy).optional
+  });
   tagsForDropdown.push({ title: 'not in policy', array: [] });
 
   const items = Object.keys(tagHierarchy)

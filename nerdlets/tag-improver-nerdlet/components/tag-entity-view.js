@@ -31,7 +31,6 @@ import { COMPLIANCEBANDS } from '../tag-schema';
 
 export default class TagEntityView extends React.Component {
   static propTypes = {
-    tagsObject: PropTypes.object,
     tagHierarchy: PropTypes.object,
     entityTagsMap: PropTypes.object,
     getTagKeys: PropTypes.object,
