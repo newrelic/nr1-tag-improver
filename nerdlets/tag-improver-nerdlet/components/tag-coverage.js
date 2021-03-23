@@ -20,8 +20,10 @@ export default class TagCoverageView extends React.Component {
     entityCount: PropTypes.number,
     tagHierarchy: PropTypes.object,
     taggingPolicy: PropTypes.array,
-    getTagKeys: PropTypes.object,
-    height: PropTypes.number
+    getTagKeys: PropTypes.array,
+    height: PropTypes.number,
+    onUpdateEntitiesFilter: PropTypes.func,
+    onShowEntities: PropTypes.func
   };
 
   state = {
@@ -29,6 +31,10 @@ export default class TagCoverageView extends React.Component {
   };
 
   updateCurrentTagGroup = currentTagGroup => {
+    this.props.onUpdateEntitiesFilter({
+      tagKey: currentTagGroup,
+      tagValue: null
+    });
     this.setState({ currentTagGroup });
   };
 
@@ -57,7 +63,7 @@ export default class TagCoverageView extends React.Component {
         const coverage = Math.floor((count * 100) / entityCount);
         const enforcement =
           (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
-          'Non-Policy';
+          'non-policy';
         const enforcementPriority = enforcement
           ? ENFORCEMENT_PRIORITY[enforcement]
           : -1;
@@ -81,6 +87,7 @@ export default class TagCoverageView extends React.Component {
 
     return Object.keys(tagHierarchy[currentTagGroup]).map(v => {
       return {
+        tagKey: currentTagGroup,
         tagValue: v,
         entityCount: tagHierarchy[currentTagGroup][v].length
       };
@@ -162,7 +169,10 @@ export default class TagCoverageView extends React.Component {
           <GridItem className="primary-content-container" columnSpan={4}>
             {currentTagGroupIsPopulated ? (
               <div className="right">
-                <TagValueTable getTableData={() => getValueTableData()} />
+                <TagValueTable
+                  getTableData={() => getValueTableData()}
+                  onShowEntities={this.props.onShowEntities}
+                />
               </div>
             ) : (
               <></>

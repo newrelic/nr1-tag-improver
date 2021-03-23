@@ -40,7 +40,10 @@ export default class TagVisualizer extends React.Component {
       id: 'APM',
       name: 'Application',
       value: 'APM_APPLICATION_ENTITY'
-    }
+    },
+    selectedTagKey: null,
+    selectedTagValue: null,
+    currentTab: 'policy-tab'
   };
 
   componentDidMount() {
@@ -73,6 +76,21 @@ export default class TagVisualizer extends React.Component {
 
   onChangeTab = newTab => {
     nerdlet.setUrlState({ tab: newTab });
+    this.setState({ currentTab: newTab });
+  };
+
+  onUpdateEntitiesFilter = item => {
+    this.setState({
+      selectedTagKey: item.tagKey,
+      selectedTagValue: item.tagValue
+    });
+  };
+
+  onShowEntities = item => {
+    this.onUpdateEntitiesFilter(item);
+    this.setState({
+      currentTab: 'entity-tab'
+    });
   };
 
   updateSelectedEntityType = entityType => {
@@ -110,7 +128,9 @@ export default class TagVisualizer extends React.Component {
         entityCount: 0,
         loadedEntities: 0,
         doneLoading: false,
-        queryCursor: undefined
+        queryCursor: undefined,
+        selectedTagKey: null,
+        selectedTagValue: null
       },
       () => {
         loadEntityBatch();
@@ -223,6 +243,12 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy,
       mandatoryTagCount
     } = this.state;
+
+    if (!Object.keys(tagHierarchy).length) {
+      for (const tag of taggingPolicy) {
+        tagHierarchy[tag.key] = {};
+      }
+    }
     entities.reduce((acc, entity) => {
       // get all the tags
       const { guid, tags } = entity;
@@ -327,7 +353,10 @@ export default class TagVisualizer extends React.Component {
       entityTagsMap,
       taggingPolicy,
       accountId,
-      selectedEntityType
+      selectedEntityType,
+      selectedTagKey,
+      selectedTagValue,
+      currentTab
     } = this.state;
 
     return (
@@ -369,6 +398,7 @@ export default class TagVisualizer extends React.Component {
 
               <Tabs
                 defaultValue={(nerdletState || {}).tab || 'overview-tab'}
+                value={currentTab}
                 onChange={this.onChangeTab}
               >
                 <TabsItem value="policy-tab" label="Policy">
@@ -393,6 +423,8 @@ export default class TagVisualizer extends React.Component {
                     taggingPolicy={taggingPolicy}
                     getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
                     height={this.props.height}
+                    onUpdateEntitiesFilter={this.onUpdateEntitiesFilter}
+                    onShowEntities={this.onShowEntities}
                   />
                 </TabsItem>
                 <TabsItem value="entity-tab" label="Entities">
@@ -405,6 +437,8 @@ export default class TagVisualizer extends React.Component {
                     entityTagsMap={entityTagsMap}
                     reloadTagsFn={this.startLoadingEntityTags}
                     getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
+                    selectedTagKey={selectedTagKey}
+                    selectedTagValue={selectedTagValue}
                   />
                 </TabsItem>
               </Tabs>

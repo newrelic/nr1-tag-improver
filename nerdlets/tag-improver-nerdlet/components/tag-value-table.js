@@ -11,7 +11,8 @@ import {
 
 export default class TagValueTable extends React.Component {
   static propTypes = {
-    getTableData: PropTypes.func
+    getTableData: PropTypes.func,
+    onShowEntities: PropTypes.func
   };
 
   constructor(props) {
@@ -20,6 +21,10 @@ export default class TagValueTable extends React.Component {
       value_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
     };
   }
+
+  openEntities = item => {
+    this.props.onShowEntities(item);
+  };
 
   setSortingColumn = (columnId, event, sortingData) => {
     const nextType = sortingData ? sortingData.nextSortingType : undefined;
@@ -32,7 +37,7 @@ export default class TagValueTable extends React.Component {
   };
 
   render() {
-    const { setSortingColumn } = this;
+    const { setSortingColumn, openEntities } = this;
 
     return (
       <Table items={this.props.getTableData()}>
@@ -55,12 +60,18 @@ export default class TagValueTable extends React.Component {
           >
             Tagged entities
           </TableHeaderCell>
+          <TableHeaderCell value={({ item }) => item}>
+            Manage entities
+          </TableHeaderCell>
         </TableHeader>
 
         {({ item }) => (
           <TableRow>
             <TableRowCell>{item.tagValue}</TableRowCell>
             <TableRowCell>{item.entityCount}</TableRowCell>
+            <TableRowCell>
+              <a onClick={() => openEntities(item)}>manage</a>
+            </TableRowCell>
           </TableRow>
         )}
       </Table>

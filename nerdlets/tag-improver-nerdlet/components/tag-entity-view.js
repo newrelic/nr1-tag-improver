@@ -33,12 +33,14 @@ export default class TagEntityView extends React.Component {
   static propTypes = {
     tagHierarchy: PropTypes.object,
     entityTagsMap: PropTypes.object,
-    getTagKeys: PropTypes.object,
-    reloadTagsFn: PropTypes.func
+    getTagKeys: PropTypes.array,
+    reloadTagsFn: PropTypes.func,
+    selectedTagKey: PropTypes.string,
+    selectedTagValue: PropTypes.string
   };
 
   state = {
-    firstTagKey: 'account',
+    firstTagKey: this.props.selectedTagKey || 'account',
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
@@ -53,6 +55,15 @@ export default class TagEntityView extends React.Component {
         urlState.entityViewSortDirection ||
         TableHeaderCell.SORTING_TYPE.ASCENDING
     });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (
+      !this.props.selectedTagKey === prevProps.selectedTagKey ||
+      !this.props.selectedTagValue === prevProps.selectedTagValue
+    ) {
+      this.setState({ firstTagKey: this.props.selectedTagKey }); // eslint-disable-line react/no-did-update-set-state
+    }
   }
 
   static contextType = NerdletStateContext;
@@ -153,6 +164,7 @@ export default class TagEntityView extends React.Component {
         return 'mid__band';
       else return 'low__band';
     };
+
     return (
       <Grid className="primary-grid">
         <GridItem
