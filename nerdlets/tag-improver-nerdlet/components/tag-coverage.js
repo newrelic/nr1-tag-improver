@@ -1,7 +1,16 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Dropdown, DropdownItem, Grid, GridItem, HeadingText } from 'nr1';
+import {
+  Dropdown,
+  DropdownSection,
+  DropdownItem,
+  Grid,
+  GridItem,
+  HeadingText
+} from 'nr1';
+
+import { ENFORCEMENT_PRIORITY } from '../tag-schema';
 
 import TagTable from './tag-table';
 import TagValueTable from './tag-value-table';
@@ -10,6 +19,8 @@ export default class TagCoverageView extends React.Component {
   static propTypes = {
     entityCount: PropTypes.number,
     tagHierarchy: PropTypes.object,
+    taggingPolicy: PropTypes.array,
+    getTagKeys: PropTypes.object,
     height: PropTypes.number
   };
 
@@ -21,22 +32,46 @@ export default class TagCoverageView extends React.Component {
     this.setState({ currentTagGroup });
   };
 
-  getTagTableData = () => {
-    const { entityCount, tagHierarchy } = this.props;
-
-    return Object.keys(tagHierarchy).map(k => {
-      const count = Object.keys(tagHierarchy[k]).reduce(
-        (acc, v) => acc + tagHierarchy[k][v].length,
-        0
-      );
-      const coverage = Math.floor((count * 100) / entityCount);
-      return {
-        tagKey: k,
-        cardinality: Object.keys(tagHierarchy[k]).length,
-        entityCount: count,
-        entityPercent: coverage
-      };
+  getSortedTagKeys = tags => {
+    return tags.sort((a, b) => {
+      const pa = a.enforcementPriority || 99;
+      const pb = b.enforcementPriority || 99;
+      if (pa < pb) return 1;
+      if (pa > pb) return -1;
+      return a.tagKey.localeCompare(b.tagKey, undefined, {
+        sensitivity: 'base'
+      });
     });
+  };
+
+  getTagTableData = () => {
+    const { entityCount, tagHierarchy, taggingPolicy } = this.props;
+    const { getSortedTagKeys } = this;
+
+    return getSortedTagKeys(
+      Object.keys(tagHierarchy).map(k => {
+        const count = Object.keys(tagHierarchy[k]).reduce(
+          (acc, v) => acc + tagHierarchy[k][v].length,
+          0
+        );
+        const coverage = Math.floor((count * 100) / entityCount);
+        const enforcement =
+          (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
+          'Non-Policy';
+        const enforcementPriority = enforcement
+          ? ENFORCEMENT_PRIORITY[enforcement]
+          : -1;
+
+        return {
+          tagKey: k,
+          enforcement: enforcement,
+          enforcementPriority: enforcementPriority,
+          cardinality: Object.keys(tagHierarchy[k]).length,
+          entityCount: count,
+          entityPercent: coverage
+        };
+      })
+    );
   };
 
   getValueTableData = () => {
@@ -55,6 +90,7 @@ export default class TagCoverageView extends React.Component {
   render() {
     const { getTagTableData, getValueTableData, updateCurrentTagGroup } = this;
     const { tagHierarchy } = this.props;
+    const tagKeys = this.props.getTagKeys;
     const { currentTagGroup } = this.state;
     const currentTagGroupIsPopulated =
       tagHierarchy[currentTagGroup] &&
@@ -79,20 +115,29 @@ export default class TagCoverageView extends React.Component {
               Tag
               <Dropdown
                 title={currentTagGroup}
-                items={Object.keys(tagHierarchy)}
+                items={tagKeys}
                 style={{
                   display: 'inline-block',
                   margin: '0 .5em',
                   verticalAlign: 'middle'
                 }}
+                sectioned
               >
-                {({ item, index }) => (
-                  <DropdownItem
-                    key={`d-${index}`}
-                    onClick={() => updateCurrentTagGroup(item)}
+                {({ item: section, index }) => (
+                  <DropdownSection
+                    key={index}
+                    title={section.title}
+                    items={section.items}
                   >
-                    {item}
-                  </DropdownItem>
+                    {({ item, index }) => (
+                      <DropdownItem
+                        key={`d-${index}`}
+                        onClick={() => updateCurrentTagGroup(item)}
+                      >
+                        {item}
+                      </DropdownItem>
+                    )}
+                  </DropdownSection>
                 )}
               </Dropdown>
               breakdown

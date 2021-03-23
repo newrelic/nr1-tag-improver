@@ -60,6 +60,7 @@ export default class TagVisualizer extends React.Component {
 
   componentDidUpdate() {
     if (this.context.accountId !== this.state.accountId) {
+      // eslint-disable-next-line react/no-did-update-set-state
       this.setState(
         { accountId: this.context.accountId, taggingPolicy: null },
         () => this.getTaggingPolicy(),
@@ -389,6 +390,8 @@ export default class TagVisualizer extends React.Component {
                     entityCount={entityCount}
                     loadedEntities={loadedEntities}
                     doneLoading={doneLoading}
+                    taggingPolicy={taggingPolicy}
+                    getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
                     height={this.props.height}
                   />
                 </TabsItem>
@@ -401,7 +404,7 @@ export default class TagVisualizer extends React.Component {
                     doneLoading={doneLoading}
                     entityTagsMap={entityTagsMap}
                     reloadTagsFn={this.startLoadingEntityTags}
-                    tagsObject={tagsObject(taggingPolicy)}
+                    getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
                   />
                 </TabsItem>
               </Tabs>
@@ -432,4 +435,37 @@ function tagsObject(policy) {
         : acc,
     { required: [], optional: [] }
   );
+}
+
+function getTagKeys(tagHierarchy, policy) {
+  const tagsForDropdown = [];
+  tagsForDropdown.push({
+    title: 'required',
+    array: tagsObject(policy).required
+  });
+  tagsForDropdown.push({
+    title: 'optional',
+    array: tagsObject(policy).optional
+  });
+  tagsForDropdown.push({ title: 'not in policy', array: [] });
+
+  const items = Object.keys(tagHierarchy)
+    .reduce(
+      (acc, tag) => {
+        let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
+        if (idx < 0) idx = 2; // push into 'not in policy'
+        acc[idx].push(tag);
+        return acc;
+      },
+      [[], [], []]
+    )
+    .map(tags =>
+      tags.sort((tag1, tag2) =>
+        tag1.toLowerCase().localeCompare(tag2.toLowerCase())
+      )
+    );
+
+  tagsForDropdown.map((section, i) => (tagsForDropdown[i].items = items[i]));
+
+  return tagsForDropdown;
 }
