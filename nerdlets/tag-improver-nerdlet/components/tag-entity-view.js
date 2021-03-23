@@ -44,13 +44,18 @@ export default class TagEntityView extends React.Component {
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
+    // selectedTagKey: this.props.selectedTagKey,
+    // selectedTagValue: this.props.selectedTagValue,
     showAllTags: true
   };
 
   componentDidMount() {
     const urlState = this.context || {};
     this.setState({
-      firstTagKey: urlState.entityViewFirstTagKey || 'account',
+      firstTagKey:
+        this.props.selectedTagKey ||
+        urlState.entityViewFirstTagKey ||
+        'account',
       [`table_column_${urlState.entityViewSortColumn || 1}`]:
         urlState.entityViewSortDirection ||
         TableHeaderCell.SORTING_TYPE.ASCENDING
@@ -59,10 +64,15 @@ export default class TagEntityView extends React.Component {
 
   componentDidUpdate(prevProps) {
     if (
-      !this.props.selectedTagKey === prevProps.selectedTagKey ||
-      !this.props.selectedTagValue === prevProps.selectedTagValue
+      this.props.selectedTagKey !== prevProps.selectedTagKey ||
+      this.props.selectedTagValue !== prevProps.selectedTagValue
     ) {
-      this.setState({ firstTagKey: this.props.selectedTagKey }); // eslint-disable-line react/no-did-update-set-state
+      // eslint-disable-next-line react/no-did-update-set-state
+      this.setState({
+        firstTagKey: this.props.selectedTagKey,
+        selectedEntities: {},
+        selectedEntityIds: []
+      });
     }
   }
 
@@ -89,23 +99,45 @@ export default class TagEntityView extends React.Component {
     nerdlet.setUrlState({ entityViewFirstTagKey: firstTagKey });
   };
 
+  addEntity = (entity, activeTagValue) => {
+    return {
+      entityName: entity.name,
+      entityGuid: entity.guid,
+      firstTagValue: activeTagValue,
+      complianceScore: entity.complianceScore,
+      mandatoryTags: entity.mandatoryTags,
+      optionalTags: entity.optionalTags
+    };
+  };
+
   getTableData = () => {
-    const { tagHierarchy } = this.props;
+    const { tagHierarchy, selectedTagKey, selectedTagValue } = this.props;
     const { firstTagKey } = this.state;
 
+    let newTagHierarchy = {};
+    if (selectedTagKey && selectedTagValue) {
+      newTagHierarchy[selectedTagKey] = {};
+      newTagHierarchy[selectedTagKey][selectedTagValue] =
+        tagHierarchy[selectedTagKey][selectedTagValue];
+    } else {
+      newTagHierarchy = tagHierarchy;
+    }
     const entities = {};
-    for (const tagData of Object.values(tagHierarchy)) {
+    for (const tagData of Object.values(newTagHierarchy)) {
       for (const entityList of Object.values(tagData)) {
         for (const entity of entityList) {
           if (!entities[entity.guid]) {
-            entities[entity.guid] = {
-              entityName: entity.name,
-              entityGuid: entity.guid,
-              firstTagValue: this.findTagValue(entity, firstTagKey),
-              complianceScore: entity.complianceScore,
-              mandatoryTags: entity.mandatoryTags,
-              optionalTags: entity.optionalTags
-            };
+            if (selectedTagKey && selectedTagValue) {
+              this.onSelectEntity(
+                { target: { checked: true } },
+                { item: { entityGuid: entity.guid } }
+              );
+            }
+            const activeTagValue =
+              selectedTagKey && selectedTagValue
+                ? selectedTagValue
+                : this.findTagValue(entity, firstTagKey);
+            entities[entity.guid] = this.addEntity(entity, activeTagValue);
           }
         }
       }
@@ -149,7 +181,13 @@ export default class TagEntityView extends React.Component {
       selectedEntityIds,
       showAllTags
     } = this.state;
-    const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
+    const {
+      tagHierarchy,
+      entityTagsMap,
+      reloadTagsFn,
+      selectedTagKey,
+      selectedTagValue
+    } = this.props;
     const tagKeys = this.props.getTagKeys;
     const entities = this.getTableData();
     const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
@@ -177,6 +215,7 @@ export default class TagEntityView extends React.Component {
               <Dropdown
                 title={firstTagKey}
                 items={tagKeys}
+                disabled={selectedTagKey && selectedTagValue}
                 style={{
                   display: 'inline-block',
                   margin: '0 .5em',
