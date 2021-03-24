@@ -40,7 +40,11 @@ export default class TagValueTable extends React.Component {
     const { setSortingColumn, openEntities } = this;
 
     return (
-      <Table items={this.props.getTableData()}>
+      <Table
+        items={this.props.getTableData().filter(item => {
+          return item.entityCount > 0;
+        })}
+      >
         <TableHeader>
           <TableHeaderCell
             value={({ item }) => item.tagValue}
@@ -67,10 +71,30 @@ export default class TagValueTable extends React.Component {
 
         {({ item }) => (
           <TableRow>
-            <TableRowCell>{item.tagValue}</TableRowCell>
-            <TableRowCell>{item.entityCount}</TableRowCell>
+            <TableRowCell
+              className={
+                item.tagValue === '<not present>' && item.entityCount
+                  ? 'tag__value__blank__row'
+                  : 'tag__value__normal__row'
+              }
+            >
+              {item.tagValue}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.tagValue === '<not present>' && item.entityCount
+                  ? 'tag__value__blank__row'
+                  : 'tag__value__normal__row'
+              }
+            >
+              {item.entityCount}
+            </TableRowCell>
             <TableRowCell>
-              <a onClick={() => openEntities(item)}>manage</a>
+              {item.entityCount ? (
+                <a onClick={() => openEntities(item)}>manage</a>
+              ) : (
+                ''
+              )}
             </TableRowCell>
           </TableRow>
         )}

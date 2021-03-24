@@ -83,15 +83,24 @@ export default class TagCoverageView extends React.Component {
   getValueTableData = () => {
     const { tagHierarchy } = this.props;
     const { currentTagGroup } = this.state;
-    if (!tagHierarchy[currentTagGroup]) return [];
+    // if (!tagHierarchy[currentTagGroup]) return [];
 
-    return Object.keys(tagHierarchy[currentTagGroup]).map(v => {
+    const valueTableData = Object.keys(tagHierarchy[currentTagGroup]).map(v => {
       return {
         tagKey: currentTagGroup,
         tagValue: v,
         entityCount: tagHierarchy[currentTagGroup][v].length
       };
     });
+    const entityCount = valueTableData.reduce((acc, cur) => {
+      return acc + cur.entityCount;
+    }, 0);
+    valueTableData.push({
+      tagKey: currentTagGroup,
+      tagValue: '<not present>',
+      entityCount: this.props.entityCount - entityCount
+    });
+    return valueTableData;
   };
 
   render() {

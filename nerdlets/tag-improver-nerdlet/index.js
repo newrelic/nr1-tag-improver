@@ -41,8 +41,8 @@ export default class TagVisualizer extends React.Component {
       name: 'Application',
       value: 'APM_APPLICATION_ENTITY'
     },
-    selectedTagKey: null,
-    selectedTagValue: null,
+    selectedTagKey: '',
+    selectedTagValue: '',
     currentTab: 'policy-tab'
   };
 
@@ -76,7 +76,14 @@ export default class TagVisualizer extends React.Component {
 
   onChangeTab = newTab => {
     nerdlet.setUrlState({ tab: newTab });
-    this.setState({ currentTab: newTab });
+    this.setState({ currentTab: newTab }, () => {
+      if (newTab !== 'entity-tab') {
+        this.setState({
+          // selectedTagKey: '',
+          selectedTagValue: ''
+        });
+      }
+    });
   };
 
   onUpdateEntitiesFilter = item => {
@@ -129,8 +136,8 @@ export default class TagVisualizer extends React.Component {
         loadedEntities: 0,
         doneLoading: false,
         queryCursor: undefined,
-        selectedTagKey: null,
-        selectedTagValue: null
+        selectedTagKey: '',
+        selectedTagValue: ''
       },
       () => {
         loadEntityBatch();

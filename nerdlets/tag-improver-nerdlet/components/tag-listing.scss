@@ -69,3 +69,11 @@ $low-band-color: rgb(191, 0, 22);
     color: $high-band-color;
     background-color: rgba(17, 166, 0, 0.05);
   }
+
+.tag__value__blank__row {
+  background-color: rgb(231, 181, 95);
+}
+
+.tag__value__normal__row {
+  background-color: white;
+}

@@ -10,6 +10,8 @@ import {
   Grid,
   GridItem,
   Link,
+  Radio,
+  RadioGroup,
   Table,
   TableHeader,
   TableHeaderCell,
@@ -44,18 +46,20 @@ export default class TagEntityView extends React.Component {
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
-    // selectedTagKey: this.props.selectedTagKey,
-    // selectedTagValue: this.props.selectedTagValue,
-    showAllTags: true
+    showAllTags: true,
+    entityDisplayOption: '1' // only show entities with tag value present
   };
 
   componentDidMount() {
+    // setTimeout(() => { /* do nothing */ console.log("waiting for 800 ms"); }, 800);
     const urlState = this.context || {};
     this.setState({
       firstTagKey:
         this.props.selectedTagKey ||
         urlState.entityViewFirstTagKey ||
         'account',
+      entityDisplayOption:
+        this.props.selectedTagValue === '<not present>' ? '2' : '1',
       [`table_column_${urlState.entityViewSortColumn || 1}`]:
         urlState.entityViewSortDirection ||
         TableHeaderCell.SORTING_TYPE.ASCENDING
@@ -69,7 +73,12 @@ export default class TagEntityView extends React.Component {
     ) {
       // eslint-disable-next-line react/no-did-update-set-state
       this.setState({
-        firstTagKey: this.props.selectedTagKey,
+        firstTagKey:
+          this.props.selectedTagKey ||
+          this.context.entityViewFirstTagKey ||
+          'account',
+        entityDisplayOption:
+          this.props.selectedTagValue === '<not present>' ? '2' : '1',
         selectedEntities: {},
         selectedEntityIds: []
       });
@@ -111,11 +120,21 @@ export default class TagEntityView extends React.Component {
   };
 
   getTableData = () => {
-    const { tagHierarchy, selectedTagKey, selectedTagValue } = this.props;
-    const { firstTagKey } = this.state;
+    const {
+      tagHierarchy,
+      entityTagsMap,
+      selectedTagKey,
+      selectedTagValue
+    } = this.props;
+    const { firstTagKey, entityDisplayOption } = this.state;
 
     let newTagHierarchy = {};
-    if (selectedTagKey && selectedTagValue) {
+    if (
+      entityDisplayOption === '1' &&
+      selectedTagKey &&
+      selectedTagValue &&
+      selectedTagValue !== '<not present>'
+    ) {
       newTagHierarchy[selectedTagKey] = {};
       newTagHierarchy[selectedTagKey][selectedTagValue] =
         tagHierarchy[selectedTagKey][selectedTagValue];
@@ -127,17 +146,33 @@ export default class TagEntityView extends React.Component {
       for (const entityList of Object.values(tagData)) {
         for (const entity of entityList) {
           if (!entities[entity.guid]) {
-            if (selectedTagKey && selectedTagValue) {
-              this.onSelectEntity(
-                { target: { checked: true } },
-                { item: { entityGuid: entity.guid } }
-              );
-            }
             const activeTagValue =
-              selectedTagKey && selectedTagValue
+              selectedTagKey &&
+              selectedTagValue &&
+              entityDisplayOption === '1' &&
+              selectedTagValue !== '<not present>'
                 ? selectedTagValue
                 : this.findTagValue(entity, firstTagKey);
-            entities[entity.guid] = this.addEntity(entity, activeTagValue);
+
+            const tagHasValue = entityTagsMap[entity.guid].find(
+              tag => tag.tagKey === firstTagKey
+            );
+            // const tagHasValue = entity.tags.find(tag => tag.tagKey === firstTagKey);
+
+            if (
+              (entityDisplayOption === '1' && !tagHasValue) ||
+              (entityDisplayOption === '2' && tagHasValue)
+            ) {
+              continue;
+            } else {
+              // if (selectAllEntities && selectedTagKey && selectedTagValue) {
+              //   this.onSelectEntity(
+              //     { target: { checked: true } },
+              //     { item: { entityGuid: entity.guid } }
+              //   );
+              // }
+              entities[entity.guid] = this.addEntity(entity, activeTagValue);
+            }
           }
         }
       }
@@ -173,13 +208,23 @@ export default class TagEntityView extends React.Component {
     this.setState({ showAllTags });
   };
 
+  onRadioChange = (event, value) => {
+    // value: 1 = show entities with tag value present
+    //        2 = show entities with tag value not present
+    //        3 = show entities with or without tag value present
+    this.setState({
+      entityDisplayOption: value
+    });
+  };
+
   render() {
     const { updateFirstTagKey, setSortingColumn } = this;
     const {
       firstTagKey,
       selectedEntities,
       selectedEntityIds,
-      showAllTags
+      showAllTags,
+      entityDisplayOption
     } = this.state;
     const {
       tagHierarchy,
@@ -242,12 +287,24 @@ export default class TagEntityView extends React.Component {
               </Dropdown>
             </div>
           </div>
-          <div>
-            <Checkbox
-              checked={this.state.showAllTags}
-              onChange={this.onCheckboxChange}
-              label="Show all policy tags"
-            />
+          <div style={{ display: 'flex', flexDirection: 'row' }}>
+            <div style={{ margin: '10px' }}>
+              <RadioGroup
+                onChange={this.onRadioChange}
+                value={entityDisplayOption || '1'}
+              >
+                <Radio label="Tag value present" value="1" />
+                <Radio label="Tag value not present" value="2" />
+                <Radio label="Both" value="3" />
+              </RadioGroup>
+            </div>
+            <div style={{ margin: '35px' }}>
+              <Checkbox
+                checked={this.state.showAllTags}
+                onChange={this.onCheckboxChange}
+                label="Show all policy tags"
+              />
+            </div>
           </div>
           <div className="button-section" style={{ padding: 8 }}>
             <ModalButton
