@@ -53,6 +53,7 @@ export default class TagCoverageView extends React.Component {
   getTagTableData = () => {
     const { entityCount, tagHierarchy, taggingPolicy } = this.props;
     const { getSortedTagKeys } = this;
+    const { currentTagGroup } = this.state;
 
     return getSortedTagKeys(
       Object.keys(tagHierarchy).map(k => {
@@ -74,7 +75,8 @@ export default class TagCoverageView extends React.Component {
           enforcementPriority: enforcementPriority,
           cardinality: Object.keys(tagHierarchy[k]).length,
           entityCount: count,
-          entityPercent: coverage
+          entityPercent: coverage,
+          selected: k === currentTagGroup ? true : false // eslint-disable-line no-unneeded-ternary
         };
       })
     );
@@ -97,7 +99,7 @@ export default class TagCoverageView extends React.Component {
     }, 0);
     valueTableData.push({
       tagKey: currentTagGroup,
-      tagValue: '<not present>',
+      tagValue: '<tag not defined>',
       entityCount: this.props.entityCount - entityCount
     });
     return valueTableData;
