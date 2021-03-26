@@ -73,7 +73,7 @@ export default class TagValueTable extends React.Component {
           <TableRow>
             <TableRowCell
               className={
-                item.tagValue === '<not present>' && item.entityCount
+                item.tagValue === '<tag not defined>' && item.entityCount
                   ? 'tag__value__blank__row'
                   : 'tag__value__normal__row'
               }
@@ -82,7 +82,7 @@ export default class TagValueTable extends React.Component {
             </TableRowCell>
             <TableRowCell
               className={
-                item.tagValue === '<not present>' && item.entityCount
+                item.tagValue === '<tag not defined>' && item.entityCount
                   ? 'tag__value__blank__row'
                   : 'tag__value__normal__row'
               }

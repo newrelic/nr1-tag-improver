@@ -88,11 +88,51 @@ export default class TagTable extends React.Component {
               this.props.selectTag(item.tagKey);
             }}
           >
-            <TableRowCell>{item.tagKey}</TableRowCell>
-            <TableRowCell>{item.enforcement}</TableRowCell>
-            <TableRowCell>{item.cardinality}</TableRowCell>
-            <TableRowCell>{item.entityCount}</TableRowCell>
-            <TableRowCell>{item.entityPercent}</TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.tagKey}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.enforcement}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.cardinality}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.entityCount}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.entityPercent}
+            </TableRowCell>
           </TableRow>
         )}
       </Table>
