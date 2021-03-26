@@ -264,14 +264,14 @@ export default class TagVisualizer extends React.Component {
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
 
       // for each tag, if it doesn't make an empty object
-      tags.forEach(({ tagKey, tagValues }) => {
-        if (!acc[tagKey]) acc[tagKey] = {};
+      for (const tag of tags) {
+        if (!acc[tag.tagKey]) acc[tag.tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
-        tagValues.forEach(value => {
-          if (!acc[tagKey][value]) acc[tagKey][value] = [];
-          acc[tagKey][value].push(entity);
-        });
-      });
+        for (const value of tag.tagValues) {
+          if (!acc[tag.tagKey][value]) acc[tag.tagKey][value] = [];
+          acc[tag.tagKey][value].push(entity);
+        }
+      }
       return acc;
     }, tagHierarchy);
 
@@ -340,13 +340,13 @@ export default class TagVisualizer extends React.Component {
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
         const { updateEntityTagCompliance } = this;
-        Object.entries(tagHierarchy).forEach(tagKey => {
-          Object.values(tagKey[1]).forEach(tagValue => {
-            tagValue.forEach(entity => {
+        for (const tagKey of Object.entries(tagHierarchy)) {
+          for (const tagValue of Object.values(tagKey[1])) {
+            for (const entity of tagValue) {
               updateEntityTagCompliance(entity, policy, mandatoryTagCount);
-            });
-          });
-        });
+            }
+          }
+        }
       }
     );
   };
