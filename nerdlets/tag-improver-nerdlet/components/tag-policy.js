@@ -86,7 +86,11 @@ export default class TaggingPolicy extends React.Component {
   startEditing = () => {
     const { schema } = this.props;
     const workingSchema = schema.map(schemaRule => ({ ...schemaRule }));
-    this.setState({ isEditMode: true, workingSchema, savedSchema: workingSchema });
+    this.setState({
+      isEditMode: true,
+      workingSchema,
+      savedSchema: workingSchema
+    });
   };
 
   cancelEditing = () => {

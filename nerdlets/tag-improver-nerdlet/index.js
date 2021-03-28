@@ -350,8 +350,13 @@ export default class TagVisualizer extends React.Component {
           }
           // remove tags that were removed from ploicy and are not used by any entity
           for (const tag of prevPolicy) {
-            if (!policy.find(policyTag => {return policyTag.key === tag.key}))
-              if (!Object.keys(tagHierarchy[tag.key]).length) delete tagHierarchy[tag.key];
+            if (
+              !policy.find(policyTag => {
+                return policyTag.key === tag.key;
+              })
+            )
+              if (!Object.keys(tagHierarchy[tag.key]).length)
+                delete tagHierarchy[tag.key];
           }
         }
 
