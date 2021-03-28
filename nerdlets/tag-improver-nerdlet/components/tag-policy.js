@@ -46,6 +46,7 @@ export default class TaggingPolicy extends React.Component {
     super(props);
     this.state = {
       workingSchema: null,
+      savedSchema: null,
       isEditMode: false,
       savingPolicy: false,
       policySaveErrored: false,
@@ -58,7 +59,7 @@ export default class TaggingPolicy extends React.Component {
 
   applyEdits = () => {
     const { updatePolicy } = this.props;
-    const { workingSchema: policy } = this.state;
+    const { workingSchema: policy, savedSchema } = this.state;
     this.setState({ savingPolicy: true });
     UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -74,7 +75,7 @@ export default class TaggingPolicy extends React.Component {
             savingPolicy: false,
             policySaveErrored: false
           },
-          () => updatePolicy(policy)
+          () => updatePolicy(policy, savedSchema)
         );
       })
       .catch(() => {
@@ -85,7 +86,7 @@ export default class TaggingPolicy extends React.Component {
   startEditing = () => {
     const { schema } = this.props;
     const workingSchema = schema.map(schemaRule => ({ ...schemaRule }));
-    this.setState({ isEditMode: true, workingSchema });
+    this.setState({ isEditMode: true, workingSchema, savedSchema: workingSchema });
   };
 
   cancelEditing = () => {

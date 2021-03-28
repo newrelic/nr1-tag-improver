@@ -95,6 +95,7 @@ export default class TagVisualizer extends React.Component {
 
   onShowEntities = item => {
     this.onUpdateEntitiesFilter(item);
+    nerdlet.setUrlState({ tab: 'entity-tab' });
     this.setState({
       currentTab: 'entity-tab'
     });
@@ -330,7 +331,7 @@ export default class TagVisualizer extends React.Component {
       });
   };
 
-  updatePolicy = policy => {
+  updatePolicy = (policy, prevPolicy) => {
     this.setState(
       {
         taggingPolicy: sortedPolicy(policy),
@@ -340,6 +341,20 @@ export default class TagVisualizer extends React.Component {
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
         const { updateEntityTagCompliance } = this;
+
+        // check if policy was changed
+        if (JSON.stringify(policy) !== JSON.stringify(prevPolicy)) {
+          // add new policy tags to tagHierarchy if not present (not likely)
+          for (const tag of policy) {
+            if (!tagHierarchy[tag.key]) tagHierarchy[tag.key] = {};
+          }
+          // remove tags that were removed from ploicy and are not used by any entity
+          for (const tag of prevPolicy) {
+            if (!policy.find(policyTag => {return policyTag.key === tag.key}))
+              if (!Object.keys(tagHierarchy[tag.key]).length) delete tagHierarchy[tag.key];
+          }
+        }
+
         for (const tagKey of Object.entries(tagHierarchy)) {
           for (const tagValue of Object.values(tagKey[1])) {
             for (const entity of tagValue) {
@@ -405,7 +420,7 @@ export default class TagVisualizer extends React.Component {
 
               <Tabs
                 defaultValue={(nerdletState || {}).tab || 'overview-tab'}
-                value={currentTab}
+                value={(nerdletState || {}).tab || currentTab}
                 onChange={this.onChangeTab}
               >
                 <TabsItem value="policy-tab" label="Policy">
