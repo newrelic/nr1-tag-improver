@@ -39,6 +39,7 @@ const DISPLAY_OPTION = {
 export default class TagEntityView extends React.Component {
   static propTypes = {
     tagHierarchy: PropTypes.object,
+    selectedEntityType: PropTypes.object,
     entityCount: PropTypes.number,
     entityTagsMap: PropTypes.object,
     getTagKeys: PropTypes.array,
@@ -330,7 +331,8 @@ export default class TagEntityView extends React.Component {
         entityDisplayOption,
         dropDownSelectedTagValue
       } = this.state;
-      let result = 'Showing entities ';
+      const { selectedEntityType } = this.props;
+      let result = `Showing entities for "${selectedEntityType.name}" entity type `;
 
       // showing entities with
       const DISPLAY_OPTION = {
@@ -342,18 +344,18 @@ export default class TagEntityView extends React.Component {
       switch (entityDisplayOption) {
         case DISPLAY_OPTION.SPECIFIC_TAG_VALUE:
           // eslint-disable-next-line prefer-template,prettier/prettier
-          result += 'with tag key: [' + firstTagKey + '] with tag value: [' + dropDownSelectedTagValue + ']';
+          result += `with tag key: [${firstTagKey}] / tag value: [${dropDownSelectedTagValue}]`;
           break;
         case DISPLAY_OPTION.ALL_TAG_VALUES:
           // eslint-disable-next-line prefer-template
-          result += 'with tag key: [' + firstTagKey + '] with any value';
+          result += `with tag key: [${firstTagKey}] with any value`;
           break;
         case DISPLAY_OPTION.TAG_NOT_DEFINED:
           // eslint-disable-next-line prefer-template
-          result += 'with tag key: [' + firstTagKey + '] not defined';
+          result += `with tag key: [${firstTagKey}] not defined`;
           break;
         case DISPLAY_OPTION.ALL_ENTITIES:
-          result = 'Showing all entities';
+          result = `Showing all entities for "${selectedEntityType.name}" entity type`;
           break;
       }
       return result;
