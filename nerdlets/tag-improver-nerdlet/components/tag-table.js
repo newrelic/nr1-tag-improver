@@ -42,7 +42,7 @@ export default class TagTable extends React.Component {
             sortingOrder={1}
             onClick={(a, b) => setSortingColumn(0, a, b)}
           >
-            Tag name
+            Tag key
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.enforcement}
@@ -51,7 +51,7 @@ export default class TagTable extends React.Component {
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
           >
-            Enforcement Level
+            Enforcement level
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.cardinality}
@@ -69,7 +69,7 @@ export default class TagTable extends React.Component {
             sortingOrder={4}
             onClick={(a, b) => setSortingColumn(3, a, b)}
           >
-            Tagged entities
+            Entity count
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityPercent}

@@ -130,7 +130,7 @@ export default class TagCoverageView extends React.Component {
           </GridItem>
           <GridItem className="primary-content-container" columnSpan={4}>
             <HeadingText type={HeadingText.TYPE.HEADING_4}>
-              Tag
+              Values in use for
               <Dropdown
                 title={currentTagGroup}
                 items={tagKeys}
@@ -158,7 +158,7 @@ export default class TagCoverageView extends React.Component {
                   </DropdownSection>
                 )}
               </Dropdown>
-              breakdown
+              tag
             </HeadingText>
           </GridItem>
 
