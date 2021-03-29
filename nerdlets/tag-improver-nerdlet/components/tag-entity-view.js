@@ -343,15 +343,12 @@ export default class TagEntityView extends React.Component {
       };
       switch (entityDisplayOption) {
         case DISPLAY_OPTION.SPECIFIC_TAG_VALUE:
-          // eslint-disable-next-line prefer-template,prettier/prettier
           result += `with tag key: [${firstTagKey}] / tag value: [${dropDownSelectedTagValue}]`;
           break;
         case DISPLAY_OPTION.ALL_TAG_VALUES:
-          // eslint-disable-next-line prefer-template
           result += `with tag key: [${firstTagKey}] with any value`;
           break;
         case DISPLAY_OPTION.TAG_NOT_DEFINED:
-          // eslint-disable-next-line prefer-template
           result += `with tag key: [${firstTagKey}] not defined`;
           break;
         case DISPLAY_OPTION.ALL_ENTITIES:
