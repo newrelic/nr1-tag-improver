@@ -143,7 +143,6 @@ export default class TaggingPolicy extends React.Component {
         ...workingSchema,
         {
           key: '',
-          label: '',
           enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
           purpose: ''
         }
