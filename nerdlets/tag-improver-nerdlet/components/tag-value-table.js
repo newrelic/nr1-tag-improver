@@ -53,7 +53,7 @@ export default class TagValueTable extends React.Component {
             sortingOrder={1}
             onClick={(a, b) => setSortingColumn(0, a, b)}
           >
-            Tag value
+            Tag Value
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityCount}
@@ -62,10 +62,10 @@ export default class TagValueTable extends React.Component {
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
           >
-            Entity count
+            Entity Count
           </TableHeaderCell>
           <TableHeaderCell value={({ item }) => item}>
-            Manage entities
+            Manage Entities
           </TableHeaderCell>
         </TableHeader>
 
@@ -91,7 +91,7 @@ export default class TagValueTable extends React.Component {
             </TableRowCell>
             <TableRowCell>
               {item.entityCount ? (
-                <a onClick={() => openEntities(item)}>manage</a>
+                <a onClick={() => openEntities(item)}>Manage</a>
               ) : (
                 ''
               )}

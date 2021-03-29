@@ -42,7 +42,7 @@ export default class TagTable extends React.Component {
             sortingOrder={1}
             onClick={(a, b) => setSortingColumn(0, a, b)}
           >
-            Tag key
+            Key
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.enforcement}
@@ -51,7 +51,7 @@ export default class TagTable extends React.Component {
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
           >
-            Enforcement level
+            Enforcement Level
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.cardinality}
@@ -60,7 +60,7 @@ export default class TagTable extends React.Component {
             sortingOrder={3}
             onClick={(a, b) => setSortingColumn(2, a, b)}
           >
-            Distinct values
+            Distinct Values
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityCount}
@@ -69,7 +69,7 @@ export default class TagTable extends React.Component {
             sortingOrder={4}
             onClick={(a, b) => setSortingColumn(3, a, b)}
           >
-            Entity count
+            Entity Count
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.entityPercent}
@@ -78,7 +78,7 @@ export default class TagTable extends React.Component {
             sortingOrder={5}
             onClick={(a, b) => setSortingColumn(4, a, b)}
           >
-            % coverage
+            Coverage
           </TableHeaderCell>
         </TableHeader>
 
@@ -131,7 +131,7 @@ export default class TagTable extends React.Component {
                   : 'tag__analyzer__normal__row'
               }
             >
-              {item.entityPercent}
+              {item.entityPercent}%
             </TableRowCell>
           </TableRow>
         )}

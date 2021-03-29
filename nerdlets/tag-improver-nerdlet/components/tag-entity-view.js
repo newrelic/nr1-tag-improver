@@ -380,7 +380,7 @@ export default class TagEntityView extends React.Component {
         >
           <div>
             <div>
-              tag/value [
+              Key:Value [
               <Dropdown
                 title={firstTagKey}
                 items={tagKeys}
@@ -444,7 +444,7 @@ export default class TagEntityView extends React.Component {
           <div className="button-section" style={{ padding: 8 }}>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Add tags"
+              buttonText="Add Tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkAdd
@@ -456,7 +456,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Rename tags"
+              buttonText="Rename Tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkRename
@@ -469,7 +469,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Change values"
+              buttonText="Change Values"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkEdit
@@ -482,7 +482,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Remove tags"
+              buttonText="Remove Tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkDelete
@@ -534,7 +534,7 @@ export default class TagEntityView extends React.Component {
                 Score
               </TableHeaderCell>
               <TableHeaderCell width="6fr">
-                {showAllTags ? '' : 'Undefined'} Mandatory Tags
+                {showAllTags ? '' : 'Undefined'} Required Tags
               </TableHeaderCell>
               <TableHeaderCell width="7fr">
                 {showAllTags ? '' : 'Undefined'} Optional Tags
