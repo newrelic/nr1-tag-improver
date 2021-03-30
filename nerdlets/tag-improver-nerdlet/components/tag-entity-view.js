@@ -309,11 +309,7 @@ export default class TagEntityView extends React.Component {
       showAllTags,
       dropDownSelectedTagValue
     } = this.state;
-    const {
-      tagHierarchy,
-      entityTagsMap,
-      reloadTagsFn
-    } = this.props;
+    const { tagHierarchy, entityTagsMap, reloadTagsFn } = this.props;
     const tagKeys = this.props.getTagKeys;
     const entities = this.getTableData();
     const operableEntities = Object.keys(entityTagsMap).filter(entityId =>
