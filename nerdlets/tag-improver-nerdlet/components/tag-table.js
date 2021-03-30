@@ -107,6 +107,7 @@ export default class TagTable extends React.Component {
               {item.enforcement}
             </TableRowCell>
             <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               className={
                 item.selected
                   ? 'tag__analyzer__selected__row'
@@ -116,6 +117,7 @@ export default class TagTable extends React.Component {
               {item.cardinality}
             </TableRowCell>
             <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               className={
                 item.selected
                   ? 'tag__analyzer__selected__row'
@@ -125,6 +127,7 @@ export default class TagTable extends React.Component {
               {item.entityCount}
             </TableRowCell>
             <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               className={
                 item.selected
                   ? 'tag__analyzer__selected__row'

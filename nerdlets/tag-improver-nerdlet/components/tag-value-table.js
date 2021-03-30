@@ -81,6 +81,7 @@ export default class TagValueTable extends React.Component {
               {item.tagValue}
             </TableRowCell>
             <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               className={
                 item.tagValue === '<tag not defined>' && item.entityCount
                   ? 'tag__value__blank__row'
