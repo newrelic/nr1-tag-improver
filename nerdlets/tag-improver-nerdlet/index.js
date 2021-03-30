@@ -345,7 +345,10 @@ export default class TagVisualizer extends React.Component {
         const { updateEntityTagCompliance } = this;
 
         // check if policy was changed
-        if (JSON.stringify(policy) !== JSON.stringify(prevPolicy)) {
+        if (
+          JSON.stringify(sortedPolicy(policy)) !==
+          JSON.stringify(sortedPolicy(prevPolicy))
+        ) {
           // add new policy tags to tagHierarchy if not present (not likely)
           for (const tag of policy) {
             if (!tagHierarchy[tag.key]) tagHierarchy[tag.key] = {};
