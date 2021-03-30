@@ -115,6 +115,8 @@ export default class TagVisualizer extends React.Component {
       queryCursor: undefined,
       accountId: null,
       taggingPolicy: null,
+      selectedTagKey: '',
+      selectedTagValue: '',
       mandatoryTagCount: 0
     });
   };

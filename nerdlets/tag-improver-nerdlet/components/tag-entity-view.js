@@ -50,6 +50,7 @@ export default class TagEntityView extends React.Component {
 
   state = {
     firstTagKey: this.props.selectedTagKey || 'account',
+    selectedEntityType: this.props.selectedEntityType,
     table_column_1: TableHeaderCell.SORTING_TYPE.ASCENDING,
     selectedEntities: {},
     selectedEntityIds: [],
@@ -57,6 +58,17 @@ export default class TagEntityView extends React.Component {
     dropDownSelectedTagValue: '',
     entityDisplayOption: DISPLAY_OPTION.SPECIFIC_TAG_VALUE // only show entities with tag value present
   };
+
+  static getDerivedStateFromProps(props, state) {
+    if (props.selectedEntityType.name !== state.selectedEntityType.name) {
+      return {
+        selectedEntityType: props.selectedEntityType,
+        dropDownSelectedTagValue: ''
+      };
+    } else {
+      return null;
+    }
+  }
 
   componentDidMount() {
     const urlState = this.context || {};
@@ -326,11 +338,7 @@ export default class TagEntityView extends React.Component {
     };
 
     const renderHeaderInfo = () => {
-      const {
-        firstTagKey,
-        entityDisplayOption,
-        dropDownSelectedTagValue
-      } = this.state;
+      const { firstTagKey, dropDownSelectedTagValue } = this.state;
       const { selectedEntityType } = this.props;
       let result = `Showing entities for "${selectedEntityType.name}" entity type `;
 
@@ -341,6 +349,15 @@ export default class TagEntityView extends React.Component {
         TAG_NOT_DEFINED: '3',
         ALL_ENTITIES: '4'
       };
+
+      let { entityDisplayOption } = this.state;
+      if (
+        entityDisplayOption === DISPLAY_OPTION.SPECIFIC_TAG_VALUE &&
+        !dropDownSelectedTagValue
+      ) {
+        entityDisplayOption = DISPLAY_OPTION.ALL_TAG_VALUES;
+      }
+
       switch (entityDisplayOption) {
         case DISPLAY_OPTION.SPECIFIC_TAG_VALUE:
           result += `with tag key: [${firstTagKey}] / tag value: [${dropDownSelectedTagValue}]`;
