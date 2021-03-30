@@ -285,7 +285,7 @@ export default class TaggingPolicy extends React.Component {
                   : tableSorting.enforcement
               }
             >
-              Enforcement Level
+              Enforcement level
             </TableHeaderCell>
             <TableHeaderCell
               width="100px"
@@ -322,7 +322,7 @@ export default class TaggingPolicy extends React.Component {
                   : tableSorting.count
               }
             >
-              Entity Count
+              Entity count
             </TableHeaderCell>
             <TableHeaderCell
               sortable={!isEditMode}
