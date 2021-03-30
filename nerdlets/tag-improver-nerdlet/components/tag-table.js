@@ -54,6 +54,7 @@ export default class TagTable extends React.Component {
             Enforcement level
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.cardinality}
             sortable
             sortingType={this.state.tag_column_2}
@@ -63,6 +64,7 @@ export default class TagTable extends React.Component {
             Distinct values
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityCount}
             sortable
             sortingType={this.state.tag_column_3}
@@ -72,6 +74,7 @@ export default class TagTable extends React.Component {
             Entity count
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityPercent}
             sortable
             sortingType={this.state.tag_column_4}

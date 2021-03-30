@@ -56,6 +56,7 @@ export default class TagValueTable extends React.Component {
             Tag value
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityCount}
             sortable
             sortingType={this.state.value_column_1}
@@ -74,7 +75,7 @@ export default class TagValueTable extends React.Component {
             <TableRowCell
               className={
                 item.tagValue === '<tag not defined>' && item.entityCount
-                  ? 'tag__value__blank__row'
+                  ? `tag__value__blank__row__${item.enforcementPriority}`
                   : 'tag__value__normal__row'
               }
             >
@@ -84,7 +85,7 @@ export default class TagValueTable extends React.Component {
               alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               className={
                 item.tagValue === '<tag not defined>' && item.entityCount
-                  ? 'tag__value__blank__row'
+                  ? `tag__value__blank__row__${item.enforcementPriority}`
                   : 'tag__value__normal__row'
               }
             >

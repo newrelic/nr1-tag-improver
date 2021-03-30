@@ -70,12 +70,23 @@ $low-band-color: rgb(191, 0, 22);
     background-color: rgba(17, 166, 0, 0.05);
   }
 
-.tag__value__blank__row {
-  background-color: rgb(231, 181, 95);
+.tag__value__blank__row__required {
+  color: $low-band-color;
+  font-weight: 900;
+}
+
+.tag__value__blank__row__optional {
+  color: $mid-band-color;
+  font-weight: 900;
+}
+
+.tag__value__blank__row__non-policy {
+  color: black;
+  font-weight: 900;
 }
 
 .tag__value__normal__row {
-  background-color: white;
+  color: initial;
 }
 
 .tag__analyzer__selected__row {

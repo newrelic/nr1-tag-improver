@@ -83,7 +83,7 @@ export default class TagCoverageView extends React.Component {
   };
 
   getValueTableData = () => {
-    const { tagHierarchy } = this.props;
+    const { tagHierarchy, taggingPolicy } = this.props;
     const { currentTagGroup } = this.state;
     // if (!tagHierarchy[currentTagGroup]) return [];
 
@@ -99,6 +99,9 @@ export default class TagCoverageView extends React.Component {
     }, 0);
     valueTableData.push({
       tagKey: currentTagGroup,
+      enforcementPriority:
+        (taggingPolicy.find(tag => tag.key === currentTagGroup) || {})
+          .enforcement || 'non-policy',
       tagValue: '<tag not defined>',
       entityCount: this.props.entityCount - entityCount
     });
