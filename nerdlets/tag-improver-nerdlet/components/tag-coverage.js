@@ -61,7 +61,9 @@ export default class TagCoverageView extends React.Component {
           (acc, v) => acc + tagHierarchy[k][v].length,
           0
         );
-        const coverage = Math.floor((count * 100) / entityCount);
+        const coverage = !entityCount
+          ? 0
+          : Math.floor((count * 100) / entityCount);
         const enforcement =
           (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
           'non-policy';
