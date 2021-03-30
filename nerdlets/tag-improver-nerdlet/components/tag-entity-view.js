@@ -228,12 +228,6 @@ export default class TagEntityView extends React.Component {
             ) {
               continue;
             } else {
-              // if (selectAllEntities && selectedTagKey && selectedTagValue) {
-              //   this.onSelectEntity(
-              //     { target: { checked: true } },
-              //     { item: { entityGuid: entity.guid } }
-              //   );
-              // }
               entities[entity.guid] = this.addEntity(entity, activeTagValue);
             }
           }
@@ -318,8 +312,6 @@ export default class TagEntityView extends React.Component {
     const {
       tagHierarchy,
       entityTagsMap,
-      // selectedTagKey,
-      // selectedTagValue
       reloadTagsFn
     } = this.props;
     const tagKeys = this.props.getTagKeys;
@@ -401,7 +393,6 @@ export default class TagEntityView extends React.Component {
               <Dropdown
                 title={firstTagKey}
                 items={tagKeys}
-                // disabled={selectedTagKey && selectedTagValue}
                 style={{
                   display: 'inline-block',
                   margin: '0 .5em',
@@ -430,7 +421,6 @@ export default class TagEntityView extends React.Component {
               <Dropdown
                 title={dropDownSelectedTagValue}
                 items={this.getTagValues()}
-                // disabled={selectedTagKey && selectedTagValue}
                 style={{
                   display: 'inline-block',
                   margin: '0 .5em',
@@ -461,7 +451,7 @@ export default class TagEntityView extends React.Component {
           <div className="button-section" style={{ padding: 8 }}>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Add Tags"
+              buttonText="Add tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkAdd
@@ -473,7 +463,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Rename Tags"
+              buttonText="Rename tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkRename
@@ -486,7 +476,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Change Values"
+              buttonText="Change values"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkEdit
@@ -499,7 +489,7 @@ export default class TagEntityView extends React.Component {
             </ModalButton>
             <ModalButton
               disabled={!operableEntities.length}
-              buttonText="Remove Tags"
+              buttonText="Remove tags"
               buttonType={Button.TYPE.PRIMARY}
             >
               <TagBulkDelete
