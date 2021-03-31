@@ -42,7 +42,7 @@ export default class TagTable extends React.Component {
             sortingOrder={1}
             onClick={(a, b) => setSortingColumn(0, a, b)}
           >
-            Tag name
+            Key
           </TableHeaderCell>
           <TableHeaderCell
             value={({ item }) => item.enforcement}
@@ -51,9 +51,10 @@ export default class TagTable extends React.Component {
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
           >
-            Enforcement Level
+            Enforcement level
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.cardinality}
             sortable
             sortingType={this.state.tag_column_2}
@@ -63,22 +64,24 @@ export default class TagTable extends React.Component {
             Distinct values
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityCount}
             sortable
             sortingType={this.state.tag_column_3}
             sortingOrder={4}
             onClick={(a, b) => setSortingColumn(3, a, b)}
           >
-            Tagged entities
+            Entity count
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityPercent}
             sortable
             sortingType={this.state.tag_column_4}
             sortingOrder={5}
             onClick={(a, b) => setSortingColumn(4, a, b)}
           >
-            % coverage
+            Coverage
           </TableHeaderCell>
         </TableHeader>
 
@@ -88,11 +91,54 @@ export default class TagTable extends React.Component {
               this.props.selectTag(item.tagKey);
             }}
           >
-            <TableRowCell>{item.tagKey}</TableRowCell>
-            <TableRowCell>{item.enforcement}</TableRowCell>
-            <TableRowCell>{item.cardinality}</TableRowCell>
-            <TableRowCell>{item.entityCount}</TableRowCell>
-            <TableRowCell>{item.entityPercent}</TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.tagKey}
+            </TableRowCell>
+            <TableRowCell
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.enforcement}
+            </TableRowCell>
+            <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.cardinality}
+            </TableRowCell>
+            <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.entityCount}
+            </TableRowCell>
+            <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+              className={
+                item.selected
+                  ? 'tag__analyzer__selected__row'
+                  : 'tag__analyzer__normal__row'
+              }
+            >
+              {item.entityPercent}%
+            </TableRowCell>
           </TableRow>
         )}
       </Table>

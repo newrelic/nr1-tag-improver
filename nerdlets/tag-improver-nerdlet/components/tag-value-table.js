@@ -11,7 +11,8 @@ import {
 
 export default class TagValueTable extends React.Component {
   static propTypes = {
-    getTableData: PropTypes.func
+    getTableData: PropTypes.func,
+    onShowEntities: PropTypes.func
   };
 
   constructor(props) {
@@ -20,6 +21,10 @@ export default class TagValueTable extends React.Component {
       value_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
     };
   }
+
+  openEntities = item => {
+    this.props.onShowEntities(item);
+  };
 
   setSortingColumn = (columnId, event, sortingData) => {
     const nextType = sortingData ? sortingData.nextSortingType : undefined;
@@ -32,10 +37,14 @@ export default class TagValueTable extends React.Component {
   };
 
   render() {
-    const { setSortingColumn } = this;
+    const { setSortingColumn, openEntities } = this;
 
     return (
-      <Table items={this.props.getTableData()}>
+      <Table
+        items={this.props.getTableData().filter(item => {
+          return item.entityCount > 0;
+        })}
+      >
         <TableHeader>
           <TableHeaderCell
             value={({ item }) => item.tagValue}
@@ -47,20 +56,48 @@ export default class TagValueTable extends React.Component {
             Tag value
           </TableHeaderCell>
           <TableHeaderCell
+            alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
             value={({ item }) => item.entityCount}
             sortable
             sortingType={this.state.value_column_1}
             sortingOrder={2}
             onClick={(a, b) => setSortingColumn(1, a, b)}
           >
-            Tagged entities
+            Entity count
+          </TableHeaderCell>
+          <TableHeaderCell value={({ item }) => item}>
+            Manage entities
           </TableHeaderCell>
         </TableHeader>
 
         {({ item }) => (
           <TableRow>
-            <TableRowCell>{item.tagValue}</TableRowCell>
-            <TableRowCell>{item.entityCount}</TableRowCell>
+            <TableRowCell
+              className={
+                item.tagValue === '<tag not defined>' && item.entityCount
+                  ? `tag__value__blank__row__${item.enforcementPriority}`
+                  : 'tag__value__normal__row'
+              }
+            >
+              {item.tagValue}
+            </TableRowCell>
+            <TableRowCell
+              alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
+              className={
+                item.tagValue === '<tag not defined>' && item.entityCount
+                  ? `tag__value__blank__row__${item.enforcementPriority}`
+                  : 'tag__value__normal__row'
+              }
+            >
+              {item.entityCount}
+            </TableRowCell>
+            <TableRowCell>
+              {item.entityCount ? (
+                <a onClick={() => openEntities(item)}>Manage</a>
+              ) : (
+                ''
+              )}
+            </TableRowCell>
           </TableRow>
         )}
       </Table>

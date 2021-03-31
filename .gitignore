@@ -13,3 +13,4 @@ tmp
 .env
 .env.test
 .cache
+package-lock.json

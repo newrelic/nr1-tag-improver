@@ -46,6 +46,7 @@ export default class TaggingPolicy extends React.Component {
     super(props);
     this.state = {
       workingSchema: null,
+      savedSchema: null,
       isEditMode: false,
       savingPolicy: false,
       policySaveErrored: false,
@@ -58,7 +59,7 @@ export default class TaggingPolicy extends React.Component {
 
   applyEdits = () => {
     const { updatePolicy } = this.props;
-    const { workingSchema: policy } = this.state;
+    const { workingSchema: policy, savedSchema } = this.state;
     this.setState({ savingPolicy: true });
     UserStorageMutation.mutate({
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -74,7 +75,7 @@ export default class TaggingPolicy extends React.Component {
             savingPolicy: false,
             policySaveErrored: false
           },
-          () => updatePolicy(policy)
+          () => updatePolicy(policy, savedSchema)
         );
       })
       .catch(() => {
@@ -85,7 +86,11 @@ export default class TaggingPolicy extends React.Component {
   startEditing = () => {
     const { schema } = this.props;
     const workingSchema = schema.map(schemaRule => ({ ...schemaRule }));
-    this.setState({ isEditMode: true, workingSchema });
+    this.setState({
+      isEditMode: true,
+      workingSchema,
+      savedSchema: workingSchema
+    });
   };
 
   cancelEditing = () => {
@@ -96,19 +101,6 @@ export default class TaggingPolicy extends React.Component {
     const { workingSchema } = this.state;
     const itemAtIndex = workingSchema[index];
     const newItem = { ...itemAtIndex, key: value };
-    this.setState({
-      workingSchema: [
-        ...workingSchema.slice(0, index),
-        newItem,
-        ...workingSchema.slice(index + 1, workingSchema.length)
-      ]
-    });
-  };
-
-  onChangeLabel = index => e => {
-    const { workingSchema } = this.state;
-    const itemAtIndex = workingSchema[index];
-    const newItem = { ...itemAtIndex, label: e.currentTarget.value };
     this.setState({
       workingSchema: [
         ...workingSchema.slice(0, index),
@@ -151,7 +143,6 @@ export default class TaggingPolicy extends React.Component {
         ...workingSchema,
         {
           key: '',
-          label: '',
           enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
           purpose: ''
         }
@@ -188,15 +179,6 @@ export default class TaggingPolicy extends React.Component {
       savingPolicy,
       tableSorting
     } = this.state;
-    /*
-    {
-        label: 'Owning team',
-        key: 'Team',
-        purpose: '',
-        enforcement: TAG_SCHEMA_ENFORCEMENT.required,
-        allowedValues: [],
-    },
-    */
 
     if (!schema) {
       return <Spinner />;
@@ -278,20 +260,6 @@ export default class TaggingPolicy extends React.Component {
         <Table items={isEditMode ? workingSchema : schema}>
           <TableHeader>
             <TableHeaderCell
-              width="200px"
-              sortable={!isEditMode}
-              sortingOrder={4}
-              value={({ item }) => item.label}
-              onClick={this.onClickTableHeaderCell('label')}
-              sortingType={
-                isEditMode
-                  ? TableHeaderCell.SORTING_TYPE.NONE
-                  : tableSorting.label
-              }
-            >
-              Name
-            </TableHeaderCell>
-            <TableHeaderCell
               width="150px"
               sortable={!isEditMode}
               sortingOrder={3}
@@ -303,7 +271,7 @@ export default class TaggingPolicy extends React.Component {
                   : tableSorting.key
               }
             >
-              Tag key
+              Key
             </TableHeaderCell>
             <TableHeaderCell
               width="200px"
@@ -358,7 +326,7 @@ export default class TaggingPolicy extends React.Component {
             </TableHeaderCell>
             <TableHeaderCell
               sortable={!isEditMode}
-              sortingOrder={5}
+              sortingOrder={4}
               value={({ item }) => item.purpose}
               onClick={this.onClickTableHeaderCell('purpose')}
               sortingType={
@@ -374,16 +342,6 @@ export default class TaggingPolicy extends React.Component {
 
           {({ item, index }) => (
             <TableRow>
-              <TableRowCell>
-                {isEditMode ? (
-                  <TextField
-                    onChange={this.onChangeLabel(index)}
-                    value={item.label}
-                  />
-                ) : (
-                  item.label
-                )}
-              </TableRowCell>
               <TableRowCell>
                 {isEditMode ? (
                   <Autocomplete

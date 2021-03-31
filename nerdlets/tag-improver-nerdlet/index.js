@@ -40,7 +40,10 @@ export default class TagVisualizer extends React.Component {
       id: 'APM',
       name: 'Application',
       value: 'APM_APPLICATION_ENTITY'
-    }
+    },
+    selectedTagKey: '',
+    selectedTagValue: '',
+    currentTab: 'policy-tab'
   };
 
   componentDidMount() {
@@ -73,6 +76,29 @@ export default class TagVisualizer extends React.Component {
 
   onChangeTab = newTab => {
     nerdlet.setUrlState({ tab: newTab });
+    this.setState({ currentTab: newTab }, () => {
+      if (newTab !== 'entity-tab') {
+        this.setState({
+          // selectedTagKey: '',
+          selectedTagValue: ''
+        });
+      }
+    });
+  };
+
+  onUpdateEntitiesFilter = item => {
+    this.setState({
+      selectedTagKey: item.tagKey,
+      selectedTagValue: item.tagValue
+    });
+  };
+
+  onShowEntities = item => {
+    this.onUpdateEntitiesFilter(item);
+    nerdlet.setUrlState({ tab: 'entity-tab' });
+    this.setState({
+      currentTab: 'entity-tab'
+    });
   };
 
   updateSelectedEntityType = entityType => {
@@ -89,6 +115,8 @@ export default class TagVisualizer extends React.Component {
       queryCursor: undefined,
       accountId: null,
       taggingPolicy: null,
+      selectedTagKey: '',
+      selectedTagValue: '',
       mandatoryTagCount: 0
     });
   };
@@ -110,7 +138,9 @@ export default class TagVisualizer extends React.Component {
         entityCount: 0,
         loadedEntities: 0,
         doneLoading: false,
-        queryCursor: undefined
+        queryCursor: undefined,
+        selectedTagKey: '',
+        selectedTagValue: ''
       },
       () => {
         loadEntityBatch();
@@ -223,6 +253,12 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy,
       mandatoryTagCount
     } = this.state;
+
+    if (!Object.keys(tagHierarchy).length) {
+      for (const tag of taggingPolicy) {
+        tagHierarchy[tag.key] = {};
+      }
+    }
     entities.reduce((acc, entity) => {
       // get all the tags
       const { guid, tags } = entity;
@@ -231,14 +267,14 @@ export default class TagVisualizer extends React.Component {
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
 
       // for each tag, if it doesn't make an empty object
-      tags.forEach(({ tagKey, tagValues }) => {
-        if (!acc[tagKey]) acc[tagKey] = {};
+      for (const tag of tags) {
+        if (!acc[tag.tagKey]) acc[tag.tagKey] = {};
         // for each tag value, check if it exists, if it doesn't make it an empty object
-        tagValues.forEach(value => {
-          if (!acc[tagKey][value]) acc[tagKey][value] = [];
-          acc[tagKey][value].push(entity);
-        });
-      });
+        for (const value of tag.tagValues) {
+          if (!acc[tag.tagKey][value]) acc[tag.tagKey][value] = [];
+          acc[tag.tagKey][value].push(entity);
+        }
+      }
       return acc;
     }, tagHierarchy);
 
@@ -297,7 +333,7 @@ export default class TagVisualizer extends React.Component {
       });
   };
 
-  updatePolicy = policy => {
+  updatePolicy = (policy, prevPolicy) => {
     this.setState(
       {
         taggingPolicy: sortedPolicy(policy),
@@ -307,13 +343,35 @@ export default class TagVisualizer extends React.Component {
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
         const { updateEntityTagCompliance } = this;
-        Object.entries(tagHierarchy).forEach(tagKey => {
-          Object.values(tagKey[1]).forEach(tagValue => {
-            tagValue.forEach(entity => {
+
+        // check if policy was changed
+        if (
+          JSON.stringify(sortedPolicy(policy)) !==
+          JSON.stringify(sortedPolicy(prevPolicy))
+        ) {
+          // add new policy tags to tagHierarchy if not present (not likely)
+          for (const tag of policy) {
+            if (!tagHierarchy[tag.key]) tagHierarchy[tag.key] = {};
+          }
+          // remove tags that were removed from ploicy and are not used by any entity
+          for (const tag of prevPolicy) {
+            if (
+              !policy.find(policyTag => {
+                return policyTag.key === tag.key;
+              })
+            )
+              if (!Object.keys(tagHierarchy[tag.key]).length)
+                delete tagHierarchy[tag.key];
+          }
+        }
+
+        for (const tagKey of Object.entries(tagHierarchy)) {
+          for (const tagValue of Object.values(tagKey[1])) {
+            for (const entity of tagValue) {
               updateEntityTagCompliance(entity, policy, mandatoryTagCount);
-            });
-          });
-        });
+            }
+          }
+        }
       }
     );
   };
@@ -327,7 +385,10 @@ export default class TagVisualizer extends React.Component {
       entityTagsMap,
       taggingPolicy,
       accountId,
-      selectedEntityType
+      selectedEntityType,
+      selectedTagKey,
+      selectedTagValue,
+      currentTab
     } = this.state;
 
     return (
@@ -369,6 +430,7 @@ export default class TagVisualizer extends React.Component {
 
               <Tabs
                 defaultValue={(nerdletState || {}).tab || 'overview-tab'}
+                value={(nerdletState || {}).tab || currentTab}
                 onChange={this.onChangeTab}
               >
                 <TabsItem value="policy-tab" label="Policy">
@@ -393,6 +455,8 @@ export default class TagVisualizer extends React.Component {
                     taggingPolicy={taggingPolicy}
                     getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
                     height={this.props.height}
+                    onUpdateEntitiesFilter={this.onUpdateEntitiesFilter}
+                    onShowEntities={this.onShowEntities}
                   />
                 </TabsItem>
                 <TabsItem value="entity-tab" label="Entities">
@@ -405,6 +469,8 @@ export default class TagVisualizer extends React.Component {
                     entityTagsMap={entityTagsMap}
                     reloadTagsFn={this.startLoadingEntityTags}
                     getTagKeys={getTagKeys(tagHierarchy, taggingPolicy)}
+                    selectedTagKey={selectedTagKey}
+                    selectedTagValue={selectedTagValue}
                   />
                 </TabsItem>
               </Tabs>

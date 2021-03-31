@@ -20,8 +20,10 @@ export default class TagCoverageView extends React.Component {
     entityCount: PropTypes.number,
     tagHierarchy: PropTypes.object,
     taggingPolicy: PropTypes.array,
-    getTagKeys: PropTypes.object,
-    height: PropTypes.number
+    getTagKeys: PropTypes.array,
+    height: PropTypes.number,
+    onUpdateEntitiesFilter: PropTypes.func,
+    onShowEntities: PropTypes.func
   };
 
   state = {
@@ -29,6 +31,10 @@ export default class TagCoverageView extends React.Component {
   };
 
   updateCurrentTagGroup = currentTagGroup => {
+    this.props.onUpdateEntitiesFilter({
+      tagKey: currentTagGroup,
+      tagValue: null
+    });
     this.setState({ currentTagGroup });
   };
 
@@ -47,6 +53,7 @@ export default class TagCoverageView extends React.Component {
   getTagTableData = () => {
     const { entityCount, tagHierarchy, taggingPolicy } = this.props;
     const { getSortedTagKeys } = this;
+    const { currentTagGroup } = this.state;
 
     return getSortedTagKeys(
       Object.keys(tagHierarchy).map(k => {
@@ -54,10 +61,12 @@ export default class TagCoverageView extends React.Component {
           (acc, v) => acc + tagHierarchy[k][v].length,
           0
         );
-        const coverage = Math.floor((count * 100) / entityCount);
+        const coverage = !entityCount
+          ? 0
+          : Math.floor((count * 100) / entityCount);
         const enforcement =
           (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
-          'Non-Policy';
+          'non-policy';
         const enforcementPriority = enforcement
           ? ENFORCEMENT_PRIORITY[enforcement]
           : -1;
@@ -68,23 +77,37 @@ export default class TagCoverageView extends React.Component {
           enforcementPriority: enforcementPriority,
           cardinality: Object.keys(tagHierarchy[k]).length,
           entityCount: count,
-          entityPercent: coverage
+          entityPercent: coverage,
+          selected: k === currentTagGroup ? true : false // eslint-disable-line no-unneeded-ternary
         };
       })
     );
   };
 
   getValueTableData = () => {
-    const { tagHierarchy } = this.props;
+    const { tagHierarchy, taggingPolicy } = this.props;
     const { currentTagGroup } = this.state;
-    if (!tagHierarchy[currentTagGroup]) return [];
+    // if (!tagHierarchy[currentTagGroup]) return [];
 
-    return Object.keys(tagHierarchy[currentTagGroup]).map(v => {
+    const valueTableData = Object.keys(tagHierarchy[currentTagGroup]).map(v => {
       return {
+        tagKey: currentTagGroup,
         tagValue: v,
         entityCount: tagHierarchy[currentTagGroup][v].length
       };
     });
+    const entityCount = valueTableData.reduce((acc, cur) => {
+      return acc + cur.entityCount;
+    }, 0);
+    valueTableData.push({
+      tagKey: currentTagGroup,
+      enforcementPriority:
+        (taggingPolicy.find(tag => tag.key === currentTagGroup) || {})
+          .enforcement || 'non-policy',
+      tagValue: '<tag not defined>',
+      entityCount: this.props.entityCount - entityCount
+    });
+    return valueTableData;
   };
 
   render() {
@@ -112,7 +135,7 @@ export default class TagCoverageView extends React.Component {
           </GridItem>
           <GridItem className="primary-content-container" columnSpan={4}>
             <HeadingText type={HeadingText.TYPE.HEADING_4}>
-              Tag
+              Values in use for
               <Dropdown
                 title={currentTagGroup}
                 items={tagKeys}
@@ -140,7 +163,7 @@ export default class TagCoverageView extends React.Component {
                   </DropdownSection>
                 )}
               </Dropdown>
-              breakdown
+              tag
             </HeadingText>
           </GridItem>
 
@@ -162,7 +185,10 @@ export default class TagCoverageView extends React.Component {
           <GridItem className="primary-content-container" columnSpan={4}>
             {currentTagGroupIsPopulated ? (
               <div className="right">
-                <TagValueTable getTableData={() => getValueTableData()} />
+                <TagValueTable
+                  getTableData={() => getValueTableData()}
+                  onShowEntities={this.props.onShowEntities}
+                />
               </div>
             ) : (
               <></>

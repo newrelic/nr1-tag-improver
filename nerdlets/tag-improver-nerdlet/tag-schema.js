@@ -21,14 +21,12 @@ const COMPLIANCEBANDS = {
 
 const SCHEMA = [
   {
-    label: 'Owning team',
     key: 'Team',
     purpose: 'What team owns this entity?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Environment',
     key: 'Environment',
     purpose:
       'Is this entity part of your production, pre-prod, test, dev, or other environment?',
@@ -36,14 +34,12 @@ const SCHEMA = [
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Business application',
     key: 'Application',
     purpose: 'What business application/area/line is this entity part of?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Chat channel',
     key: 'Chat',
     purpose:
       'What Slack/Teams/chat channel do I go to with questions about this entity?',
@@ -51,7 +47,6 @@ const SCHEMA = [
     allowedValues: [] // reserved for future use
   },
   {
-    label: 'Region / AZ / Datacenter',
     key: 'Region',
     purpose:
       'What region/availability zone/datacenter is this entity deployed in?',
