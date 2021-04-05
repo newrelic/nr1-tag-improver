@@ -1,3 +1,10 @@
+## [1.1.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.0...v1.1.1) (2021-04-05)
+
+
+### Bug Fixes
+
+* Trigger release and changelog generation (via GH Actions) ([be4c736](https://github.com/newrelic/nr1-tag-improver/commit/be4c73668c88863b97c3462499440fcd60e121c8))
+
 # [1.1.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.0.6...v1.1.0) (2021-03-31)
 
 
