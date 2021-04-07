@@ -115,7 +115,9 @@ export default class TagCoverageView extends React.Component {
     const { tagHierarchy } = this.props;
     const tagKeys = this.props.getTagKeys;
     const { currentTagGroup } = this.state;
-    const currentTagGroupIsPopulated = tagHierarchy[currentTagGroup];
+    const currentTagGroupIsPopulated =
+      tagHierarchy[currentTagGroup] &&
+      Object.keys(tagHierarchy[currentTagGroup]).length > 0;
 
     return (
       <div
