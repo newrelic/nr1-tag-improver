@@ -1,3 +1,11 @@
+## [1.1.2](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.1...v1.1.2) (2021-04-07)
+
+
+### Bug Fixes
+
+* [#78](https://github.com/newrelic/nr1-tag-improver/issues/78) - align entity type dropdown/label across tabs ([c9203fa](https://github.com/newrelic/nr1-tag-improver/commit/c9203fa0ebaaab316ae16880dd917e7db8ac7c1a))
+* issue [#77](https://github.com/newrelic/nr1-tag-improver/issues/77) - display <tag not defined> when no entities have the tag defined ([7c44f1e](https://github.com/newrelic/nr1-tag-improver/commit/7c44f1ec06c52d842321964e9d3a864fed486440))
+
 ## [1.1.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.0...v1.1.1) (2021-04-05)
 
 
