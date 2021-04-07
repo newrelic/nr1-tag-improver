@@ -400,6 +400,8 @@ export default class TagVisualizer extends React.Component {
                 className="status"
                 style={{
                   height: '24px',
+                  display: 'flex',
+                  flexDirection: 'row',
                   lineHeight: '24px',
                   paddingBottom: '9px'
                 }}
