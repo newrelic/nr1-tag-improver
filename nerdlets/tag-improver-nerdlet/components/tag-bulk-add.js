@@ -34,7 +34,7 @@ export default class TagBulkAdd extends React.Component {
   applyTagsToEntities = async () => {
     const { selectedEntityIds } = this.props;
     const { tagsToAdd, entityStatuses } = this.state;
-    
+
     let entitiesToUpdate;
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
@@ -61,21 +61,21 @@ export default class TagBulkAdd extends React.Component {
             ? ENTITY_UPDATE_STATUS.ERROR
             : ENTITY_UPDATE_STATUS.SUCCESS
         }
-        });
-      }.bind(this);
-
-      this.setState({ entityStatuses: statusObject });
-
-      await addTags({
-        entitiesToUpdate,
-        tagsToAdd,
-        setEntityStatusFn,
-        maxThreads: 2
       });
+    }.bind(this);
 
-      this.props.reloadTagsFn(selectedEntityIds);
-    };
-    
+    this.setState({ entityStatuses: statusObject });
+
+    await addTags({
+      entitiesToUpdate,
+      tagsToAdd,
+      setEntityStatusFn,
+      maxThreads: 2
+    });
+
+    this.props.reloadTagsFn(selectedEntityIds);
+  };
+
   changeTag = (fromTag, toTag) => {
     // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToAdd };

@@ -33,7 +33,7 @@ async function sendGQL({ graphStatements, eventHandlers, maxThreads = 3 }) {
     // console.log(`sendGQL statements=${JSON.stringify(statements)}`);
     for (let i = 0; i < statements.length; i++) {
       yield (async () => {
-        const { entityGuid: entityId, entityTags: tags } = statements[i].variables;
+        const { entityGuid: entityId, entityTags: tags } = statements[i].variables; // eslint-disable-line prettier/prettier
         const response = await NerdGraphMutation.mutate(statements[i]);
 
         // TODO: refactor this .. pass response parser so it can be used by other actions
