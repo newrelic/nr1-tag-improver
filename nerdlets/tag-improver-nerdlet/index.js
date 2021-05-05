@@ -184,16 +184,15 @@ export default class TagVisualizer extends React.Component {
           : ''
       }`
     };
-    if (queryCursor) {
-      variables.nextCursor = queryCursor;
-    }
-
+    variables.nextCursor = queryCursor || null;
     NerdGraphQuery.query({
       query,
-      variables
+      variables,
+      fetchPolicyType: NerdGraphQuery.FETCH_POLICY_TYPE.NO_CACHE
     })
       .then(({ data, errors }) => {
         if (data) {
+          // console.log(`index.loadEntityBatch(): len=${data.actor.entitySearch.results.entities[0].tags.length} \n${JSON.stringify(data.actor.entitySearch.results.entities[0].tags)}`)
           processEntityQueryResults(
             data.actor.entitySearch.results.entities,
             data.actor.entitySearch.count,
@@ -390,7 +389,6 @@ export default class TagVisualizer extends React.Component {
       selectedTagValue,
       currentTab
     } = this.state;
-
     return (
       <>
         <NerdletStateContext.Consumer>

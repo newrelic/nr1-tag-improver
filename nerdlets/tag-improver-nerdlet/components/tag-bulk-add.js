@@ -1,12 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { addTags } from './graphUtils';
 
-import {
-  HeadingText,
-  PlatformStateContext,
-  Button,
-  NerdGraphMutation
-} from 'nr1';
+import { HeadingText, PlatformStateContext, Button } from 'nr1';
 import Autocomplete from './autocomplete';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
@@ -38,73 +34,48 @@ export default class TagBulkAdd extends React.Component {
   applyTagsToEntities = async () => {
     const { selectedEntityIds } = this.props;
     const { tagsToAdd, entityStatuses } = this.state;
-    const tagsForGql = Object.entries(tagsToAdd).map(([tagKey, tagValue]) => ({
-      key: tagKey,
-      values: [tagValue]
-    }));
-    const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
-      taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
-        errors {
-            message
-        }
-      }
-    }`;
+    
     let entitiesToUpdate;
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
-      entitiesToUpdate = statusEntries.filter(
-        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
-      );
+      entitiesToUpdate = statusEntries
+        .filter(
+          ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        )
+        .map(item => item[0]);
     } else {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
     entitiesToUpdate.forEach(entityId => {
-      if (!statusObject[entityId]) {
+      if (statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
-    this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
-      const variables = { entityGuid: entityId, entityTags: tagsForGql };
-      try {
-        const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
-        } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
-          throw result.data.taggingAddTagsToEntity.errors;
-        } else {
-          const previousStatuses = this.state.entityStatuses;
-          this.setState(
-            {
-              entityStatuses: {
-                ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
-            },
-            () => {
-              if (
-                Object.values(this.state.entityStatuses).every(
-                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
-                )
-              ) {
-                this.props.reloadTagsFn(selectedEntityIds);
-              }
-            }
-          );
+    const setEntityStatusFn = function(entityId, hasErrors = false) {
+      const previousStatuses = this.state.entityStatuses;
+      this.setState({
+        entityStatuses: {
+          ...previousStatuses,
+          [entityId]: hasErrors
+            ? ENTITY_UPDATE_STATUS.ERROR
+            : ENTITY_UPDATE_STATUS.SUCCESS
         }
-      } catch (error) {
-        const previousStatuses = this.state.entityStatuses;
-        this.setState({
-          entityStatuses: {
-            ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
         });
-      }
-    });
-  };
+      }.bind(this);
 
+      this.setState({ entityStatuses: statusObject });
+
+      await addTags({
+        entitiesToUpdate,
+        tagsToAdd,
+        setEntityStatusFn,
+        maxThreads: 2
+      });
+
+      this.props.reloadTagsFn(selectedEntityIds);
+    };
+    
   changeTag = (fromTag, toTag) => {
     // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToAdd };
