@@ -50,10 +50,7 @@ export default class TagVisualizer extends React.Component {
     nerdlet.setConfig({
       timePicker: false,
       accountPicker: true,
-      accountPickerValues: [
-        nerdlet.ACCOUNT_PICKER_VALUE.CROSS_ACCOUNT,
-        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES
-      ]
+      accountPickerValues: [...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES]
     });
     this.setState({ accountId: this.context.accountId }, () => {
       this.getTaggingPolicy();
