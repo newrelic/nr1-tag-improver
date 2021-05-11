@@ -51,6 +51,47 @@ function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
   return mutations;
 }
 
+function createDeleteEntityTagValuesGQL({
+  updatedEntityIds,
+  entityTagsMap,
+  tagKey,
+  tagValue,
+  newTagValue
+}) {
+  const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagValueInput!]!) {
+    taggingDeleteTagValuesFromEntity(
+        guid: $entityGuid,
+        tagValues: $entityTags) {
+            errors {
+                message
+            }
+        }
+  }`;
+
+  const mutations = updatedEntityIds.map(entityGuid => {
+    const tagsToDeleteForEntity = tagValue
+      ? [{ key: tagKey, value: tagValue }]
+      : (
+          (entityTagsMap[entityGuid].find(tag => tag.tagKey === tagKey) || {})
+            .tagValues || []
+        )
+          .filter(value => value !== newTagValue)
+          .map(value => ({
+            key: tagKey,
+            value: value
+          }));
+    return {
+      mutation,
+      variables: {
+        entityGuid,
+        entityTags: tagsToDeleteForEntity
+      }
+    };
+  });
+
+  return mutations;
+}
+
 async function executeGQL({ generatorFn, eventHandler, maxThreads = 3 }) {
   const pool = new PromisePool(generatorFn(), maxThreads);
   pool.addEventListener('fulfilled', eventHandler.passHandler);
@@ -70,7 +111,13 @@ export async function addTags({
     const failEntityIds = [];
     const passEntityIds = [];
     function handler({ data }) {
-      const { hasErrors, entityId } = data.result;
+      const { error, result } = data;
+
+      if (error && error.length > 0) {
+        throw new Error(error[0].message);
+      }
+
+      const { hasErrors, entityId } = result;
       const list = hasErrors ? failEntityIds : passEntityIds;
       list.push(entityId);
       entityStatusUpdaterFn(entityId, hasErrors);
@@ -226,7 +273,13 @@ export async function deleteTags({
     const failEntityIds = [];
     const passEntityIds = [];
     function handler({ data }) {
-      const { errors, entityId } = data.result;
+      const { error, result } = data;
+
+      if (error && error.length > 0) {
+        throw new Error(error[0].message);
+      }
+
+      const { errors, entityId } = result;
       const hasErrors = errors && errors.length > 1;
       const list = hasErrors ? failEntityIds : passEntityIds;
       list.push(entityId);
@@ -277,6 +330,79 @@ export async function deleteTags({
   return { ...eventHandler };
 }
 
+export async function deleteTagValues({
+  updatedEntityIds,
+  entityTagsMap,
+  tagKey,
+  tagValue,
+  newTagValue,
+  setEntityStatusFn,
+  maxThreads = 3
+}) {
+  // Define the Promise pool event handler
+  const eventHandler = (entityStatusUpdaterFn => {
+    const failEntityIds = [];
+    const passEntityIds = [];
+    function handler({ data }) {
+      const { error, result } = data;
+
+      if (error && error.length > 0) {
+        throw new Error(error[0].message);
+      }
+
+      const { errors, entityId } = result;
+      const hasErrors = errors && errors.length > 1;
+      const list = hasErrors ? failEntityIds : passEntityIds;
+      list.push(entityId);
+      entityStatusUpdaterFn(entityId, hasErrors);
+    }
+    return {
+      entityStatusUpdaterFn,
+      failEntityIds,
+      passEntityIds,
+      passHandler: handler,
+      failHandler: handler
+    };
+  })(setEntityStatusFn);
+  // Define the Promise generator
+  const generatorFn = function*() {
+    const statements = createDeleteEntityTagValuesGQL({
+      updatedEntityIds,
+      entityTagsMap,
+      tagKey,
+      tagValue,
+      newTagValue
+    });
+    const execute = async function(statement) {
+      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const response = await NerdGraphMutation.mutate(statement);
+      const { errors } = response.data.taggingDeleteTagValuesFromEntity;
+      return {
+        hasErrors: errors && errors.length > 0,
+        errors,
+        entityId,
+        tags
+      };
+    };
+
+    for (let i = 0; i < statements.length; i++) {
+      yield execute(statements[i]);
+    }
+  };
+  // execute the GQL statement(s)
+  await executeGQL({
+    generatorFn,
+    eventHandler,
+    maxThreads
+  });
+
+  // cleanup data model
+  delete eventHandler.entityStatusUpdaterFn;
+  delete eventHandler.passHandler;
+  delete eventHandler.failHandler;
+  // return list of pass/fail entity ids
+  return { ...eventHandler };
+}
 export async function repeatIfEqual(
   before,
   retry_params,

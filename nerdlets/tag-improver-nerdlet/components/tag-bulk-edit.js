@@ -5,11 +5,13 @@ import {
   HeadingText,
   PlatformStateContext,
   Button,
-  NerdGraphMutation,
   Select,
-  SelectItem
+  logger,
+  SelectItem,
+  Spinner
 } from 'nr1';
 import Autocomplete from './autocomplete';
+import { addTags, deleteTagValues } from './commonUtils';
 
 const ENTITY_UPDATE_STATUS = {
   NONE: 0,
@@ -34,11 +36,20 @@ export default class TagBulkEdit extends React.Component {
       selectedCurrentTag: '',
       selectedCurrentTagValue: '',
       selectedNewTagValue: '',
-      entityStatuses: {}
+      entityStatuses: {},
+      enableSpinner: true
     };
   }
 
+  componentDidMount() {
+    this.setState({ enableSpinner: false });
+  }
+
   static contextType = PlatformStateContext;
+
+  enableSpinner = enable => {
+    this.setState({ enableSpinner: enable });
+  };
 
   applyChangeValueToEntities = async () => {
     const { selectedEntityIds, entityTagsMap } = this.props;
@@ -48,148 +59,80 @@ export default class TagBulkEdit extends React.Component {
       selectedNewTagValue,
       entityStatuses
     } = this.state;
-    const addMutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
-      taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
-        errors {
-            message
-        }
-      }
-    }`;
-    const deleteMutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagValueInput!]!) {
-      taggingDeleteTagValuesFromEntity(
-          guid: $entityGuid,
-          tagValues: $entityTags) {
-              errors {
-                  message
-              }
-          }
-    }`;
+
     let entitiesToUpdate;
+    //  entityStatus format is array [ <GUID>, <ENTITY_UPDATE_STATUS.SUCCESS> ]
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
-      entitiesToUpdate = statusEntries.filter(
-        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
-      );
+      entitiesToUpdate = statusEntries
+        .filter(
+          ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        )
+        .map(item => item[0]);
     } else {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
     entitiesToUpdate.forEach(entityId => {
-      if (!statusObject[entityId]) {
+      if (statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.ADDING;
       }
     });
+
+    const setEntityStatusFn = async function(entityId, hasErrors = false) {
+      const previousStatuses = this.state.entityStatuses;
+      this.setState({
+        entityStatuses: {
+          ...previousStatuses,
+          [entityId]: hasErrors
+            ? ENTITY_UPDATE_STATUS.ERROR
+            : ENTITY_UPDATE_STATUS.SUCCESS
+        }
+      });
+    }.bind(this);
+    this.enableSpinner(true);
+
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
-      let addSuccess = false;
-      if (statusObject[entityId] < ENTITY_UPDATE_STATUS.REMOVING) {
-        try {
-          const tagsVariable = {
-            key: selectedCurrentTag,
-            values: [selectedNewTagValue]
-          };
-          const addVariables = {
-            entityGuid: entityId,
-            entityTags: tagsVariable
-          };
-          const result = await NerdGraphMutation.mutate({
-            mutation: addMutation,
-            variables: addVariables
-          });
-          if (result.errors?.length) {
-            throw result.errors;
-          } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
-            throw result.data.taggingAddTagsToEntity.errors;
-          } else {
-            addSuccess = true;
-            const previousStatuses = this.state.entityStatuses;
-            this.setState({
-              entityStatuses: {
-                ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.REMOVING
-              }
-            });
-          }
-        } catch (error) {
-          addSuccess = false;
-          const previousStatuses = this.state.entityStatuses;
-          this.setState({
-            entityStatuses: {
-              ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR
-            }
-          });
-        }
-      } else {
-        addSuccess = true;
-      }
-      if (
-        addSuccess &&
-        this.state.entityStatuses[entityId] < ENTITY_UPDATE_STATUS.SUCCESS
-      ) {
-        try {
-          const tagsToDeleteForEntity = selectedCurrentTagValue
-            ? [{ key: selectedCurrentTag, value: selectedCurrentTagValue }]
-            : (
-                (
-                  entityTagsMap[entityId].find(
-                    tag => tag.tagKey === selectedCurrentTag
-                  ) || {}
-                ).tagValues || []
-              )
-                .filter(tagValue => tagValue !== selectedNewTagValue)
-                .map(tagValue => ({
-                  key: selectedCurrentTag,
-                  value: tagValue
-                }));
-          if (tagsToDeleteForEntity.length) {
-            const deleteVariables = {
-              entityGuid: entityId,
-              entityTags: tagsToDeleteForEntity
-            };
-            const result = await NerdGraphMutation.mutate({
-              mutation: deleteMutation,
-              variables: deleteVariables
-            });
-            if (result.errors?.length) {
-              throw result.errors;
-            } else if (
-              result.data?.taggingDeleteTagValuesFromEntity?.errors?.length
-            ) {
-              throw result.data.taggingDeleteTagValuesFromEntity.errors;
-            } else {
-              const previousStatuses = this.state.entityStatuses;
-              this.setState(
-                {
-                  entityStatuses: {
-                    ...previousStatuses,
-                    [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-                  }
-                },
-                () => {
-                  if (
-                    Object.values(this.state.entityStatuses).every(
-                      status => status === ENTITY_UPDATE_STATUS.SUCCESS
-                    )
-                  ) {
-                    this.props.reloadTagsFn(selectedEntityIds);
-                  }
-                }
-              );
-            }
-          }
-        } catch (error) {
-          addSuccess = false;
-          const previousStatuses = this.state.entityStatuses;
-          this.setState({
-            entityStatuses: {
-              ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR
-            }
-          });
-        }
-      }
+
+    const tagsToAdd = {};
+    tagsToAdd[selectedCurrentTag] = selectedNewTagValue;
+
+    await addTags({
+      entitiesToUpdate,
+      tagsToAdd,
+      setEntityStatusFn,
+      maxThreads: 2
     });
+
+    // create a list of entities w/ newly added tags
+    const updatedEntityIds = (() => {
+      const successGuids = [];
+      for (const [guid, status] of Object.entries(this.state.entityStatuses)) {
+        if (status === ENTITY_UPDATE_STATUS.SUCCESS) {
+          successGuids.push(guid);
+        }
+      }
+      return entitiesToUpdate.filter(update_guid =>
+        successGuids.find(guid => update_guid === guid)
+      );
+    })(); // eof updatedEntities
+
+    if (updatedEntityIds && updatedEntityIds.length === 0) {
+      logger.warn(`Bulk edit: WARNING: NO Tags to delete, skipping`);
+      return;
+    }
+
+    await deleteTagValues({
+      updatedEntityIds,
+      entityTagsMap,
+      tagKey: selectedCurrentTag,
+      tagValue: selectedCurrentTagValue,
+      newTagValue: selectedNewTagValue,
+      setEntityStatusFn,
+      maxThreads: 2
+    });
+    await this.props.reloadTagsFn(selectedEntityIds);
+    this.enableSpinner(false);
   };
 
   changeCurrentTag = (e, value) => this.setState({ selectedCurrentTag: value });
@@ -260,6 +203,10 @@ export default class TagBulkEdit extends React.Component {
       resultText = 'Tags changed!';
     } else {
       resultText = 'Change value';
+    }
+
+    if (this.state.enableSpinner) {
+      return <Spinner />;
     }
 
     return (
