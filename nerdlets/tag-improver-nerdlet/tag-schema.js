@@ -13,7 +13,7 @@ const ENFORCEMENT_PRIORITY = {
 };
 
 const COMPLIANCEBANDS = {
-  // rule: the loverlimit always falls within the range
+  // rule: the lowerLimit always falls within the range
   highBand: { upperLimit: 100, lowerLimit: 67, color: 'seagreen' },
   midBand: { upperLimit: 67, lowerLimit: 33, color: 'sandybrown' },
   lowBand: { upperLimit: 33, lowerLimit: 0, color: 'orangered' }
@@ -21,42 +21,56 @@ const COMPLIANCEBANDS = {
 
 const SCHEMA = [
   {
-    key: 'Team',
-    purpose: 'What team owns this entity?',
+    key: 'team',
+    purpose: 'What is the team or squad that is responsible for this entity?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    key: 'Environment',
+    key: 'owner',
     purpose:
-      'Is this entity part of your production, pre-prod, test, dev, or other environment?',
+      'What is the email or primary identifier of the individual (ex. team lead or primary contributor) who owns this entity?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    key: 'Application',
-    purpose: 'What business application/area/line is this entity part of?',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
+    key: 'help-channel',
+    purpose:
+      'What is the identifier/URL of the primary communication channel for requesting help or additional info for this entity?',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    key: 'Chat',
+    key: 'repository',
     purpose:
-      'What Slack/Teams/chat channel do I go to with questions about this entity?',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
+      'What is the identifier/URL of the repository for the source code, image, or configuration file for this entity?',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
-    key: 'Region',
+    key: 'runbook',
     purpose:
-      'What region/availability zone/datacenter is this entity deployed in?',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
+      'What is the identifier/URL of the runbook or wiki that documents this entity and relevant/associated processes?',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
+    allowedValues: [] // reserved for future use
+  },
+  {
+    key: 'environment',
+    purpose:
+      'What is the environment in which this entity exists?  (ex. production, quality-assurance, development, etc.)',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
+    allowedValues: [] // reserved for future use
+  },
+  {
+    key: 'value-stream',
+    purpose: 'What is the business value stream, application, or functional area that this entity is a part of, to deliver business value to users?',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   }
 ];
 
 const ENTITY_TYPES = [
-  // { id: "all", name: "All Entity Types", value: "ALL_ENTITIES" },
+  // { id: "ALL", name: "All Entity Types", value: "ALL_ENTITIES" },
   { id: 'APM', name: 'Application', value: 'APM_APPLICATION_ENTITY' },
   { id: 'BROWSER', name: 'Browser', value: 'BROWSER_APPLICATION_ENTITY' },
   { id: 'MOBILE', name: 'Mobile', value: 'MOBILE_APPLICATION_ENTITY' },
