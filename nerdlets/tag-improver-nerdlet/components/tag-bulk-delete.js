@@ -6,10 +6,11 @@ import {
   PlatformStateContext,
   BlockText,
   Button,
-  NerdGraphMutation,
   Select,
-  SelectItem
+  SelectItem,
+  Spinner
 } from 'nr1';
+import { deleteTags } from './commonUtils';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
 
@@ -30,9 +31,14 @@ export default class TagBulkDelete extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      enableSpinner: true,
       tagsToDelete: { [emptyTagPlaceholderKey]: 1 },
       entityStatuses: {}
     };
+  }
+
+  componentDidMount() {
+    this.setState({ enableSpinner: false });
   }
 
   static contextType = PlatformStateContext;
@@ -40,70 +46,49 @@ export default class TagBulkDelete extends React.Component {
   deleteTagsFromEntities = async () => {
     const { selectedEntityIds } = this.props;
     const { tagsToDelete, entityStatuses } = this.state;
-    const tagsForGql = Object.keys(tagsToDelete);
-    const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [String!]!) {
-      taggingDeleteTagFromEntity(
-          guid: $entityGuid,
-          tagKeys: $entityTags) {
-              errors {
-                  message
-              }
-          }
-    }`;
+
     let entitiesToUpdate;
+    //  entityStatus format is array [ <GUID>, <ENTITY_UPDATE_STATUS.SUCCESS> ]
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
-      entitiesToUpdate = statusEntries.filter(
-        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
-      );
+      entitiesToUpdate = statusEntries
+        .filter(
+          ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        )
+        .map(item => item[0]);
     } else {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
     entitiesToUpdate.forEach(entityId => {
-      if (!statusObject[entityId]) {
+      if (statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
-    this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
-      const variables = { entityGuid: entityId, entityTags: tagsForGql };
-      try {
-        const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
-        } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
-          throw result.data.taggingDeleteTagFromEntity.errors;
-        } else {
-          const previousStatuses = this.state.entityStatuses;
-          this.setState(
-            {
-              entityStatuses: {
-                ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
-            },
-            () => {
-              if (
-                Object.values(this.state.entityStatuses).every(
-                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
-                )
-              ) {
-                this.props.reloadTagsFn(selectedEntityIds);
-              }
-            }
-          );
+
+    const setEntityStatusFn = async function(entityId, hasErrors = false) {
+      const previousStatuses = this.state.entityStatuses;
+      this.setState({
+        entityStatuses: {
+          ...previousStatuses,
+          [entityId]: hasErrors
+            ? ENTITY_UPDATE_STATUS.ERROR
+            : ENTITY_UPDATE_STATUS.SUCCESS
         }
-      } catch (error) {
-        const previousStatuses = this.state.entityStatuses;
-        this.setState({
-          entityStatuses: {
-            ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
-        });
-      }
+      });
+    }.bind(this);
+    this.enableSpinner(true);
+    this.setState({ entityStatuses: statusObject });
+
+    // const prev_entities = await getEntitiesTags(entitiesToUpdate);
+    await deleteTags({
+      entitiesToUpdate,
+      tagsToDelete,
+      setEntityStatusFn,
+      maxThreads: 2
     });
+    await this.props.reloadTagsFn(selectedEntityIds);
+    this.enableSpinner(false);
   };
 
   changeTag = (fromTag, toTag) => {
@@ -126,6 +111,10 @@ export default class TagBulkDelete extends React.Component {
     this.setState({
       tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 }
     });
+  };
+
+  enableSpinner = enable => {
+    this.setState({ enableSpinner: enable });
   };
 
   render() {
@@ -164,6 +153,9 @@ export default class TagBulkDelete extends React.Component {
       resultText = 'Remove tags';
     }
 
+    if (this.state.enableSpinner) {
+      return <Spinner />;
+    }
     return (
       <div className="full-height-modal">
         <div>

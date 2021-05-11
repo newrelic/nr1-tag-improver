@@ -4,15 +4,13 @@ import PropTypes from 'prop-types';
 import {
   Dropdown,
   DropdownItem,
-  NerdGraphQuery,
   Spinner,
   Tabs,
   TabsItem,
   nerdlet,
   PlatformStateContext,
   NerdletStateContext,
-  UserStorageQuery,
-  logger
+  UserStorageQuery
 } from 'nr1';
 
 import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
@@ -20,6 +18,7 @@ import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
 import TagCoverageView from './components/tag-coverage';
 import TagEntityView from './components/tag-entity-view';
 import TaggingPolicy from './components/tag-policy';
+import { getAllEntities, getEntities } from './components/commonUtils';
 
 export default class TagVisualizer extends React.Component {
   static propTypes = {
@@ -127,90 +126,67 @@ export default class TagVisualizer extends React.Component {
    * The code below implements a progressive loader that handles the paginated entity query api,
    * unpacking tags from each entity, and building a global tag histogram.
    */
-  startLoadingEntityTags = () => {
-    // reset all cached state and then fetch the first page of entity results...
-    const { loadEntityBatch } = this;
+  startLoadingEntityTags = async (selectedIds = null) => {
+    const defaults = {
+      entityCount: 0,
+      loadedEntities: 0,
+      doneLoading: false,
+      queryCursor: undefined,
+      selectedTagKey: '',
+      selectedTagValue: ''
+    };
 
-    this.setState(
-      {
-        tagHierarchy: {},
-        entityTagsMap: {},
-        entityCount: 0,
-        loadedEntities: 0,
-        doneLoading: false,
-        queryCursor: undefined,
-        selectedTagKey: '',
-        selectedTagValue: ''
-      },
-      () => {
-        loadEntityBatch();
-      }
-    );
+    let attrs = { ...defaults };
+    if (!selectedIds) {
+      attrs = { ...attrs, tagHierarchy: {}, entityTagsMap: {} };
+    }
+
+    this.setState(attrs);
+    return new Promise(resolve => {
+      return resolve(this.loadEntityBatch(selectedIds));
+    });
   };
 
-  loadEntityBatch = () => {
+  loadEntityBatch = async (selectedIds = null) => {
     const {
       processEntityQueryResults,
       state: { queryCursor, accountId, selectedEntityType }
     } = this;
 
-    const query = `
-    query EntitiesSearchQuery($queryString: String!, $nextCursor: String) {
-      actor {
-        entitySearch(query: $queryString) {
-          count
-          results(cursor: $nextCursor) {
-            entities {
-              name
-              entityType
-              guid
-              accountId
-              tags {
-                tagKey: key
-                tagValues: values
-              }
-            }
-            nextCursor
-          }
-        }
-      }
+    let packedData = {};
+    if (selectedIds) {
+      const { entities } = await getEntities(selectedIds);
+      packedData = {
+        entities,
+        count: entities && entities.length > 0 ? entities.length : 0,
+        cursor: null
+      };
+    } else {
+      const { data } = await getAllEntities(
+        accountId,
+        selectedEntityType.id,
+        queryCursor
+      );
+      packedData = {
+        entities: data.actor.entitySearch.results.entities,
+        count: data.actor.entitySearch.count,
+        cursor: data.actor.entitySearch.results.nextCursor
+      };
     }
-    `;
-    const variables = {
-      // queryString: `domain in ('APM', 'MOBILE', 'BROWSER', 'DASHBOARD', 'WORKLOAD')${
-      queryString: `domain = '${selectedEntityType.id}' ${
-        accountId && accountId !== 'cross-account'
-          ? `AND accountId = '${accountId}'`
-          : ''
-      }`
-    };
-    variables.nextCursor = queryCursor || null;
-    NerdGraphQuery.query({
-      query,
-      variables,
-      fetchPolicyType: NerdGraphQuery.FETCH_POLICY_TYPE.NO_CACHE
-    })
-      .then(({ data, errors }) => {
-        if (data) {
-          // console.log(`index.loadEntityBatch(): len=${data.actor.entitySearch.results.entities[0].tags.length} \n${JSON.stringify(data.actor.entitySearch.results.entities[0].tags)}`)
-          processEntityQueryResults(
-            data.actor.entitySearch.results.entities,
-            data.actor.entitySearch.count,
-            data.actor.entitySearch.results.nextCursor
-          );
-        } else {
-          logger.log('data is NOT truthy %O', data);
-        }
-        if (errors) {
-          logger.error('Entity query error %O', errors);
-        }
-      })
-      .catch(err => {
-        logger.error(err.toString());
-      });
+    return processEntityQueryResults(
+      packedData.entities,
+      packedData.count,
+      packedData.cursor,
+      selectedIds
+    );
   };
 
-  processEntityQueryResults = (entitiesToProcess, count, ngCursor) => {
+  processEntityQueryResults = (
+    entities = [],
+    count = 0,
+    cursor = null,
+    selectedIds = null
+  ) => {
     const {
       loadEntityBatch,
       state: { loadedEntities, accountId }
@@ -218,66 +194,107 @@ export default class TagVisualizer extends React.Component {
     if (accountId !== this.state.accountId) {
       return;
     }
-    let entityCount = 0;
-    let entities = [];
-    let nextCursor;
-    try {
-      entityCount = count;
-      entities = entitiesToProcess || [];
-      nextCursor = ngCursor || undefined;
-    } catch (err) {
-      logger.error('Error parsing results %O', err);
-    }
-    this.processLoadedEntityTags(entities);
+
+    const {
+      tagHierarchy,
+      entityTagsMap,
+      taggingPolicy
+    } = this.processLoadedEntityTags(entities);
 
     this.setState(
       {
-        queryCursor: nextCursor,
-        entityCount,
+        tagHierarchy,
+        entityTagsMap,
+        taggingPolicy,
+        queryCursor: cursor,
+        entityCount: count,
         loadedEntities: loadedEntities + entities.length,
-        doneLoading: !nextCursor
+        doneLoading: !cursor
       },
-      () => {
-        if (nextCursor && accountId === this.state.accountId) {
-          loadEntityBatch();
+      async () => {
+        if (cursor && accountId === this.state.accountId) {
+          await loadEntityBatch(selectedIds);
         }
       }
     );
   };
 
   processLoadedEntityTags = entities => {
-    const {
-      tagHierarchy,
-      entityTagsMap,
-      taggingPolicy,
-      mandatoryTagCount
-    } = this.state;
+    const tagHierarchy =
+      Object.keys(this.state.tagHierarchy).length > 0
+        ? { ...this.state.tagHierarchy }
+        : {};
+    const entityTagsMap =
+      Object.keys(this.state.entityTagsMap).length > 0
+        ? { ...this.state.entityTagsMap }
+        : {};
+    const taggingPolicy =
+      this.state.taggingPolicy && this.state.taggingPolicy.length > 0
+        ? [...this.state.taggingPolicy]
+        : [];
+
+    const { mandatoryTagCount } = this.state;
 
     if (!Object.keys(tagHierarchy).length) {
       for (const tag of taggingPolicy) {
         tagHierarchy[tag.key] = {};
       }
     }
+
     entities.reduce((acc, entity) => {
       // get all the tags
+      if (entity.__typename) {
+        delete entity.__typename;
+      }
+
       const { guid, tags } = entity;
-      entityTagsMap[guid] = [...tags];
+      entityTagsMap[guid] = tags.map(tag => {
+        if (tag.__typename) {
+          delete tag.__typename;
+        }
+        return tag;
+      });
 
       this.updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount);
 
-      // for each tag, if it doesn't make an empty object
-      for (const tag of tags) {
-        if (!acc[tag.tagKey]) acc[tag.tagKey] = {};
-        // for each tag value, check if it exists, if it doesn't make it an empty object
-        for (const value of tag.tagValues) {
-          if (!acc[tag.tagKey][value]) acc[tag.tagKey][value] = [];
-          acc[tag.tagKey][value].push(entity);
-        }
-      }
-      return acc;
-    }, tagHierarchy);
+      const newKeys = [];
+      for (const { tagKey: key, tagValues: values } of tags) {
+        newKeys.push(key);
 
-    return tagHierarchy;
+        if (!acc[key]) acc[key] = {};
+
+        for (const value of values) {
+          if (!acc[key][value] || key.toLowerCase() === 'guid') {
+            acc[key][value] = [];
+          } else {
+            // dedup existing entity
+            acc[key][value] = acc[key][value].filter(
+              cacheEntity => cacheEntity.guid !== entity.guid
+            );
+          }
+          acc[key][value].push(entity);
+        } // end of for-loop values
+      } // end of for-loop tags
+
+      // find stale keys
+      const removedKeys =
+        Object.keys(tagHierarchy).length > 0
+          ? Object.keys(tagHierarchy).filter(key => !newKeys.includes(key))
+          : [];
+
+      // remove stale data
+      removedKeys.forEach(removedKey => {
+        Object.keys(acc[removedKey]).forEach(value => {
+          acc[removedKey][value] = acc[removedKey][value].filter(
+            e => e.guid !== entity.guid
+          );
+        });
+      });
+
+      return acc;
+    }, tagHierarchy); // end of reducer
+
+    return { tagHierarchy, entityTagsMap, taggingPolicy };
   };
 
   updateEntityTagCompliance(entity, taggingPolicy, mandatoryTagCount) {
@@ -333,46 +350,43 @@ export default class TagVisualizer extends React.Component {
   };
 
   updatePolicy = (policy, prevPolicy) => {
-    this.setState(
-      {
-        taggingPolicy: sortedPolicy(policy),
-        mandatoryTagCount:
-          policy.filter(tag => tag.enforcement === 'required').length || 0
-      },
-      () => {
-        const { tagHierarchy, mandatoryTagCount } = this.state;
-        const { updateEntityTagCompliance } = this;
+    const { tagHierarchy, mandatoryTagCount } = this.state;
+    const { updateEntityTagCompliance } = this;
 
-        // check if policy was changed
+    // check if policy was changed
+    if (
+      JSON.stringify(sortedPolicy(policy)) !==
+      JSON.stringify(sortedPolicy(prevPolicy))
+    ) {
+      // add new policy tags to tagHierarchy if not present (not likely)
+      for (const tag of policy) {
+        if (!tagHierarchy[tag.key]) tagHierarchy[tag.key] = {};
+      }
+      // remove tags that were removed from ploicy and are not used by any entity
+      for (const tag of prevPolicy) {
         if (
-          JSON.stringify(sortedPolicy(policy)) !==
-          JSON.stringify(sortedPolicy(prevPolicy))
-        ) {
-          // add new policy tags to tagHierarchy if not present (not likely)
-          for (const tag of policy) {
-            if (!tagHierarchy[tag.key]) tagHierarchy[tag.key] = {};
-          }
-          // remove tags that were removed from ploicy and are not used by any entity
-          for (const tag of prevPolicy) {
-            if (
-              !policy.find(policyTag => {
-                return policyTag.key === tag.key;
-              })
-            )
-              if (!Object.keys(tagHierarchy[tag.key]).length)
-                delete tagHierarchy[tag.key];
-          }
-        }
+          !policy.find(policyTag => {
+            return policyTag.key === tag.key;
+          })
+        )
+          if (!Object.keys(tagHierarchy[tag.key]).length)
+            delete tagHierarchy[tag.key];
+      }
+    }
 
-        for (const tagKey of Object.entries(tagHierarchy)) {
-          for (const tagValue of Object.values(tagKey[1])) {
-            for (const entity of tagValue) {
-              updateEntityTagCompliance(entity, policy, mandatoryTagCount);
-            }
-          }
+    for (const tagKey of Object.entries(tagHierarchy)) {
+      for (const tagValue of Object.values(tagKey[1])) {
+        for (const entity of tagValue) {
+          updateEntityTagCompliance(entity, policy, mandatoryTagCount);
         }
       }
-    );
+    }
+
+    this.setState({
+      taggingPolicy: sortedPolicy(policy),
+      mandatoryTagCount:
+        policy.filter(tag => tag.enforcement === 'required').length || 0
+    });
   };
 
   render() {
@@ -535,3 +549,4 @@ function getTagKeys(tagHierarchy, policy) {
 
   return tagsForDropdown;
 }
+

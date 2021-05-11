@@ -1,8 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { addTags } from './graphUtils';
+import { addTags } from './commonUtils';
 
-import { HeadingText, PlatformStateContext, Button } from 'nr1';
+import { HeadingText, PlatformStateContext, Button, Spinner } from 'nr1';
 import Autocomplete from './autocomplete';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
@@ -24,9 +24,14 @@ export default class TagBulkAdd extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      enableSpinner: true,
       tagsToAdd: { [emptyTagPlaceholderKey]: '' },
       entityStatuses: {}
     };
+  }
+
+  componentDidMount() {
+    this.setState({ enableSpinner: false });
   }
 
   static contextType = PlatformStateContext;
@@ -36,6 +41,7 @@ export default class TagBulkAdd extends React.Component {
     const { tagsToAdd, entityStatuses } = this.state;
 
     let entitiesToUpdate;
+    //  entityStatus format is array [ <GUID>, <ENTITY_UPDATE_STATUS.SUCCESS> ]
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
       entitiesToUpdate = statusEntries
@@ -52,6 +58,7 @@ export default class TagBulkAdd extends React.Component {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
+
     const setEntityStatusFn = function(entityId, hasErrors = false) {
       const previousStatuses = this.state.entityStatuses;
       this.setState({
@@ -63,9 +70,10 @@ export default class TagBulkAdd extends React.Component {
         }
       });
     }.bind(this);
-
+    this.enableSpinner(true);
     this.setState({ entityStatuses: statusObject });
 
+    // const prev_entities = await getEntitiesTags(entitiesToUpdate);
     await addTags({
       entitiesToUpdate,
       tagsToAdd,
@@ -73,7 +81,8 @@ export default class TagBulkAdd extends React.Component {
       maxThreads: 2
     });
 
-    this.props.reloadTagsFn(selectedEntityIds);
+    await this.props.reloadTagsFn(selectedEntityIds);
+    this.enableSpinner(false);
   };
 
   changeTag = (fromTag, toTag) => {
@@ -101,6 +110,10 @@ export default class TagBulkAdd extends React.Component {
     this.setState({
       tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: '' }
     });
+  };
+
+  enableSpinner = enable => {
+    this.setState({ enableSpinner: enable });
   };
 
   render() {
@@ -137,6 +150,10 @@ export default class TagBulkAdd extends React.Component {
       resultText = 'Tags added!';
     } else {
       resultText = 'Add tags';
+    }
+
+    if (this.state.enableSpinner) {
+      return <Spinner />;
     }
 
     return (

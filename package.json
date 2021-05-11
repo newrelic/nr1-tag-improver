@@ -15,6 +15,7 @@
     "dependencies": {
         "@newrelic/nr1-community": "latest",
         "es6-promise-pool": "^2.5.0",
+        "lodash": "^4.17.21",
         "prop-types": "^15.6.2"
     },
     "browserslist": [
