@@ -57,13 +57,14 @@ const SCHEMA = [
   {
     key: 'environment',
     purpose:
-      'What is the environment in which this entity exists?  (ex. production, quality-assurance, development, etc.)',
+      'What is the environment in which this entity exists? (ex. production, quality-assurance, development, etc.)',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   },
   {
     key: 'value-stream',
-    purpose: 'What is the business value stream, application, or functional area that this entity is a part of, to deliver business value to users?',
+    purpose:
+      'What is the larger value stream or business application that this entity is a part of, to deliver business value to users?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
   }
