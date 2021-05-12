@@ -97,25 +97,12 @@ export default class TagBulkEdit extends React.Component {
     const tagsToAdd = {};
     tagsToAdd[selectedCurrentTag] = selectedNewTagValue;
 
-    await addTags({
+    const { passEntityIds: updatedEntityIds } = await addTags({
       entitiesToUpdate,
       tagsToAdd,
       setEntityStatusFn,
       maxThreads: 2
     });
-
-    // create a list of entities w/ newly added tags
-    const updatedEntityIds = (() => {
-      const successGuids = [];
-      for (const [guid, status] of Object.entries(this.state.entityStatuses)) {
-        if (status === ENTITY_UPDATE_STATUS.SUCCESS) {
-          successGuids.push(guid);
-        }
-      }
-      return entitiesToUpdate.filter(update_guid =>
-        successGuids.find(guid => update_guid === guid)
-      );
-    })(); // eof updatedEntities
 
     if (updatedEntityIds && updatedEntityIds.length === 0) {
       logger.warn(`Bulk edit: WARNING: NO Tags to delete, skipping`);

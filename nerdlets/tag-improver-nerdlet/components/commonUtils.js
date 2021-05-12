@@ -114,6 +114,8 @@ export async function addTags({
       const { error, result } = data;
 
       if (error && error.length > 0) {
+        // eslint-disable-next-line prettier/prettier
+        logger.error(`addTags() Critical error encoutered. ${error[0].message}`);
         throw new Error(error[0].message);
       }
 
@@ -276,6 +278,8 @@ export async function deleteTags({
       const { error, result } = data;
 
       if (error && error.length > 0) {
+        // eslint-disable-next-line prettier/prettier
+        logger.error(`deleteTags() Critical error encoutered. ${error[0].message}`);
         throw new Error(error[0].message);
       }
 
@@ -347,6 +351,8 @@ export async function deleteTagValues({
       const { error, result } = data;
 
       if (error && error.length > 0) {
+        // eslint-disable-next-line prettier/prettier
+        logger.error(`deleteTagValues() Critical error encoutered. ${error[0].message}`);
         throw new Error(error[0].message);
       }
 
