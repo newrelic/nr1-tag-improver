@@ -14,7 +14,7 @@ function createAddEntityTagGQL({ entitiesToUpdate, tagsToAdd }) {
       }
     }
   }`;
-  const mutations = entitiesToUpdate.map(entityGuid => {
+  return entitiesToUpdate.map(entityGuid => {
     return {
       mutation,
       variables: {
@@ -24,7 +24,6 @@ function createAddEntityTagGQL({ entitiesToUpdate, tagsToAdd }) {
     };
   });
 
-  return mutations;
 }
 
 function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
@@ -38,7 +37,7 @@ function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
             }
         }
   }`;
-  const mutations = entitiesToUpdate.map(entityGuid => {
+  return  entitiesToUpdate.map(entityGuid => {
     return {
       mutation,
       variables: {
@@ -47,8 +46,38 @@ function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
       }
     };
   });
+}
 
-  return mutations;
+function createAddEntityTagValuesGQL({
+  entitiesToUpdate,
+  entityTagsMap,
+  newTagKey,
+  currentTagKey
+}) {
+  const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
+    taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
+      errors {
+          message
+      }
+    }
+  }`;
+
+  return entitiesToUpdate.map(entityGuid => {
+    const entityTags = entityTagsMap[entityGuid].reduce((_acc, _curr) => {
+      if (_curr.tagKey === currentTagKey) {
+        _acc.push({ key: newTagKey, values: _curr.tagValues });
+      }
+      return _acc;
+    }, []);
+
+    return {
+      mutation,
+      variables: {
+        entityGuid,
+        entityTags
+      }
+    };
+  });
 }
 
 function createDeleteEntityTagValuesGQL({
@@ -68,7 +97,7 @@ function createDeleteEntityTagValuesGQL({
         }
   }`;
 
-  const mutations = updatedEntityIds.map(entityGuid => {
+  return updatedEntityIds.map(entityGuid => {
     const tagsToDeleteForEntity = tagValue
       ? [{ key: tagKey, value: tagValue }]
       : (
@@ -88,8 +117,6 @@ function createDeleteEntityTagValuesGQL({
       }
     };
   });
-
-  return mutations;
 }
 
 async function executeGQL({ generatorFn, eventHandler, maxThreads = 3 }) {
@@ -150,8 +177,8 @@ export async function addTags({
       };
     };
 
-    for (let i = 0; i < statements.length; i++) {
-      yield execute(statements[i]);
+    for (const statement of statements) {
+      yield execute(statement);
     }
   };
   // execute the GQL statement(s)
@@ -213,10 +240,7 @@ export async function getEntities(entityIds, cursor = null) {
   }
 
   if (nextCursor != null && nextCursor.length > 0) {
-    const { entities: result_entities } = await getEntities(
-      entityIds,
-      nextCursor
-    );
+    const { entities: result_entities } = getEntities(entityIds, nextCursor);
     entities = entities.concat(result_entities);
   }
   return { error: null, entities };
@@ -315,8 +339,8 @@ export async function deleteTags({
       };
     };
 
-    for (let i = 0; i < statements.length; i++) {
-      yield execute(statements[i]);
+    for (const statement of statements) {
+      yield execute(statement);
     }
   };
   // execute the GQL statement(s)
@@ -334,6 +358,79 @@ export async function deleteTags({
   return { ...eventHandler };
 }
 
+export async function addTagAndValues({
+  entitiesToUpdate,
+  entityTagsMap,
+  newTagKey,
+  currentTagKey,
+  setEntityStatusFn,
+  maxThreads = 3
+}) {
+  // Define the Promise pool event handler
+  const eventHandler = (entityStatusUpdaterFn => {
+    const failEntityIds = [];
+    const passEntityIds = [];
+    function handler({ data }) {
+      const { error, result } = data;
+
+      if (error) {
+        // eslint-disable-next-line prettier/prettier
+        logger.error(`addTagAndValues() Critical error encoutered. ${error.message}`);
+        throw new Error(error.message);
+      }
+
+      const { errors, entityId } = result;
+      const hasErrors = errors && errors.length > 1;
+      const list = hasErrors ? failEntityIds : passEntityIds;
+      list.push(entityId);
+      entityStatusUpdaterFn(entityId, hasErrors);
+    }
+    return {
+      entityStatusUpdaterFn,
+      failEntityIds,
+      passEntityIds,
+      passHandler: handler,
+      failHandler: handler
+    };
+  })(setEntityStatusFn);
+  // Define the Promise generator
+  const generatorFn = function*() {
+    const statements = createAddEntityTagValuesGQL({
+      entitiesToUpdate,
+      entityTagsMap,
+      newTagKey,
+      currentTagKey
+    });
+    const execute = async function(statement) {
+      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const response = await NerdGraphMutation.mutate(statement);
+      const { errors } = response.data.taggingAddTagsToEntity;
+      return {
+        hasErrors: errors && errors.length > 0,
+        errors,
+        entityId,
+        tags
+      };
+    };
+
+    for (const statement of statements) {
+      yield execute(statement);
+    }
+  };
+  // execute the GQL statement(s)
+  await executeGQL({
+    generatorFn,
+    eventHandler,
+    maxThreads
+  });
+
+  // cleanup data model
+  delete eventHandler.entityStatusUpdaterFn;
+  delete eventHandler.passHandler;
+  delete eventHandler.failHandler;
+  // return list of pass/fail entity ids
+  return { ...eventHandler };
+}
 export async function deleteTagValues({
   updatedEntityIds,
   entityTagsMap,
@@ -391,8 +488,8 @@ export async function deleteTagValues({
       };
     };
 
-    for (let i = 0; i < statements.length; i++) {
-      yield execute(statements[i]);
+    for (const statement of statements) {
+      yield execute(statement);
     }
   };
   // execute the GQL statement(s)
