@@ -1,6 +1,15 @@
 import PromisePool from 'es6-promise-pool';
-import { NerdGraphMutation, NerdGraphQuery, logger } from 'nr1';
+import {
+  NerdGraphMutation,
+  NerdGraphQuery,
+  UserStorageQuery,
+  AccountStorageQuery,
+  AccountStorageMutation,
+  logger,
+  Toast
+} from 'nr1';
 import { isEqual } from 'lodash';
+import { SCHEMA, STORAGE_TYPE } from '../tag-schema';
 
 function createAddEntityTagGQL({ entitiesToUpdate, tagsToAdd }) {
   const tagsForGql = Object.entries(tagsToAdd).map(([tagKey, tagValue]) => ({
@@ -23,7 +32,6 @@ function createAddEntityTagGQL({ entitiesToUpdate, tagsToAdd }) {
       }
     };
   });
-
 }
 
 function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
@@ -37,7 +45,7 @@ function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
             }
         }
   }`;
-  return  entitiesToUpdate.map(entityGuid => {
+  return entitiesToUpdate.map(entityGuid => {
     return {
       mutation,
       variables: {
@@ -526,3 +534,204 @@ export async function repeatIfEqual(
   }
   return Promise.resolve(hasChanged);
 }
+
+export const TAG_POLICY_COLLECTION = {
+  collection: 'nr1-tag-improver',
+  documentId: 'tagging-policy'
+};
+
+export function showError(error) {
+  if (!error && error.message.length === 0) {
+    return;
+  }
+
+  Toast.showToast({
+    title: 'Error',
+    sticky: true,
+    description: error.message,
+    type: Toast.TYPE.CRITICAL
+  });
+  return { errorMessage: error.message, hasError: true };
+}
+export function showErrors(errors) {
+  if (!errors || errors.length === 0) {
+    return;
+  }
+
+  errors.forEach(error => {
+    showError(error);
+  });
+}
+
+function handleStorageQuery({ storageType, data }) {
+  let result = {
+    taggingPolicy: {},
+    keyCount: 0,
+    mandatoryTagCount: 0
+  };
+  let error = null;
+  let hasError = false;
+  try {
+    if (data) {
+      const keyCount = data.policy.length;
+      const taggingPolicy = keyCount > 0 ? data.policy : {};
+      if (keyCount > 0) {
+        result = {
+          taggingPolicy: taggingPolicy,
+          keyCount,
+          mandatoryTagCount:
+            taggingPolicy.filter(tag => tag.enforcement === 'required')
+              .length || 0
+        };
+      }
+    }
+  } catch (err) {
+    hasError = true;
+    error = err;
+    console.log(`handleStorageQuery: Error=${error.message}`);
+  }
+
+  return { storageType, hasError, error, ...result };
+}
+
+export function mutateAccountStorage(mutation) {
+  return AccountStorageMutation.mutate(mutation)
+    .then(data => {
+      return handleStorageQuery({
+        storageType: 'account',
+        hasError: false,
+        policySaveErrored: false,
+        data
+      });
+    })
+    .catch(error => {
+      console.log(error);
+      return handleStorageQuery({
+        storageType: 'account',
+        hasError: true,
+        policySaveErrored: true
+      });
+    });
+}
+
+export function hasAccountStorageWriteAccess({ accountId }) {
+  if (!parseInt(accountId)) {
+    return false;
+  }
+
+  const mutation = {
+    accountId,
+    collection: 'nr1-tag-improver',
+    documentId: 'tagging-policy-write-test'
+  };
+  return AccountStorageMutation.mutate({
+    ...mutation,
+    actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+    document: { text: 'hello world' }
+  })
+    .then(() => {
+      // console.log(data.nerdStorageWriteDocument.text);
+      return AccountStorageMutation.mutate({
+        ...mutation,
+        actionType: AccountStorageMutation.ACTION_TYPE.DELETE_DOCUMENT
+      });
+    })
+    .then(() => {
+      return true;
+    })
+    .catch(error => {
+      console.log(error);
+      return false;
+    });
+}
+
+export function queryUserStorage() {
+  return UserStorageQuery.query(TAG_POLICY_COLLECTION).then(({ data }) => {
+    return handleStorageQuery({ storageType: 'user', data });
+  });
+}
+export function queryAccountStorage({ accountId }) {
+  return (_=> {
+    if (!parseInt(accountId)) {
+      return Promise.resolve({ data: null });
+    } else {
+      return AccountStorageQuery.query({ ...TAG_POLICY_COLLECTION, accountId });
+    }
+  })().then(({ data }) => {
+    return handleStorageQuery({ storageType: 'account', data });
+  });
+}
+export async function loadTaggingPolicy({ accountId }) {
+  const errors = [];
+  const results = await Promise.all(
+    [queryUserStorage(), queryAccountStorage({ accountId })].map(p =>
+      p.catch(error => {
+        errors.push(error);
+      })
+    )
+  );
+
+  showErrors(errors);
+  const response = {
+    hasAccountPolicy: false,
+    hasUserPolicy: false,
+    userPolicy: {},
+    accountPolicy: {}
+  };
+  const userPolicy = results
+    .filter(({ hasError }) => !hasError)
+    .filter(({ storageType }) => storageType === 'user');
+  const accountPolicy = results
+    .filter(({ hasError }) => !hasError)
+    .filter(({ storageType }) => storageType === 'account');
+
+  if (accountPolicy && accountPolicy.length > 0) {
+    response.hasAccountPolicy = accountPolicy[0].keyCount > 0;
+    response.accountPolicy =
+      accountPolicy[0].keyCount > 0 ? { ...accountPolicy[0] } : {};
+  }
+  if (userPolicy && userPolicy.length > 0) {
+    response.hasUserPolicy = userPolicy[0].keyCount > 0;
+    response.userPolicy =
+      userPolicy[0].keyCount > 0 ? { ...userPolicy[0] } : {};
+  }
+
+  return response;
+}
+
+export async function getTaggingPolicyProps(storageId, accountId) {
+  const {
+    hasAccountPolicy,
+    hasUserPolicy,
+    accountPolicy,
+    userPolicy
+  } = await loadTaggingPolicy({ accountId });
+  let taggingPolicy = SCHEMA;
+
+  const storageTypes = [];
+  const [USER_STORE, ACCOUNT_STORE] = STORAGE_TYPE;
+
+  if (hasUserPolicy) {
+    storageTypes.push(STORAGE_TYPE[0]);
+  }
+
+  if (hasAccountPolicy) {
+    storageTypes.push(STORAGE_TYPE[1]);
+  }
+
+  if (storageId === 'SCHEMA') {
+    taggingPolicy = hasUserPolicy ? [...userPolicy.taggingPolicy] : SCHEMA;
+    storageId = hasUserPolicy ? USER_STORE.id : storageId;
+  }
+
+  if (storageId === USER_STORE.id && hasUserPolicy) {
+    taggingPolicy = [...userPolicy.taggingPolicy];
+  } else if (storageId === ACCOUNT_STORE.id && hasAccountPolicy) {
+    taggingPolicy = [...accountPolicy.taggingPolicy];
+  }
+
+  return { taggingPolicy, storageTypes, storageId };
+}
+
+
+

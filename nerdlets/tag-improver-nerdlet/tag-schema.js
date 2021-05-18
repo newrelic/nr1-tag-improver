@@ -81,10 +81,16 @@ const ENTITY_TYPES = [
   { id: 'NR1', name: 'Workload', value: 'WORKLOAD_ENTITY' }
 ];
 
+const STORAGE_TYPE = [
+  { id: 'USER_STORE', name: 'User Store', value: 'USER_STORE' },
+  { id: 'ACCOUNT_STORE', name: 'Account Store', value: 'ACCOUNT_STORE' }
+];
+
 export {
   SCHEMA,
   TAG_SCHEMA_ENFORCEMENT,
   ENFORCEMENT_PRIORITY,
   COMPLIANCEBANDS,
-  ENTITY_TYPES
+  ENTITY_TYPES,
+  STORAGE_TYPE
 };

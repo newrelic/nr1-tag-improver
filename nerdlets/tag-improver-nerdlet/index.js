@@ -13,12 +13,18 @@ import {
   UserStorageQuery
 } from 'nr1';
 
-import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
+import {
+  SCHEMA,
+  ENFORCEMENT_PRIORITY,
+  ENTITY_TYPES,
+  STORAGE_TYPE
+} from './tag-schema';
 
+import { StorageTypeView } from './components/tag-schema-store';
 import TagCoverageView from './components/tag-coverage';
 import TagEntityView from './components/tag-entity-view';
 import TaggingPolicy from './components/tag-policy';
-import { getAllEntities, getEntities } from './components/commonUtils';
+import { getAllEntities, getEntities, getTaggingPolicyProps } from './components/commonUtils';
 
 export default class TagVisualizer extends React.Component {
   static propTypes = {
@@ -26,6 +32,7 @@ export default class TagVisualizer extends React.Component {
   };
 
   state = {
+    entities: [],
     tagHierarchy: {},
     entityTagsMap: {},
     entityCount: 0,
@@ -40,6 +47,7 @@ export default class TagVisualizer extends React.Component {
       name: 'Application',
       value: 'APM_APPLICATION_ENTITY'
     },
+    selectedStorageId: 'SCHEMA',
     selectedTagKey: '',
     selectedTagValue: '',
     currentTab: 'policy-tab'
@@ -49,25 +57,28 @@ export default class TagVisualizer extends React.Component {
     nerdlet.setConfig({
       timePicker: false,
       accountPicker: true,
+      selectedStorageId: 'SCHEMA',
       accountPickerValues: [
         nerdlet.ACCOUNT_PICKER_VALUE.CROSS_ACCOUNT,
         ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES
       ]
     });
-    this.setState({ accountId: this.context.accountId }, () => {
-      this.getTaggingPolicy();
-      this.startLoadingEntityTags();
-    });
+    this.setState(
+      { accountId: this.context.accountId, entities: [] },
+      async () => {
+        await this.getTaggingPolicy();
+        this.startLoadingEntityTags();
+      }
+    );
   }
 
   componentDidUpdate() {
     if (this.context.accountId !== this.state.accountId) {
       // eslint-disable-next-line react/no-did-update-set-state
-      this.setState(
-        { accountId: this.context.accountId, taggingPolicy: null },
-        () => this.getTaggingPolicy(),
-        this.startLoadingEntityTags()
-      );
+      this.setState({ accountId: this.context.accountId }, async () => {
+        await this.getTaggingPolicy();
+        this.startLoadingEntityTags();
+      });
     }
   }
 
@@ -127,7 +138,9 @@ export default class TagVisualizer extends React.Component {
    * unpacking tags from each entity, and building a global tag histogram.
    */
   startLoadingEntityTags = async (selectedIds = null) => {
+
     const defaults = {
+      entities: [],
       entityCount: 0,
       loadedEntities: 0,
       doneLoading: false,
@@ -152,7 +165,6 @@ export default class TagVisualizer extends React.Component {
       processEntityQueryResults,
       state: { queryCursor, accountId, selectedEntityType }
     } = this;
-
     let packedData = {};
     if (selectedIds) {
       const { entities } = await getEntities(selectedIds);
@@ -191,6 +203,7 @@ export default class TagVisualizer extends React.Component {
       loadEntityBatch,
       state: { loadedEntities, accountId }
     } = this;
+    const { entities: state_entities } = this.state;
     if (accountId !== this.state.accountId) {
       return;
     }
@@ -200,9 +213,10 @@ export default class TagVisualizer extends React.Component {
       entityTagsMap,
       taggingPolicy
     } = this.processLoadedEntityTags(entities);
-
+    const updatedEntities = state_entities.concat(entities);
     this.setState(
       {
+        entities: updatedEntities,
         tagHierarchy,
         entityTagsMap,
         taggingPolicy,
@@ -221,10 +235,11 @@ export default class TagVisualizer extends React.Component {
 
   processLoadedEntityTags = entities => {
     const tagHierarchy =
-      Object.keys(this.state.tagHierarchy).length > 0
+      this.state.tagHierarchy && Object.keys(this.state.tagHierarchy).length > 0
         ? { ...this.state.tagHierarchy }
         : {};
     const entityTagsMap =
+      this.state.entityTagsMap &&
       Object.keys(this.state.entityTagsMap).length > 0
         ? { ...this.state.entityTagsMap }
         : {};
@@ -261,17 +276,21 @@ export default class TagVisualizer extends React.Component {
       for (const { tagKey: key, tagValues: values } of tags) {
         newKeys.push(key);
 
-        if (!acc[key]) acc[key] = {};
+        if (!acc[key]) {
+          acc[key] = {};
+        } else {
+          // dedup by removing existing/matching entity
+          // assumption: entities includes the latest values
+          acc[key] = Object.keys(acc[key]).map(_values =>
+            acc[key][_values].filter(_entity => _entity.guid !== guid)
+          );
+        }
 
         for (const value of values) {
           if (!acc[key][value] || key.toLowerCase() === 'guid') {
             acc[key][value] = [];
-          } else {
-            // dedup existing entity
-            acc[key][value] = acc[key][value].filter(
-              cacheEntity => cacheEntity.guid !== entity.guid
-            );
           }
+
           acc[key][value].push(entity);
         } // end of for-loop values
       } // end of for-loop tags
@@ -326,27 +345,17 @@ export default class TagVisualizer extends React.Component {
         : 0;
   }
 
-  getTaggingPolicy = () => {
-    UserStorageQuery.query({
-      collection: 'nr1-tag-improver',
-      documentId: 'tagging-policy'
-    })
-      .then(({ data }) => {
-        const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
-        this.setState({
-          taggingPolicy: sortedPolicy(taggingPolicy),
-          mandatoryTagCount:
-            taggingPolicy.filter(tag => tag.enforcement === 'required')
-              .length || 0
-        });
-      })
-      .catch(() => {
-        this.setState({
-          taggingPolicy: sortedPolicy(SCHEMA),
-          mandatoryTagCount:
-            SCHEMA.filter(tag => tag.enforcement === 'required').length || 0
-        });
-      });
+  getTaggingPolicy = async () => {
+    const { taggingPolicy, storageId } = await getTaggingPolicyProps(
+      this.state.storageId || 'SCHEMA',
+      this.state.accountId
+    );
+    this.setState({
+      storageId,
+      taggingPolicy: sortedPolicy(taggingPolicy),
+      mandatoryTagCount:
+        taggingPolicy.filter(tag => tag.enforcement === 'required').length || 0
+    });
   };
 
   updatePolicy = (policy, prevPolicy) => {
@@ -389,6 +398,26 @@ export default class TagVisualizer extends React.Component {
     });
   };
 
+  setTaggingPolicy = (taggingPolicy, storageId) => {
+    this.setState(
+      { tagHierarchy: {}, taggingPolicy, selectedStorageId: storageId },
+      () => {
+        if (this.state.entities != null) {
+          const {
+            tagHierarchy,
+            entityTagsMap,
+            taggingPolicy
+          } = this.processLoadedEntityTags(this.state.entities);
+          this.setState({
+            tagHierarchy,
+            entityTagsMap,
+            taggingPolicy
+          });
+      }
+      }
+    );
+  };
+
   render() {
     const {
       doneLoading,
@@ -399,10 +428,12 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy,
       accountId,
       selectedEntityType,
+      selectedStorageId,
       selectedTagKey,
       selectedTagValue,
       currentTab
     } = this.state;
+
     return (
       <>
         <NerdletStateContext.Consumer>
@@ -418,9 +449,15 @@ export default class TagVisualizer extends React.Component {
                   paddingBottom: '9px'
                 }}
               >
-                Entity type:
+                <StorageTypeView
+                  accountId={accountId}
+                  selectedStorageId={selectedStorageId}
+                  setTaggingPolicy={this.setTaggingPolicy}
+                />
+
+                 Entity type:
                 <Dropdown
-                  style={{ marginLeft: '0' }}
+                  style={{ marginLeft: '0'}}
                   title={selectedEntityType.name}
                   items={ENTITY_TYPES}
                 >
@@ -457,6 +494,7 @@ export default class TagVisualizer extends React.Component {
                     doneLoading={doneLoading}
                     schema={taggingPolicy}
                     updatePolicy={this.updatePolicy}
+                    selectedStorageId={selectedStorageId}
                   />
                 </TabsItem>
                 <TabsItem value="coverage-tab" label="Tag analyzer">

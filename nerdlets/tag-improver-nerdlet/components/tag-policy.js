@@ -13,9 +13,19 @@ import {
   TableRowCell,
   TextField,
   Tooltip,
-  UserStorageMutation
+  UserStorageMutation,
+  AccountStorageMutation,
+  PlatformStateContext
 } from 'nr1';
-import { TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY } from '../tag-schema';
+
+import { StorageTypeEdit } from './tag-schema-store';
+
+import {
+  TAG_SCHEMA_ENFORCEMENT,
+  ENFORCEMENT_PRIORITY,
+  ENTITY_TYPES,
+  STORAGE_TYPE
+} from '../tag-schema';
 import Autocomplete from './autocomplete';
 
 const coverageTooltipText = `For required tags, less than 50 percent coverage changes the state to red, between 50 to 80 percent changes the state to yellow, and over 80 percent changes the state to green.`;
@@ -39,7 +49,8 @@ export default class TaggingPolicy extends React.Component {
     updatePolicy: PropTypes.func,
     tagHierarchy: PropTypes.object,
     schema: PropTypes.array,
-    entityCount: PropTypes.number
+    entityCount: PropTypes.number,
+    selectedStorageId: PropTypes.string
   };
 
   constructor(props) {
@@ -50,6 +61,7 @@ export default class TaggingPolicy extends React.Component {
       isEditMode: false,
       savingPolicy: false,
       policySaveErrored: false,
+      selectedStorageId: this.props.selectedStorageId,
       tableSorting: {
         enforcement: 'ascending',
         key: 'ascending'
@@ -57,16 +69,36 @@ export default class TaggingPolicy extends React.Component {
     };
   }
 
+  static contextType = PlatformStateContext;
+
   applyEdits = () => {
     const { updatePolicy } = this.props;
-    const { workingSchema: policy, savedSchema } = this.state;
+    const { accountId } = this.context;
+    const {
+      selectedStorageId,
+      workingSchema: policy,
+      savedSchema
+    } = this.state;
     this.setState({ savingPolicy: true });
-    UserStorageMutation.mutate({
+
+    const [USER_STORE, ACCOUNT_STORE] = STORAGE_TYPE;
+
+    let mutateFn = UserStorageMutation.mutate;
+    const mutateOptions = {
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: 'nr1-tag-improver',
       documentId: 'tagging-policy',
       document: { policy: policy }
-    })
+    };
+
+    if (selectedStorageId === ACCOUNT_STORE.id) {
+      mutateFn = AccountStorageMutation.mutate;
+      mutateOptions.accountId = accountId;
+      mutateOptions.actionType =
+        AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT;
+    }
+
+    mutateFn(mutateOptions)
       .then(() => {
         this.setState(
           {
@@ -78,9 +110,14 @@ export default class TaggingPolicy extends React.Component {
           () => updatePolicy(policy, savedSchema)
         );
       })
-      .catch(() => {
+      .catch((error) => {
+        console.log(error)
         this.setState({ savingPolicy: false, policySaveErrored: true });
       });
+  };
+
+  setTargetStorage = ({ storageId }) => {
+    this.setState({ selectedStorageId: storageId });
   };
 
   startEditing = () => {
@@ -171,13 +208,15 @@ export default class TaggingPolicy extends React.Component {
   };
 
   render() {
+    const { accountId } = this.context;
     const { schema, tagHierarchy, entityCount } = this.props;
     const {
       workingSchema,
       isEditMode,
       policySaveErrored,
       savingPolicy,
-      tableSorting
+      tableSorting,
+      selectedStorageId
     } = this.state;
 
     if (!schema) {
@@ -243,6 +282,11 @@ export default class TaggingPolicy extends React.Component {
                     Error occurred saving policy.
                   </div>
                 )}
+                <StorageTypeEdit
+                  accountId={accountId}
+                  selectedStorageId={selectedStorageId}
+                  setTargetStorage={this.setTargetStorage}
+                />
                 <Button onClick={this.cancelEditing}>Cancel</Button>
                 <Button
                   loading={savingPolicy}
