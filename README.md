@@ -47,6 +47,7 @@ npm -v
 ```bash
 nr1 nerdpack:clone -r https://github.com/newrelic/nr1-tag-improver.git
 cd nr1-tag-improver
+npm install
 nr1 nerdpack:serve
 ```
 
