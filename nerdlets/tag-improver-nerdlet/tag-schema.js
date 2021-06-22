@@ -67,6 +67,12 @@ const SCHEMA = [
       'What is the larger value stream or business application that this entity is a part of, to deliver business value to users?',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [] // reserved for future use
+  },
+  {
+    key: 'application',
+    purpose: 'application (set of services) to which the service belongs',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
+    allowedValues: [] // reserved for future use
   }
 ];
 
