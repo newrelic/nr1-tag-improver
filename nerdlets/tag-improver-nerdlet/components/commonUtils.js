@@ -23,7 +23,6 @@ function createAddEntityTagGQL({ entitiesToUpdate, tagsToAdd }) {
       }
     };
   });
-
 }
 
 function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
@@ -37,7 +36,7 @@ function createDeleteEntityTagGQL({ entitiesToUpdate, tagsToDelete }) {
             }
         }
   }`;
-  return  entitiesToUpdate.map(entityGuid => {
+  return entitiesToUpdate.map(entityGuid => {
     return {
       mutation,
       variables: {
@@ -166,7 +165,7 @@ export async function addTags({
       tagsToAdd
     });
     const execute = async function(statement) {
-      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const { entityGuid: entityId, entityTags: tags } = statement.variables;
       const response = await NerdGraphMutation.mutate(statement);
       const { errors } = response.data.taggingAddTagsToEntity;
       return {
@@ -328,7 +327,7 @@ export async function deleteTags({
       tagsToDelete
     });
     const execute = async function(statement) {
-      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const { entityGuid: entityId, entityTags: tags } = statement.variables;
       const response = await NerdGraphMutation.mutate(statement);
       const { errors } = response.data.taggingDeleteTagFromEntity;
       return {
@@ -402,7 +401,7 @@ export async function addTagAndValues({
       currentTagKey
     });
     const execute = async function(statement) {
-      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const { entityGuid: entityId, entityTags: tags } = statement.variables;
       const response = await NerdGraphMutation.mutate(statement);
       const { errors } = response.data.taggingAddTagsToEntity;
       return {
@@ -477,7 +476,7 @@ export async function deleteTagValues({
       newTagValue
     });
     const execute = async function(statement) {
-      const { entityGuid: entityId, entityTags: tags } = statement.variables; // eslint-disable-line prettier/prettier
+      const { entityGuid: entityId, entityTags: tags } = statement.variables;
       const response = await NerdGraphMutation.mutate(statement);
       const { errors } = response.data.taggingDeleteTagValuesFromEntity;
       return {

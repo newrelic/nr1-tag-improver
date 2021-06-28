@@ -549,4 +549,3 @@ function getTagKeys(tagHierarchy, policy) {
 
   return tagsForDropdown;
 }
-
