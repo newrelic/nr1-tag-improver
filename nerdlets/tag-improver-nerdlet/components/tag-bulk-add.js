@@ -1,12 +1,8 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { addTags } from './commonUtils';
 
-import {
-  HeadingText,
-  PlatformStateContext,
-  Button,
-  NerdGraphMutation
-} from 'nr1';
+import { HeadingText, PlatformStateContext, Button, Spinner } from 'nr1';
 import Autocomplete from './autocomplete';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
@@ -28,9 +24,14 @@ export default class TagBulkAdd extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      enableSpinner: true,
       tagsToAdd: { [emptyTagPlaceholderKey]: '' },
       entityStatuses: {}
     };
+  }
+
+  componentDidMount() {
+    this.setState({ enableSpinner: false });
   }
 
   static contextType = PlatformStateContext;
@@ -38,71 +39,50 @@ export default class TagBulkAdd extends React.Component {
   applyTagsToEntities = async () => {
     const { selectedEntityIds } = this.props;
     const { tagsToAdd, entityStatuses } = this.state;
-    const tagsForGql = Object.entries(tagsToAdd).map(([tagKey, tagValue]) => ({
-      key: tagKey,
-      values: [tagValue]
-    }));
-    const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
-      taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
-        errors {
-            message
-        }
-      }
-    }`;
+
     let entitiesToUpdate;
+    //  entityStatus format is array [ <GUID>, <ENTITY_UPDATE_STATUS.SUCCESS> ]
     const statusEntries = Object.entries(entityStatuses);
     if (statusEntries.length) {
-      entitiesToUpdate = statusEntries.filter(
-        ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
-      );
+      entitiesToUpdate = statusEntries
+        .filter(
+          ([, entityStatus]) => entityStatus !== ENTITY_UPDATE_STATUS.SUCCESS
+        )
+        .map(item => item[0]);
     } else {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
     entitiesToUpdate.forEach(entityId => {
-      if (!statusObject[entityId]) {
+      if (statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
-    this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
-      const variables = { entityGuid: entityId, entityTags: tagsForGql };
-      try {
-        const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
-        } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
-          throw result.data.taggingAddTagsToEntity.errors;
-        } else {
-          const previousStatuses = this.state.entityStatuses;
-          this.setState(
-            {
-              entityStatuses: {
-                ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
-            },
-            () => {
-              if (
-                Object.values(this.state.entityStatuses).every(
-                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
-                )
-              ) {
-                this.props.reloadTagsFn(selectedEntityIds);
-              }
-            }
-          );
+
+    const setEntityStatusFn = function(entityId, hasErrors = false) {
+      const previousStatuses = this.state.entityStatuses;
+      this.setState({
+        entityStatuses: {
+          ...previousStatuses,
+          [entityId]: hasErrors
+            ? ENTITY_UPDATE_STATUS.ERROR
+            : ENTITY_UPDATE_STATUS.SUCCESS
         }
-      } catch (error) {
-        const previousStatuses = this.state.entityStatuses;
-        this.setState({
-          entityStatuses: {
-            ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
-        });
-      }
+      });
+    }.bind(this);
+    this.enableSpinner(true);
+    this.setState({ entityStatuses: statusObject });
+
+    // const prev_entities = await getEntitiesTags(entitiesToUpdate);
+    await addTags({
+      entitiesToUpdate,
+      tagsToAdd,
+      setEntityStatusFn,
+      maxThreads: 2
     });
+
+    await this.props.reloadTagsFn(selectedEntityIds);
+    this.enableSpinner(false);
   };
 
   changeTag = (fromTag, toTag) => {
@@ -130,6 +110,10 @@ export default class TagBulkAdd extends React.Component {
     this.setState({
       tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: '' }
     });
+  };
+
+  enableSpinner = enable => {
+    this.setState({ enableSpinner: enable });
   };
 
   render() {
@@ -166,6 +150,10 @@ export default class TagBulkAdd extends React.Component {
       resultText = 'Tags added!';
     } else {
       resultText = 'Add tags';
+    }
+
+    if (this.state.enableSpinner) {
+      return <Spinner />;
     }
 
     return (
