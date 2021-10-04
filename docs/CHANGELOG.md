@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.2...v1.2.0) (2021-10-04)
+
+
+### Features
+
+* update semantic release with node ([dd492fe](https://github.com/newrelic/nr1-tag-improver/commit/dd492fedd3a19e951404f3d6eb403a9dac610b7c))
+
 ## [1.1.2](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.1...v1.1.2) (2021-04-07)
 
 
