@@ -154,28 +154,7 @@ export default class TagVisualizer extends React.Component {
       state: { queryCursor, accountId, selectedEntityType }
     } = this;
 
-    const query = `
-    query EntitiesSearchQuery($queryString: String!, $nextCursor: String) {
-      actor {
-        entitySearch(query: $queryString) {
-          count
-          results(cursor: $nextCursor) {
-            entities {
-              name
-              entityType
-              guid
-              accountId
-              tags {
-                tagKey: key
-                tagValues: values
-              }
-            }
-            nextCursor
-          }
-        }
-      }
-    }
-    `;
+    let query;
     const variables = {
       // queryString: `domain in ('APM', 'MOBILE', 'BROWSER', 'DASHBOARD', 'WORKLOAD')${
       queryString: `domain = '${selectedEntityType.id}' ${
@@ -186,6 +165,51 @@ export default class TagVisualizer extends React.Component {
     };
     if (queryCursor) {
       variables.nextCursor = queryCursor;
+      query = `
+      query EntitiesSearchQuery($queryString: String!, $nextCursor: String) {
+        actor {
+          entitySearch(query: $queryString) {
+            count
+            results(cursor: $nextCursor) {
+              entities {
+                name
+                entityType
+                guid
+                accountId
+                tags {
+                  tagKey: key
+                  tagValues: values
+                }
+              }
+              nextCursor
+            }
+          }
+        }
+      }
+      `;
+    } else {
+      query = `
+      query EntitiesSearchQuery($queryString: String!) {
+        actor {
+          entitySearch(query: $queryString) {
+            count
+            results {
+              entities {
+                name
+                entityType
+                guid
+                accountId
+                tags {
+                  tagKey: key
+                  tagValues: values
+                }
+              }
+              nextCursor
+            }
+          }
+        }
+      }
+      `;
     }
 
     NerdGraphQuery.query({
@@ -225,7 +249,7 @@ export default class TagVisualizer extends React.Component {
     try {
       entityCount = count;
       entities = entitiesToProcess || [];
-      nextCursor = ngCursor || undefined;
+      nextCursor = ngCursor || "";
     } catch (err) {
       logger.error('Error parsing results %O', err);
     }
