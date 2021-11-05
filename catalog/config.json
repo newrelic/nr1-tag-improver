@@ -2,6 +2,8 @@
   "tagline": "Tagging best practices",
   "repository": "https://github.com/newrelic/nr1-tag-improver.git",
   "details": "Tag Improver will help you implement consistent and complete tagging of your software and infrastructure.\n\nMany New Relic features, from the Explorer to Workloads to Alerts to other Catalog apps, work better when you tag your entities. Getting and keeping your tags consistent is hard, and that's where tag improver comes in.\n\nWe recommend some tags to get you started and you're free to edit the default policy to fit your goals and existing naming conventions. With tag improver you can:\n- View a dashboard of policy compliance\n- Explore all tag keys and values to find spelling and capitlaization variations\n- View a report of which tags are missing from each entity, and\n- Bulk-edit tags on entities through the NR One UI.",
+  "categoryTerms": [],
+  "keywords": ["tags"],
   "support": {
     "issues": {
       "url": "https://github.com/newrelic/nr1-tag-improver/issues"
