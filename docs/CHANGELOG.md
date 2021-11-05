@@ -1,3 +1,10 @@
+# [1.3.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.2.0...v1.3.0) (2021-11-05)
+
+
+### Features
+
+* add catalog keywords and categoryTerms ([291fb3f](https://github.com/newrelic/nr1-tag-improver/commit/291fb3f4dcdb4133a470c35c14a859b4adf7e174))
+
 # [1.2.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.1.2...v1.2.0) (2021-10-04)
 
 
