@@ -8,7 +8,7 @@ import {
   Button,
   NerdGraphMutation,
   Select,
-  SelectItem
+  SelectItem,
 } from 'nr1';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
@@ -17,21 +17,21 @@ const ENTITY_UPDATE_STATUS = {
   NONE: 0,
   UPDATING: 1,
   SUCCESS: 2,
-  ERROR: 3
+  ERROR: 3,
 };
 
 export default class TagBulkDelete extends React.Component {
   static propTypes = {
     selectedEntityIds: PropTypes.array,
     reloadTagsFn: PropTypes.func,
-    entityTagsMap: PropTypes.object
+    entityTagsMap: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       tagsToDelete: { [emptyTagPlaceholderKey]: 1 },
-      entityStatuses: {}
+      entityStatuses: {},
     };
   }
 
@@ -70,8 +70,8 @@ export default class TagBulkDelete extends React.Component {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
+        if (result.error?.graphQLErrors.length) {
+          throw result.error.graphQLErrors;
         } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
           throw result.data.taggingDeleteTagFromEntity.errors;
         } else {
@@ -80,8 +80,8 @@ export default class TagBulkDelete extends React.Component {
             {
               entityStatuses: {
                 ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
+                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
+              },
             },
             () => {
               if (
@@ -99,8 +99,8 @@ export default class TagBulkDelete extends React.Component {
         this.setState({
           entityStatuses: {
             ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
+            [entityId]: ENTITY_UPDATE_STATUS.ERROR,
+          },
         });
       }
     });
@@ -124,7 +124,7 @@ export default class TagBulkDelete extends React.Component {
   addNewTag = () => {
     const { tagsToDelete } = this.state;
     this.setState({
-      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 }
+      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 },
     });
   };
 
