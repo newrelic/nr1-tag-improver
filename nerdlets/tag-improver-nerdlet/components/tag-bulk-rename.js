@@ -7,7 +7,7 @@ import {
   Button,
   NerdGraphMutation,
   Select,
-  SelectItem,
+  SelectItem
 } from 'nr1';
 import Autocomplete from './autocomplete';
 
@@ -17,7 +17,7 @@ const ENTITY_UPDATE_STATUS = {
   ADD_ERROR: 2,
   REMOVING: 3,
   REMOVE_ERROR: 4,
-  SUCCESS: 5,
+  SUCCESS: 5
 };
 
 export default class TagBulkRename extends React.Component {
@@ -25,7 +25,7 @@ export default class TagBulkRename extends React.Component {
     selectedEntityIds: PropTypes.array,
     tagHierarchy: PropTypes.object,
     entityTagsMap: PropTypes.object,
-    reloadTagsFn: PropTypes.func,
+    reloadTagsFn: PropTypes.func
   };
 
   constructor(props) {
@@ -33,7 +33,7 @@ export default class TagBulkRename extends React.Component {
     this.state = {
       entityStatuses: {},
       selectedCurrentTag: '',
-      selectedNewTag: '',
+      selectedNewTag: ''
     };
   }
 
@@ -83,15 +83,15 @@ export default class TagBulkRename extends React.Component {
           ).tagValues;
           const tagsVariable = {
             key: selectedNewTag,
-            values: tagValuesForEntity,
+            values: tagValuesForEntity
           };
           const addVariables = {
             entityGuid: entityId,
-            entityTags: tagsVariable,
+            entityTags: tagsVariable
           };
           const result = await NerdGraphMutation.mutate({
             mutation: addMutation,
-            variables: addVariables,
+            variables: addVariables
           });
           if (result.error?.graphQLErrors.length) {
             throw result.error.graphQLErrors;
@@ -103,8 +103,8 @@ export default class TagBulkRename extends React.Component {
             this.setState({
               entityStatuses: {
                 ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.REMOVING,
-              },
+                [entityId]: ENTITY_UPDATE_STATUS.REMOVING
+              }
             });
           }
         } catch (error) {
@@ -113,8 +113,8 @@ export default class TagBulkRename extends React.Component {
           this.setState({
             entityStatuses: {
               ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR,
-            },
+              [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR
+            }
           });
         }
       } else {
@@ -127,11 +127,11 @@ export default class TagBulkRename extends React.Component {
         try {
           const deleteVariables = {
             entityGuid: entityId,
-            entityTags: [selectedCurrentTag],
+            entityTags: [selectedCurrentTag]
           };
           const result = await NerdGraphMutation.mutate({
             mutation: deleteMutation,
-            variables: deleteVariables,
+            variables: deleteVariables
           });
           if (result.error?.graphQLErrors.length) {
             throw result.error.graphQLErrors;
@@ -143,8 +143,8 @@ export default class TagBulkRename extends React.Component {
               {
                 entityStatuses: {
                   ...previousStatuses,
-                  [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
-                },
+                  [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
+                }
               },
               () => {
                 if (
@@ -163,8 +163,8 @@ export default class TagBulkRename extends React.Component {
           this.setState({
             entityStatuses: {
               ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR,
-            },
+              [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR
+            }
           });
         }
       }
