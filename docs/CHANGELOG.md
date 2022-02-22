@@ -1,3 +1,11 @@
+## [1.3.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.3.0...v1.3.1) (2022-02-22)
+
+
+### Bug Fixes
+
+* app deprecations ([cc55df4](https://github.com/newrelic/nr1-tag-improver/commit/cc55df4cbca46bb6c7aa74d2a226961f46e29357))
+* eslint errors ([d05e1da](https://github.com/newrelic/nr1-tag-improver/commit/d05e1dae57ae3bcf253685fd8142233f09a86f3e))
+
 # [1.3.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.2.0...v1.3.0) (2021-11-05)
 
 
