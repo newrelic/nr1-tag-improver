@@ -69,8 +69,8 @@ export default class TagBulkAdd extends React.Component {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
+        if (result.error?.graphQLErrors.length) {
+          throw result.error.graphQLErrors;
         } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
           throw result.data.taggingAddTagsToEntity.errors;
         } else {
@@ -190,7 +190,8 @@ export default class TagBulkAdd extends React.Component {
                   <Autocomplete
                     choices={Object.keys(tagHierarchy[tagKey] || {}).reduce(
                       (accumulator, tag) => (
-                        (accumulator[tag] = tag), accumulator // eslint-disable-line no-sequences, prettier/prettier
+                        (accumulator[tag] = tag),// eslint-disable-line no-sequences, prettier/prettier
+                        accumulator
                       ),
                       {}
                     )}

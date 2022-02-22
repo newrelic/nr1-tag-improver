@@ -70,8 +70,8 @@ export default class TagBulkDelete extends React.Component {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
-        if (result.errors?.length) {
-          throw result.errors;
+        if (result.error?.graphQLErrors.length) {
+          throw result.error.graphQLErrors;
         } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
           throw result.data.taggingDeleteTagFromEntity.errors;
         } else {

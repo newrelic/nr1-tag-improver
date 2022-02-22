@@ -93,8 +93,8 @@ export default class TagBulkRename extends React.Component {
             mutation: addMutation,
             variables: addVariables
           });
-          if (result.errors?.length) {
-            throw result.errors;
+          if (result.error?.graphQLErrors.length) {
+            throw result.error.graphQLErrors;
           } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
             throw result.data.taggingAddTagsToEntity.errors;
           } else {
@@ -133,8 +133,8 @@ export default class TagBulkRename extends React.Component {
             mutation: deleteMutation,
             variables: deleteVariables
           });
-          if (result.errors?.length) {
-            throw result.errors;
+          if (result.error?.graphQLErrors.length) {
+            throw result.error.graphQLErrors;
           } else if (result.data?.taggingDeleteTagFromEntity?.errors?.length) {
             throw result.data.taggingDeleteTagFromEntity.errors;
           } else {

@@ -96,8 +96,8 @@ export default class TagBulkEdit extends React.Component {
             mutation: addMutation,
             variables: addVariables
           });
-          if (result.errors?.length) {
-            throw result.errors;
+          if (result.error?.graphQLErrors.length) {
+            throw result.error.graphQLErrors;
           } else if (result.data?.taggingAddTagsToEntity?.errors?.length) {
             throw result.data.taggingAddTagsToEntity.errors;
           } else {
@@ -151,8 +151,8 @@ export default class TagBulkEdit extends React.Component {
               mutation: deleteMutation,
               variables: deleteVariables
             });
-            if (result.errors?.length) {
-              throw result.errors;
+            if (result.error?.graphQLErrors.length) {
+              throw result.error.graphQLErrors;
             } else if (
               result.data?.taggingDeleteTagValuesFromEntity?.errors?.length
             ) {
@@ -225,7 +225,8 @@ export default class TagBulkEdit extends React.Component {
     const tagValueSuggestions = selectedCurrentTag
       ? Object.keys(tagHierarchy[selectedCurrentTag] || {}).reduce(
           (accumulator, tagValue) => (
-            (accumulator[tagValue] = tagValue), accumulator // eslint-disable-line no-sequences, prettier/prettier
+            (accumulator[tagValue] = tagValue),// eslint-disable-line no-sequences, prettier/prettier
+            accumulator
           ),
           {}
         )

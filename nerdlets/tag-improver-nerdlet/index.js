@@ -192,7 +192,7 @@ export default class TagVisualizer extends React.Component {
       query,
       variables
     })
-      .then(({ data, errors }) => {
+      .then(({ data, error }) => {
         if (data) {
           processEntityQueryResults(
             data.actor.entitySearch.results.entities,
@@ -202,8 +202,8 @@ export default class TagVisualizer extends React.Component {
         } else {
           logger.log('data is NOT truthy %O', data);
         }
-        if (errors) {
-          logger.error('Entity query error %O', errors);
+        if (error?.graphQLErrors) {
+          logger.error('Entity query error %O', error?.graphQLErrors);
         }
       })
       .catch(err => {
