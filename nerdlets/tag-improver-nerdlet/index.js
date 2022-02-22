@@ -12,7 +12,7 @@ import {
   PlatformStateContext,
   NerdletStateContext,
   UserStorageQuery,
-  logger,
+  logger
 } from 'nr1';
 
 import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
@@ -23,7 +23,7 @@ import TaggingPolicy from './components/tag-policy';
 
 export default class TagVisualizer extends React.Component {
   static propTypes = {
-    height: PropTypes.number,
+    height: PropTypes.number
   };
 
   state = {
@@ -39,11 +39,11 @@ export default class TagVisualizer extends React.Component {
     selectedEntityType: {
       id: 'APM',
       name: 'Application',
-      value: 'APM_APPLICATION_ENTITY',
+      value: 'APM_APPLICATION_ENTITY'
     },
     selectedTagKey: '',
     selectedTagValue: '',
-    currentTab: 'policy-tab',
+    currentTab: 'policy-tab'
   };
 
   componentDidMount() {
@@ -52,8 +52,8 @@ export default class TagVisualizer extends React.Component {
       accountPicker: true,
       accountPickerValues: [
         nerdlet.ACCOUNT_PICKER_VALUE.CROSS_ACCOUNT,
-        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES,
-      ],
+        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES
+      ]
     });
     this.setState({ accountId: this.context.accountId }, () => {
       this.getTaggingPolicy();
@@ -80,7 +80,7 @@ export default class TagVisualizer extends React.Component {
       if (newTab !== 'entity-tab') {
         this.setState({
           // selectedTagKey: '',
-          selectedTagValue: '',
+          selectedTagValue: ''
         });
       }
     });
@@ -89,7 +89,7 @@ export default class TagVisualizer extends React.Component {
   onUpdateEntitiesFilter = item => {
     this.setState({
       selectedTagKey: item.tagKey,
-      selectedTagValue: item.tagValue,
+      selectedTagValue: item.tagValue
     });
   };
 
@@ -97,7 +97,7 @@ export default class TagVisualizer extends React.Component {
     this.onUpdateEntitiesFilter(item);
     nerdlet.setUrlState({ tab: 'entity-tab' });
     this.setState({
-      currentTab: 'entity-tab',
+      currentTab: 'entity-tab'
     });
   };
 
@@ -117,7 +117,7 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy: null,
       selectedTagKey: '',
       selectedTagValue: '',
-      mandatoryTagCount: 0,
+      mandatoryTagCount: 0
     });
   };
 
@@ -140,7 +140,7 @@ export default class TagVisualizer extends React.Component {
         doneLoading: false,
         queryCursor: undefined,
         selectedTagKey: '',
-        selectedTagValue: '',
+        selectedTagValue: ''
       },
       () => {
         loadEntityBatch();
@@ -151,7 +151,7 @@ export default class TagVisualizer extends React.Component {
   loadEntityBatch = () => {
     const {
       processEntityQueryResults,
-      state: { queryCursor, accountId, selectedEntityType },
+      state: { queryCursor, accountId, selectedEntityType }
     } = this;
 
     const query = `
@@ -182,7 +182,7 @@ export default class TagVisualizer extends React.Component {
         accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
           : ''
-      }`,
+      }`
     };
     if (queryCursor) {
       variables.nextCursor = queryCursor;
@@ -190,7 +190,7 @@ export default class TagVisualizer extends React.Component {
 
     NerdGraphQuery.query({
       query,
-      variables,
+      variables
     })
       .then(({ data, error }) => {
         if (data) {
@@ -214,7 +214,7 @@ export default class TagVisualizer extends React.Component {
   processEntityQueryResults = (entitiesToProcess, count, ngCursor) => {
     const {
       loadEntityBatch,
-      state: { loadedEntities, accountId },
+      state: { loadedEntities, accountId }
     } = this;
     if (accountId !== this.state.accountId) {
       return;
@@ -236,7 +236,7 @@ export default class TagVisualizer extends React.Component {
         queryCursor: nextCursor,
         entityCount,
         loadedEntities: loadedEntities + entities.length,
-        doneLoading: !nextCursor,
+        doneLoading: !nextCursor
       },
       () => {
         if (nextCursor && accountId === this.state.accountId) {
@@ -251,7 +251,7 @@ export default class TagVisualizer extends React.Component {
       tagHierarchy,
       entityTagsMap,
       taggingPolicy,
-      mandatoryTagCount,
+      mandatoryTagCount
     } = this.state;
 
     if (!Object.keys(tagHierarchy).length) {
@@ -294,7 +294,7 @@ export default class TagVisualizer extends React.Component {
       const found = entity.tags.find(tag => tag.tagKey === tagPolicy.key);
       const entityTag = {
         tagKey: tagPolicy.key,
-        tagValues: found ? found.tagValues : ['---'],
+        tagValues: found ? found.tagValues : ['---']
       };
 
       if (tagPolicy.enforcement === 'required') {
@@ -313,7 +313,7 @@ export default class TagVisualizer extends React.Component {
   getTaggingPolicy = () => {
     UserStorageQuery.query({
       collection: 'nr1-tag-improver',
-      documentId: 'tagging-policy',
+      documentId: 'tagging-policy'
     })
       .then(({ data }) => {
         const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
@@ -321,14 +321,14 @@ export default class TagVisualizer extends React.Component {
           taggingPolicy: sortedPolicy(taggingPolicy),
           mandatoryTagCount:
             taggingPolicy.filter(tag => tag.enforcement === 'required')
-              .length || 0,
+              .length || 0
         });
       })
       .catch(() => {
         this.setState({
           taggingPolicy: sortedPolicy(SCHEMA),
           mandatoryTagCount:
-            SCHEMA.filter(tag => tag.enforcement === 'required').length || 0,
+            SCHEMA.filter(tag => tag.enforcement === 'required').length || 0
         });
       });
   };
@@ -338,7 +338,7 @@ export default class TagVisualizer extends React.Component {
       {
         taggingPolicy: sortedPolicy(policy),
         mandatoryTagCount:
-          policy.filter(tag => tag.enforcement === 'required').length || 0,
+          policy.filter(tag => tag.enforcement === 'required').length || 0
       },
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
@@ -388,7 +388,7 @@ export default class TagVisualizer extends React.Component {
       selectedEntityType,
       selectedTagKey,
       selectedTagValue,
-      currentTab,
+      currentTab
     } = this.state;
 
     return (
@@ -403,7 +403,7 @@ export default class TagVisualizer extends React.Component {
                   display: 'flex',
                   flexDirection: 'row',
                   lineHeight: '24px',
-                  paddingBottom: '9px',
+                  paddingBottom: '9px'
                 }}
               >
                 Entity type:
@@ -509,11 +509,11 @@ function getTagKeys(tagHierarchy, policy) {
   const tagsForDropdown = [];
   tagsForDropdown.push({
     title: 'required',
-    array: tagsObject(policy).required,
+    array: tagsObject(policy).required
   });
   tagsForDropdown.push({
     title: 'optional',
-    array: tagsObject(policy).optional,
+    array: tagsObject(policy).optional
   });
   tagsForDropdown.push({ title: 'not in policy', array: [] });
 
