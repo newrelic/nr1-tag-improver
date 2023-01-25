@@ -1,8 +1,7 @@
 [![New Relic One Catalog Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/New_Relic_One_Catalog_Project.png)](https://opensource.newrelic.com/oss-category/#new-relic-one-catalog-project)
 
 # nr1-tag-improver
-
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
+![CI](https://github.com/newrelic/nr1-tag-improver/workflows/CI/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
 
 <a href="https://github.com/newrelic?q=nrlabs-viz&amp;type=all&amp;language=&amp;sort="><img src="https://user-images.githubusercontent.com/1786630/214122263-7a5795f6-f4e3-4aa0-b3f5-2f27aff16098.png" height=50 /></a>
 
