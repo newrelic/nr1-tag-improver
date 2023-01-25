@@ -77,7 +77,7 @@ New Relic has open-sourced this project. This project is provided AS-IS WITHOUT 
 
 We encourage you to bring your experiences and questions to the [Explorers Hub](https://discuss.newrelic.com) where our community members collaborate on solutions and new ideas.
 
-## Community
+## Community Support
 
 The discussions page on this repository is enabled for customers to interact with New Relic employees as well as other customers to get help and share best practices. You can check out the discussions page for this repo [here](../../discussions).
 
