@@ -4,6 +4,10 @@
 
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
 
+<a href="https://github.com/newrelic?q=nrlabs-viz&amp;type=all&amp;language=&amp;sort="><img src="https://user-images.githubusercontent.com/1786630/214122263-7a5795f6-f4e3-4aa0-b3f5-2f27aff16098.png" height=50 /></a>
+
+This application is maintained by the New Relic Labs team. Connect with us directly by [creating issues](../../issues) or [starting a discussion](../../discussions) in this repo.
+
 ## About this Nerdpack
 
 Tag Improver is here to help you get maximum value from New Relic One by simplifying the process of creating and managing a good tagging strategy.
@@ -76,9 +80,7 @@ We encourage you to bring your experiences and questions to the [Explorers Hub](
 
 ## Community
 
-New Relic hosts and moderates an online forum where customers can interact with New Relic employees as well as other customers to get help and share best practices. Like all official New Relic open source projects, there's a related Community topic in the New Relic Explorers Hub. You can find this project's topic/threads here:
-
-[https://discuss.newrelic.com/t/tag-improver-new-relic-one-nerdpack/125683](https://discuss.newrelic.com/t/tag-improver-new-relic-one-nerdpack/125683)
+The discussions page on this repository is enabled for customers to interact with New Relic employees as well as other customers to get help and share best practices. You can check out the discussions page for this repo [here](../../discussions).
 
 ## Issues / enhancement requests
 
