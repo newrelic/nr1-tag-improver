@@ -98,7 +98,7 @@ The discussions page on this repository is enabled for customers to interact wit
 
 You can also interact with us and other customers to troubleshoot issues and share best practices on [New Relic Explorers Hub](https://discuss.newrelic.com).
 
-## Issues / enhancement requests
+## Issues / Enhancement Requests
 
 Issues and enhancement requests can be submitted in the [Issues tab of this repository](../../issues). Please search for and review the existing open issues before submitting a new issue.
 
