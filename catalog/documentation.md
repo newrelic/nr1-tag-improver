@@ -1,4 +1,11 @@
+[![New Relic One Catalog Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/New_Relic_One_Catalog_Project.png)](https://opensource.newrelic.com/oss-category/#new-relic-one-catalog-project)
+
 # nr1-tag-improver
+![CI](https://github.com/newrelic/nr1-tag-improver/workflows/CI/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
+
+<a href="https://github.com/newrelic?q=nrlabs-viz&amp;type=all&amp;language=&amp;sort="><img src="https://user-images.githubusercontent.com/1786630/214122263-7a5795f6-f4e3-4aa0-b3f5-2f27aff16098.png" height=50 /></a>
+
+This application is maintained by the New Relic Labs team. Connect with us directly by [creating issues](../../issues) or [starting a discussion](../../discussions) in this repo.
 
 ## About this Nerdpack
 
@@ -8,9 +15,37 @@ Define the important entity tags for your environment, report on coverage, and v
 
 ## What can Tag Improver do for you
 
-* Report on the coverage of key tags across your portfolio based on an editable tag schema
-* Report the tags in use (and missing) from each entity, and manually manage tags in bulk
-* Explore the full set of tag key:values in use across your account
+### Report on the coverage of key tags across your portfolio based on an editable tag schema
+
+Tag Improver introduces the concept of “tag policies” which define a set of tags and their enforcement level within an account. Users can specify whether a tag is Required or Optional. Only tags that are identified as Required will be considered when assessing tag policy compliance. As a convenience, we provide you with a default tag policy on deployment of Tag Improver that you may edit to better fit and drive your organization’s tagging strategy.
+
+![View tag policy report](screenshots/tag-policy.png)
+
+### Explore the full set of tag key:values in use across your account
+
+In the Tag Analyzer tab, users can view and analyze all of the tags currently in use for a given entity type in their selected account(s), including those defined in the tag policy but not currently defined for any entities. Tag Analyzer displays all tags in use across the entities of a specific entity type, not just those defined in the tag policy, providing a consolidated and complete view.
+
+With the v1.1 release, users can now seamlessly move from identifying a cohort of entities with a particular value for a tag (or no value at all if undefined) in the Tag Analyzer tab and then operate on those entities in the Entities tab. This new and convenient workflow makes closing coverage gaps and enforcing an organization’s tag policy easy. Some of the other benefits & improvements include:
+
+- Identifying high-cardinality tags and inspecting for duplicate or redundant values
+- Identifying and managing duplicate or redundant tag keys (ex. “Environment” vs. “environment”)
+- Identifying non-policy tags with high coverage to incorporate into the tag policy
+
+![Explore all tags used across your accounts](screenshots/tag-analysis.png)
+
+### Report the tags in use (and missing) from each entity, and manually manage tags in bulk
+
+In the Policy tab, you can define a policy for tag governance across your account. In the Tag Analyzer tab, you can view adherence to that coverage and values in use. In the Entities tab, it all comes together. As the name indicates, the Entities tab provides an entity-centric view of tags and tag policy coverage, along with the ability to add, modify, or remove tags or values on those entities.
+
+![See entity tag status](screenshots/entity-tagging.png)
+
+## Caveats
+
+As with anything, a few caveats:
+
+Tag Improver currently does not recognize the mutability of tags. Attempts to add or edit an immutable tag will result in creating a new tag key but scoped to the user. A future release of Tag Improver is planned to address and remedy this behavior.
+A manual refresh Tag Improver may be needed to reflect some changes implemented (bulk edit actions)
+Tag Improver, like many Nerdpacks, employs Nerdstore for storage needs; at this time, tag policies are user-scoped. This limitation will be addressed in a future release of Tag Improver or other tag management functionality in NR1.
 
 ## Open source license
 
@@ -35,6 +70,8 @@ npm -v
 ```bash
 nr1 nerdpack:clone -r https://github.com/newrelic/nr1-tag-improver.git
 cd nr1-tag-improver
+nr1 nerdpack:uuid -gf
+npm install
 nr1 nerdpack:serve
 ```
 
@@ -55,17 +92,9 @@ nr1 nerdpack:subscribe [-c [DEV|BETA|STABLE]] [--profile=your_profile_name]
 
 Visit [https://one.newrelic.com](https://one.newrelic.com), and launch your app in New Relic.
 
-# Support
+## Community Support
 
-New Relic has open-sourced this project. This project is provided AS-IS WITHOUT WARRANTY OR DEDICATED SUPPORT. Issues and contributions should be reported to the project here on GitHub.
-
-We encourage you to bring your experiences and questions to the [Explorers Hub](https://discuss.newrelic.com) where our community members collaborate on solutions and new ideas.
-
-## Community
-
-New Relic hosts and moderates an online forum where customers can interact with New Relic employees as well as other customers to get help and share best practices. Like all official New Relic open source projects, there's a related Community topic in the New Relic Explorers Hub. You can find this project's topic/threads here:
-
-[https://discuss.newrelic.com/t/tag-improver-new-relic-one-nerdpack/125683](https://discuss.newrelic.com/t/tag-improver-new-relic-one-nerdpack/125683)
+The discussions page on this repository is enabled for customers to interact with New Relic employees as well as other customers to get help and share best practices. You can check out the discussions page for this repo [here](https://github.com/newrelic/nr1-tag-improver/discussions).
 
 ## Issues / enhancement requests
 
