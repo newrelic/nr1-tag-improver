@@ -178,7 +178,9 @@ export default class TagVisualizer extends React.Component {
     `;
     const variables = {
       // queryString: `domain in ('APM', 'MOBILE', 'BROWSER', 'DASHBOARD', 'WORKLOAD')${
-      queryString: `domain = '${selectedEntityType.id}' ${
+      queryString: `${selectedEntityType.attribute} = '${
+        selectedEntityType.id
+      }' ${
         accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
           : ''
