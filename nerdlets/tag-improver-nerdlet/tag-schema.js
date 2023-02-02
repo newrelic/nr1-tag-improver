@@ -72,13 +72,49 @@ const SCHEMA = [
 
 const ENTITY_TYPES = [
   // { id: "ALL", name: "All Entity Types", value: "ALL_ENTITIES" },
-  { id: 'APM', name: 'Application', value: 'APM_APPLICATION_ENTITY' },
-  { id: 'BROWSER', name: 'Browser', value: 'BROWSER_APPLICATION_ENTITY' },
-  { id: 'MOBILE', name: 'Mobile', value: 'MOBILE_APPLICATION_ENTITY' },
-  { id: 'INFRA', name: 'Infrastructure', value: 'INFRASTRUCTURE_HOST_ENTITY' },
-  { id: 'SYNTH', name: 'Synthetic', value: 'SYNTHETIC_MONITOR_ENTITY' },
-  { id: 'VIZ', name: 'Dashboard', value: 'DASHBOARD_ENTITY' },
-  { id: 'NR1', name: 'Workload', value: 'WORKLOAD_ENTITY' }
+  {
+    attribute: 'domain',
+    id: 'APM',
+    name: 'Application',
+    value: 'APM_APPLICATION_ENTITY'
+  },
+  {
+    attribute: 'domain',
+    id: 'BROWSER',
+    name: 'Browser',
+    value: 'BROWSER_APPLICATION_ENTITY'
+  },
+  {
+    attribute: 'domain',
+    id: 'MOBILE',
+    name: 'Mobile',
+    value: 'MOBILE_APPLICATION_ENTITY'
+  },
+  {
+    attribute: 'domain',
+    id: 'INFRA',
+    name: 'Infrastructure',
+    value: 'INFRASTRUCTURE_HOST_ENTITY'
+  },
+  {
+    attribute: 'domain',
+    id: 'SYNTH',
+    name: 'Synthetic',
+    value: 'SYNTHETIC_MONITOR_ENTITY'
+  },
+  {
+    attribute: 'type',
+    id: 'CONDITION',
+    name: 'Alert Conditions',
+    value: 'GENERIC_ENTITY'
+  },
+  {
+    attribute: 'domain',
+    id: 'VIZ',
+    name: 'Dashboard',
+    value: 'DASHBOARD_ENTITY'
+  },
+  { attribute: 'domain', id: 'NR1', name: 'Workload', value: 'WORKLOAD_ENTITY' }
 ];
 
 export {
