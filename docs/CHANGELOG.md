@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.3.1...v1.4.0) (2023-02-02)
+
+
+### Features
+
+* add alert conditions entities ([87a8fdd](https://github.com/newrelic/nr1-tag-improver/commit/87a8fdd6b63e24d9ee17007d40d5037cfc9582c4))
+
 ## [1.3.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.3.0...v1.3.1) (2022-02-22)
 
 
