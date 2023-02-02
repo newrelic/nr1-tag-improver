@@ -1,10 +1,4 @@
-[![New Relic One Catalog Project header](https://github.com/newrelic/opensource-website/raw/master/src/images/categories/New_Relic_One_Catalog_Project.png)](https://opensource.newrelic.com/oss-category/#new-relic-one-catalog-project)
-
 # nr1-tag-improver
-![CI](https://github.com/newrelic/nr1-tag-improver/workflows/CI/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/newrelic/nr1-tag-improver?include_prereleases&sort=semver) [![Snyk](https://snyk.io/test/github/newrelic/nr1-tag-improver/badge.svg)](https://snyk.io/test/github/newrelic/nr1-tag-improver)
-
-<a href="https://github.com/newrelic?q=nrlabs-viz&amp;type=all&amp;language=&amp;sort="><img src="https://user-images.githubusercontent.com/1786630/214122263-7a5795f6-f4e3-4aa0-b3f5-2f27aff16098.png" height=50 /></a>
-
 This application is maintained by the New Relic Labs team. Connect with us directly by [creating issues](../../issues) or [starting a discussion](../../discussions) in this repo.
 
 ## About this Nerdpack
@@ -19,8 +13,6 @@ Define the important entity tags for your environment, report on coverage, and v
 
 Tag Improver introduces the concept of “tag policies” which define a set of tags and their enforcement level within an account. Users can specify whether a tag is Required or Optional. Only tags that are identified as Required will be considered when assessing tag policy compliance. As a convenience, we provide you with a default tag policy on deployment of Tag Improver that you may edit to better fit and drive your organization’s tagging strategy.
 
-![View tag policy report](screenshots/tag-policy.png)
-
 ### Explore the full set of tag key:values in use across your account
 
 In the Tag Analyzer tab, users can view and analyze all of the tags currently in use for a given entity type in their selected account(s), including those defined in the tag policy but not currently defined for any entities. Tag Analyzer displays all tags in use across the entities of a specific entity type, not just those defined in the tag policy, providing a consolidated and complete view.
@@ -31,13 +23,9 @@ With the v1.1 release, users can now seamlessly move from identifying a cohort o
 - Identifying and managing duplicate or redundant tag keys (ex. “Environment” vs. “environment”)
 - Identifying non-policy tags with high coverage to incorporate into the tag policy
 
-![Explore all tags used across your accounts](screenshots/tag-analysis.png)
-
 ### Report the tags in use (and missing) from each entity, and manually manage tags in bulk
 
 In the Policy tab, you can define a policy for tag governance across your account. In the Tag Analyzer tab, you can view adherence to that coverage and values in use. In the Entities tab, it all comes together. As the name indicates, the Entities tab provides an entity-centric view of tags and tag policy coverage, along with the ability to add, modify, or remove tags or values on those entities.
-
-![See entity tag status](screenshots/entity-tagging.png)
 
 ## Caveats
 
