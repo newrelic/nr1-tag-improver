@@ -37,6 +37,7 @@ export default class TagVisualizer extends React.Component {
     taggingPolicy: null,
     mandatoryTagCount: 0,
     selectedEntityType: {
+      attribute: 'domain',
       id: 'APM',
       name: 'Application',
       value: 'APM_APPLICATION_ENTITY'
