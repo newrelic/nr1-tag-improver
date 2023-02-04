@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.4.0...v1.4.1) (2023-02-04)
+
+
+### Bug Fixes
+
+* update entity type/domain ([4a624c2](https://github.com/newrelic/nr1-tag-improver/commit/4a624c287f9f541c76c547914d9e55e6550f6028))
+
 # [1.4.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.3.1...v1.4.0) (2023-02-02)
 
 
