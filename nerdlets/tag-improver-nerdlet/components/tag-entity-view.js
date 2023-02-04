@@ -328,7 +328,7 @@ export default class TagEntityView extends React.Component {
     const renderHeaderInfo = () => {
       const { firstTagKey, dropDownSelectedTagValue } = this.state;
       const { selectedEntityType } = this.props;
-      let result = `Showing entities for "${selectedEntityType.name}" entity type `;
+      let result = `Showing entities for "${selectedEntityType.name}" entity ${selectedEntityType.attribute} `;
 
       // showing entities with
       const DISPLAY_OPTION = {
@@ -357,7 +357,7 @@ export default class TagEntityView extends React.Component {
           result += `with tag key: [${firstTagKey}] not defined`;
           break;
         case DISPLAY_OPTION.ALL_ENTITIES:
-          result = `Showing all entities for "${selectedEntityType.name}" entity type`;
+          result = `Showing all entities for "${selectedEntityType.name}" entity ${selectedEntityType.attribute}`;
           break;
       }
       return result;
