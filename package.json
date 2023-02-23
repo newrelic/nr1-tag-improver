@@ -13,7 +13,8 @@
         "email": "opensource+nr1-tag-improver@newrelic.com"
     },
     "dependencies": {
-        "@newrelic/nr1-community": "latest"
+        "@newrelic/nr1-community": "latest",
+        "nr-labs-components": "github:newrelic/nr-labs-components"
     },
     "browserslist": [
         "last 2 versions",
