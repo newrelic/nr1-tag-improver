@@ -16,7 +16,7 @@ import {
   logger
 } from 'nr1';
 
-import { HelpModal } from 'nr-labs-components';
+import { HelpModal, Messages } from 'nr-labs-components';
 
 import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
 
@@ -415,6 +415,7 @@ export default class TagVisualizer extends React.Component {
 
     return (
       <>
+        <Messages repo="nr1-tag-improver" branch="main" />
         <NerdletStateContext.Consumer>
           {nerdletState => (
             <>
