@@ -14,7 +14,7 @@
     },
     "dependencies": {
         "@newrelic/nr1-community": "latest",
-        "nr-labs-components": "github:newrelic/nr-labs-components"
+        "@newrelic/nr-labs-components": "^1.15.1"
     },
     "browserslist": [
         "last 2 versions",
