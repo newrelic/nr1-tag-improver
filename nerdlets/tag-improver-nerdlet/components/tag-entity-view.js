@@ -90,7 +90,6 @@ export default class TagEntityView extends React.Component {
       this.props.selectedTagKey !== prevProps.selectedTagKey ||
       this.props.selectedTagValue !== prevProps.selectedTagValue
     ) {
-      // eslint-disable-next-line react/no-did-update-set-state
       this.setState({
         firstTagKey:
           this.props.selectedTagKey ||
