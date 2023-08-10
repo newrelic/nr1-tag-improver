@@ -6,23 +6,23 @@ import {
   TableHeader,
   TableHeaderCell,
   TableRow,
-  TableRowCell
+  TableRowCell,
 } from 'nr1';
 
 export default class TagValueTable extends React.Component {
   static propTypes = {
     getTableData: PropTypes.func,
-    onShowEntities: PropTypes.func
+    onShowEntities: PropTypes.func,
   };
 
   constructor(props) {
     super(props);
     this.state = {
-      value_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING
+      value_column_0: TableHeaderCell.SORTING_TYPE.ASCENDING,
     };
   }
 
-  openEntities = item => {
+  openEntities = (item) => {
     this.props.onShowEntities(item);
   };
 
@@ -41,7 +41,7 @@ export default class TagValueTable extends React.Component {
 
     return (
       <Table
-        items={this.props.getTableData().filter(item => {
+        items={this.props.getTableData().filter((item) => {
           return item.entityCount > 0;
         })}
       >

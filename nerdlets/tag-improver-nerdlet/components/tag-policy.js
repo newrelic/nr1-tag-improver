@@ -13,7 +13,7 @@ import {
   TableRowCell,
   TextField,
   Tooltip,
-  UserStorageMutation
+  UserStorageMutation,
 } from 'nr1';
 import { TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY } from '../tag-schema';
 import Autocomplete from './autocomplete';
@@ -24,14 +24,14 @@ const COLOR_BREAKS = {
   required: [
     [80, '#90ff90'],
     [50, 'yellow'],
-    [0, '#ff9090']
+    [0, '#ff9090'],
   ],
-  default: [[0, '#f0f0f0']]
+  default: [[0, '#f0f0f0']],
 };
 
 const SCHEMA_ENFORCEMENT_LABELS = {
   [TAG_SCHEMA_ENFORCEMENT.required]: 'Required',
-  [TAG_SCHEMA_ENFORCEMENT.optional]: 'Optional'
+  [TAG_SCHEMA_ENFORCEMENT.optional]: 'Optional',
 };
 
 export default class TaggingPolicy extends React.Component {
@@ -39,7 +39,7 @@ export default class TaggingPolicy extends React.Component {
     updatePolicy: PropTypes.func,
     tagHierarchy: PropTypes.object,
     schema: PropTypes.array,
-    entityCount: PropTypes.number
+    entityCount: PropTypes.number,
   };
 
   constructor(props) {
@@ -52,8 +52,8 @@ export default class TaggingPolicy extends React.Component {
       policySaveErrored: false,
       tableSorting: {
         enforcement: 'ascending',
-        key: 'ascending'
-      }
+        key: 'ascending',
+      },
     };
   }
 
@@ -65,7 +65,7 @@ export default class TaggingPolicy extends React.Component {
       actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
       collection: 'nr1-tag-improver',
       documentId: 'tagging-policy',
-      document: { policy: policy }
+      document: { policy: policy },
     })
       .then(() => {
         this.setState(
@@ -73,7 +73,7 @@ export default class TaggingPolicy extends React.Component {
             isEditMode: false,
             workingSchema: null,
             savingPolicy: false,
-            policySaveErrored: false
+            policySaveErrored: false,
           },
           () => updatePolicy(policy, savedSchema)
         );
@@ -85,11 +85,11 @@ export default class TaggingPolicy extends React.Component {
 
   startEditing = () => {
     const { schema } = this.props;
-    const workingSchema = schema.map(schemaRule => ({ ...schemaRule }));
+    const workingSchema = schema.map((schemaRule) => ({ ...schemaRule }));
     this.setState({
       isEditMode: true,
       workingSchema,
-      savedSchema: workingSchema
+      savedSchema: workingSchema,
     });
   };
 
@@ -97,7 +97,7 @@ export default class TaggingPolicy extends React.Component {
     this.setState({ isEditMode: false, workingSchema: null });
   };
 
-  onChangeKey = index => (e, value) => {
+  onChangeKey = (index) => (e, value) => {
     const { workingSchema } = this.state;
     const itemAtIndex = workingSchema[index];
     const newItem = { ...itemAtIndex, key: value };
@@ -105,12 +105,12 @@ export default class TaggingPolicy extends React.Component {
       workingSchema: [
         ...workingSchema.slice(0, index),
         newItem,
-        ...workingSchema.slice(index + 1, workingSchema.length)
-      ]
+        ...workingSchema.slice(index + 1, workingSchema.length),
+      ],
     });
   };
 
-  onChangeEnforcement = index => (_, value) => {
+  onChangeEnforcement = (index) => (_, value) => {
     const { workingSchema } = this.state;
     const itemAtIndex = workingSchema[index];
     const newItem = { ...itemAtIndex, enforcement: value };
@@ -118,12 +118,12 @@ export default class TaggingPolicy extends React.Component {
       workingSchema: [
         ...workingSchema.slice(0, index),
         newItem,
-        ...workingSchema.slice(index + 1, workingSchema.length)
-      ]
+        ...workingSchema.slice(index + 1, workingSchema.length),
+      ],
     });
   };
 
-  onChangePurpose = index => e => {
+  onChangePurpose = (index) => (e) => {
     const { workingSchema } = this.state;
     const itemAtIndex = workingSchema[index];
     const newItem = { ...itemAtIndex, purpose: e.currentTarget.value };
@@ -131,8 +131,8 @@ export default class TaggingPolicy extends React.Component {
       workingSchema: [
         ...workingSchema.slice(0, index),
         newItem,
-        ...workingSchema.slice(index + 1, workingSchema.length)
-      ]
+        ...workingSchema.slice(index + 1, workingSchema.length),
+      ],
     });
   };
 
@@ -144,29 +144,29 @@ export default class TaggingPolicy extends React.Component {
         {
           key: '',
           enforcement: TAG_SCHEMA_ENFORCEMENT.optional,
-          purpose: ''
-        }
-      ]
+          purpose: '',
+        },
+      ],
     });
   };
 
-  removePolicyRow = index => () => {
+  removePolicyRow = (index) => () => {
     const { workingSchema } = this.state;
     this.setState({
       workingSchema: [
         ...workingSchema.slice(0, index),
-        ...workingSchema.slice(index + 1, workingSchema.length)
-      ]
+        ...workingSchema.slice(index + 1, workingSchema.length),
+      ],
     });
   };
 
-  onClickTableHeaderCell = key => (event, sortingData) => {
+  onClickTableHeaderCell = (key) => (event, sortingData) => {
     const previousSorting = this.state.tableSorting;
     this.setState({
       tableSorting: {
         ...previousSorting,
-        [key]: sortingData.nextSortingType
-      }
+        [key]: sortingData.nextSortingType,
+      },
     });
   };
 
@@ -177,7 +177,7 @@ export default class TaggingPolicy extends React.Component {
       isEditMode,
       policySaveErrored,
       savingPolicy,
-      tableSorting
+      tableSorting,
     } = this.state;
 
     if (!schema) {
@@ -186,11 +186,11 @@ export default class TaggingPolicy extends React.Component {
     let availableTagsDictionary = {};
     if (isEditMode) {
       const currentTagList = workingSchema
-        ? workingSchema.map(schemaRule => schemaRule.key)
+        ? workingSchema.map((schemaRule) => schemaRule.key)
         : [];
       const existingTags = Object.keys(tagHierarchy);
       const availableTagsList = existingTags
-        .filter(tag => !currentTagList.includes(tag))
+        .filter((tag) => !currentTagList.includes(tag))
         .sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
       availableTagsDictionary = availableTagsList.reduce(
         (accumulator, tag) => ((accumulator[tag] = tag), accumulator), // eslint-disable-line no-sequences
@@ -198,29 +198,28 @@ export default class TaggingPolicy extends React.Component {
       );
     }
 
-    const coverageAndCountsPerTag = (isEditMode
-      ? workingSchema
-      : schema
+    const coverageAndCountsPerTag = (
+      isEditMode ? workingSchema : schema
     ).reduce((accumulator, rule) => {
       let count = 0;
       let coverage = 0;
       const tagHistogram = tagHierarchy[rule.key];
       if (tagHistogram) {
         count = Object.keys(tagHistogram).reduce((acc, v) => {
-          tagHistogram[v].map(e => acc.add(e.guid));
+          tagHistogram[v].map((e) => acc.add(e.guid));
           return acc;
         }, new Set()).size;
         coverage = Math.floor((count * 100) / entityCount);
       }
 
       const colorMap = COLOR_BREAKS[rule.enforcement] || COLOR_BREAKS.default;
-      const cellColor = (colorMap.find(r => coverage >= r[0]) ||
+      const cellColor = (colorMap.find((r) => coverage >= r[0]) ||
         COLOR_BREAKS.default[0])[1];
 
       accumulator[rule.key] = {
         cellColor,
         coverage,
-        count
+        count,
       };
       return accumulator;
     }, {});
@@ -228,7 +227,7 @@ export default class TaggingPolicy extends React.Component {
       savingPolicy ||
       (isEditMode &&
         workingSchema &&
-        workingSchema.some(schemaRule => !schemaRule.key));
+        workingSchema.some((schemaRule) => !schemaRule.key));
     return (
       <div>
         <div>
@@ -381,14 +380,14 @@ export default class TaggingPolicy extends React.Component {
                 style={{
                   fontFamily: 'Menlo-Regular, monospace',
                   backgroundColor: (coverageAndCountsPerTag[item.key] || {})
-                    .cellColor
+                    .cellColor,
                 }}
               >
                 {(coverageAndCountsPerTag[item.key] || {}).coverage || 0}%
               </TableRowCell>
               <TableRowCell
                 style={{
-                  fontFamily: 'Menlo-Regular, monospace'
+                  fontFamily: 'Menlo-Regular, monospace',
                 }}
                 alignmentType={TableRowCell.ALIGNMENT_TYPE.RIGHT}
               >

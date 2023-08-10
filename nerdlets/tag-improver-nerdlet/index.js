@@ -13,7 +13,7 @@ import {
   PlatformStateContext,
   NerdletStateContext,
   UserStorageQuery,
-  logger
+  logger,
 } from 'nr1';
 
 import { HelpModal, Messages } from '@newrelic/nr-labs-components';
@@ -26,7 +26,7 @@ import TaggingPolicy from './components/tag-policy';
 
 export default class TagVisualizer extends React.Component {
   static propTypes = {
-    height: PropTypes.number
+    height: PropTypes.number,
   };
 
   state = {
@@ -44,11 +44,11 @@ export default class TagVisualizer extends React.Component {
       attribute: 'domain',
       id: 'APM',
       name: 'Application',
-      value: 'APM_APPLICATION_ENTITY'
+      value: 'APM_APPLICATION_ENTITY',
     },
     selectedTagKey: '',
     selectedTagValue: '',
-    currentTab: 'policy-tab'
+    currentTab: 'policy-tab',
   };
 
   componentDidMount() {
@@ -57,7 +57,7 @@ export default class TagVisualizer extends React.Component {
       accountPicker: true,
       accountPickerValues: [
         nerdlet.ACCOUNT_PICKER_VALUE.CROSS_ACCOUNT,
-        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES
+        ...nerdlet.ACCOUNT_PICKER_DEFAULT_VALUES,
       ],
       actionControls: true,
       actionControlButtons: [
@@ -66,9 +66,9 @@ export default class TagVisualizer extends React.Component {
           hint: 'Quick links to get support',
           type: 'primary',
           iconType: Icon.TYPE.INTERFACE__INFO__HELP,
-          onClick: () => this.setHelpModalOpen(true)
-        }
-      ]
+          onClick: () => this.setHelpModalOpen(true),
+        },
+      ],
     });
     this.setState({ accountId: this.context.accountId }, () => {
       this.getTaggingPolicy();
@@ -88,34 +88,34 @@ export default class TagVisualizer extends React.Component {
 
   static contextType = PlatformStateContext;
 
-  onChangeTab = newTab => {
+  onChangeTab = (newTab) => {
     nerdlet.setUrlState({ tab: newTab });
     this.setState({ currentTab: newTab }, () => {
       if (newTab !== 'entity-tab') {
         this.setState({
           // selectedTagKey: '',
-          selectedTagValue: ''
+          selectedTagValue: '',
         });
       }
     });
   };
 
-  onUpdateEntitiesFilter = item => {
+  onUpdateEntitiesFilter = (item) => {
     this.setState({
       selectedTagKey: item.tagKey,
-      selectedTagValue: item.tagValue
+      selectedTagValue: item.tagValue,
     });
   };
 
-  onShowEntities = item => {
+  onShowEntities = (item) => {
     this.onUpdateEntitiesFilter(item);
     nerdlet.setUrlState({ tab: 'entity-tab' });
     this.setState({
-      currentTab: 'entity-tab'
+      currentTab: 'entity-tab',
     });
   };
 
-  updateSelectedEntityType = entityType => {
+  updateSelectedEntityType = (entityType) => {
     const { loadedEntities } = this.state;
 
     this.setState({
@@ -131,7 +131,7 @@ export default class TagVisualizer extends React.Component {
       taggingPolicy: null,
       selectedTagKey: '',
       selectedTagValue: '',
-      mandatoryTagCount: 0
+      mandatoryTagCount: 0,
     });
   };
 
@@ -154,7 +154,7 @@ export default class TagVisualizer extends React.Component {
         doneLoading: false,
         queryCursor: undefined,
         selectedTagKey: '',
-        selectedTagValue: ''
+        selectedTagValue: '',
       },
       () => {
         loadEntityBatch();
@@ -165,7 +165,7 @@ export default class TagVisualizer extends React.Component {
   loadEntityBatch = () => {
     const {
       processEntityQueryResults,
-      state: { queryCursor, accountId, selectedEntityType }
+      state: { queryCursor, accountId, selectedEntityType },
     } = this;
 
     const query = `
@@ -198,7 +198,7 @@ export default class TagVisualizer extends React.Component {
         accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
           : ''
-      }`
+      }`,
     };
     if (queryCursor) {
       variables.nextCursor = queryCursor;
@@ -206,7 +206,7 @@ export default class TagVisualizer extends React.Component {
 
     NerdGraphQuery.query({
       query,
-      variables
+      variables,
     })
       .then(({ data, error }) => {
         if (data) {
@@ -222,7 +222,7 @@ export default class TagVisualizer extends React.Component {
           logger.error('Entity query error %O', error?.graphQLErrors);
         }
       })
-      .catch(err => {
+      .catch((err) => {
         logger.error(err.toString());
       });
   };
@@ -230,7 +230,7 @@ export default class TagVisualizer extends React.Component {
   processEntityQueryResults = (entitiesToProcess, count, ngCursor) => {
     const {
       loadEntityBatch,
-      state: { loadedEntities, accountId }
+      state: { loadedEntities, accountId },
     } = this;
     if (accountId !== this.state.accountId) {
       return;
@@ -252,7 +252,7 @@ export default class TagVisualizer extends React.Component {
         queryCursor: nextCursor,
         entityCount,
         loadedEntities: loadedEntities + entities.length,
-        doneLoading: !nextCursor
+        doneLoading: !nextCursor,
       },
       () => {
         if (nextCursor && accountId === this.state.accountId) {
@@ -262,13 +262,9 @@ export default class TagVisualizer extends React.Component {
     );
   };
 
-  processLoadedEntityTags = entities => {
-    const {
-      tagHierarchy,
-      entityTagsMap,
-      taggingPolicy,
-      mandatoryTagCount
-    } = this.state;
+  processLoadedEntityTags = (entities) => {
+    const { tagHierarchy, entityTagsMap, taggingPolicy, mandatoryTagCount } =
+      this.state;
 
     if (!Object.keys(tagHierarchy).length) {
       for (const tag of taggingPolicy) {
@@ -307,10 +303,10 @@ export default class TagVisualizer extends React.Component {
 
     for (const tagPolicy of taggingPolicy) {
       if (!tagPolicy) continue;
-      const found = entity.tags.find(tag => tag.tagKey === tagPolicy.key);
+      const found = entity.tags.find((tag) => tag.tagKey === tagPolicy.key);
       const entityTag = {
         tagKey: tagPolicy.key,
-        tagValues: found ? found.tagValues : ['---']
+        tagValues: found ? found.tagValues : ['---'],
       };
 
       if (tagPolicy.enforcement === 'required') {
@@ -329,22 +325,22 @@ export default class TagVisualizer extends React.Component {
   getTaggingPolicy = () => {
     UserStorageQuery.query({
       collection: 'nr1-tag-improver',
-      documentId: 'tagging-policy'
+      documentId: 'tagging-policy',
     })
       .then(({ data }) => {
         const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
         this.setState({
           taggingPolicy: sortedPolicy(taggingPolicy),
           mandatoryTagCount:
-            taggingPolicy.filter(tag => tag.enforcement === 'required')
-              .length || 0
+            taggingPolicy.filter((tag) => tag.enforcement === 'required')
+              .length || 0,
         });
       })
       .catch(() => {
         this.setState({
           taggingPolicy: sortedPolicy(SCHEMA),
           mandatoryTagCount:
-            SCHEMA.filter(tag => tag.enforcement === 'required').length || 0
+            SCHEMA.filter((tag) => tag.enforcement === 'required').length || 0,
         });
       });
   };
@@ -354,7 +350,7 @@ export default class TagVisualizer extends React.Component {
       {
         taggingPolicy: sortedPolicy(policy),
         mandatoryTagCount:
-          policy.filter(tag => tag.enforcement === 'required').length || 0
+          policy.filter((tag) => tag.enforcement === 'required').length || 0,
       },
       () => {
         const { tagHierarchy, mandatoryTagCount } = this.state;
@@ -372,7 +368,7 @@ export default class TagVisualizer extends React.Component {
           // remove tags that were removed from ploicy and are not used by any entity
           for (const tag of prevPolicy) {
             if (
-              !policy.find(policyTag => {
+              !policy.find((policyTag) => {
                 return policyTag.key === tag.key;
               })
             )
@@ -392,7 +388,7 @@ export default class TagVisualizer extends React.Component {
     );
   };
 
-  setHelpModalOpen = helpModalOpen => {
+  setHelpModalOpen = (helpModalOpen) => {
     this.setState({ helpModalOpen });
   };
 
@@ -409,14 +405,14 @@ export default class TagVisualizer extends React.Component {
       selectedEntityType,
       selectedTagKey,
       selectedTagValue,
-      currentTab
+      currentTab,
     } = this.state;
 
     return (
       <>
         <Messages repo="nr1-tag-improver" branch="main" />
         <NerdletStateContext.Consumer>
-          {nerdletState => (
+          {(nerdletState) => (
             <>
               <div
                 className="status"
@@ -425,7 +421,7 @@ export default class TagVisualizer extends React.Component {
                   display: 'flex',
                   flexDirection: 'row',
                   lineHeight: '24px',
-                  paddingBottom: '9px'
+                  paddingBottom: '9px',
                 }}
               >
                 Entity type:
@@ -511,22 +507,20 @@ export default class TagVisualizer extends React.Component {
             createFeature:
               'https://github.com/newrelic/nr1-tag-improver/issues/new?assignees=&labels=enhancement%2C+needs-triage&template=enhancement.md&title=',
             createQuestion:
-              'https://github.com/newrelic/nr1-tag-improver/discussions/new/choose'
+              'https://github.com/newrelic/nr1-tag-improver/discussions/new/choose',
           }}
           ownerBadge={{
             logo: {
-              src:
-                'https://drive.google.com/uc?id=1BdXVy2X34rufvG4_1BYb9czhLRlGlgsT',
-              alt: 'New Relic Labs'
+              src: 'https://drive.google.com/uc?id=1BdXVy2X34rufvG4_1BYb9czhLRlGlgsT',
+              alt: 'New Relic Labs',
             },
             blurb: {
               text: 'This is a New Relic Labs open source app.',
               link: {
                 text: 'Take a look at our other repos',
-                url:
-                  'https://github.com/newrelic?q=nrlabs-viz&type=all&language=&sort='
-              }
-            }
+                url: 'https://github.com/newrelic?q=nrlabs-viz&type=all&language=&sort=',
+              },
+            },
           }}
         />
       </>
@@ -559,25 +553,25 @@ function getTagKeys(tagHierarchy, policy) {
   const tagsForDropdown = [];
   tagsForDropdown.push({
     title: 'required',
-    array: tagsObject(policy).required
+    array: tagsObject(policy).required,
   });
   tagsForDropdown.push({
     title: 'optional',
-    array: tagsObject(policy).optional
+    array: tagsObject(policy).optional,
   });
   tagsForDropdown.push({ title: 'not in policy', array: [] });
 
   const items = Object.keys(tagHierarchy)
     .reduce(
       (acc, tag) => {
-        let idx = tagsForDropdown.findIndex(t => t.array.includes(tag));
+        let idx = tagsForDropdown.findIndex((t) => t.array.includes(tag));
         if (idx < 0) idx = 2; // push into 'not in policy'
         acc[idx].push(tag);
         return acc;
       },
       [[], [], []]
     )
-    .map(tags =>
+    .map((tags) =>
       tags.sort((tag1, tag2) =>
         tag1.toLowerCase().localeCompare(tag2.toLowerCase())
       )

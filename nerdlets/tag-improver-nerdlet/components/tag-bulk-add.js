@@ -5,7 +5,7 @@ import {
   HeadingText,
   PlatformStateContext,
   Button,
-  NerdGraphMutation
+  NerdGraphMutation,
 } from 'nr1';
 import Autocomplete from './autocomplete';
 
@@ -15,21 +15,21 @@ const ENTITY_UPDATE_STATUS = {
   NONE: 0,
   UPDATING: 1,
   SUCCESS: 2,
-  ERROR: 3
+  ERROR: 3,
 };
 
 export default class TagBulkAdd extends React.Component {
   static propTypes = {
     selectedEntityIds: PropTypes.array,
     tagHierarchy: PropTypes.object,
-    reloadTagsFn: PropTypes.func
+    reloadTagsFn: PropTypes.func,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       tagsToAdd: { [emptyTagPlaceholderKey]: '' },
-      entityStatuses: {}
+      entityStatuses: {},
     };
   }
 
@@ -40,7 +40,7 @@ export default class TagBulkAdd extends React.Component {
     const { tagsToAdd, entityStatuses } = this.state;
     const tagsForGql = Object.entries(tagsToAdd).map(([tagKey, tagValue]) => ({
       key: tagKey,
-      values: [tagValue]
+      values: [tagValue],
     }));
     const mutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
       taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
@@ -59,13 +59,13 @@ export default class TagBulkAdd extends React.Component {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
-    entitiesToUpdate.forEach(entityId => {
+    entitiesToUpdate.forEach((entityId) => {
       if (!statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
+    await entitiesToUpdate.map(async (entityId) => {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
@@ -79,13 +79,13 @@ export default class TagBulkAdd extends React.Component {
             {
               entityStatuses: {
                 ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
+                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
+              },
             },
             () => {
               if (
                 Object.values(this.state.entityStatuses).every(
-                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
+                  (status) => status === ENTITY_UPDATE_STATUS.SUCCESS
                 )
               ) {
                 this.props.reloadTagsFn(selectedEntityIds);
@@ -98,8 +98,8 @@ export default class TagBulkAdd extends React.Component {
         this.setState({
           entityStatuses: {
             ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
+            [entityId]: ENTITY_UPDATE_STATUS.ERROR,
+          },
         });
       }
     });
@@ -113,7 +113,7 @@ export default class TagBulkAdd extends React.Component {
     this.setState({ tagsToAdd: newTags });
   };
 
-  removeTag = tag => {
+  removeTag = (tag) => {
     // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToAdd };
     delete newTags[tag];
@@ -128,7 +128,7 @@ export default class TagBulkAdd extends React.Component {
   addNewTag = () => {
     const { tagsToAdd } = this.state;
     this.setState({
-      tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: '' }
+      tagsToAdd: { ...tagsToAdd, [emptyTagPlaceholderKey]: '' },
     });
   };
 
@@ -138,7 +138,7 @@ export default class TagBulkAdd extends React.Component {
     const currentTagList = Object.keys(tagsToAdd);
     const existingTags = Object.keys(tagHierarchy);
     const availableTagsList = existingTags
-      .filter(tag => !currentTagList.includes(tag))
+      .filter((tag) => !currentTagList.includes(tag))
       .sort((a, b) => (a.toUpperCase() > b.toUpperCase() ? 1 : -1));
     const availableTagsDictionary = availableTagsList.reduce(
       (accumulator, tag) => ((accumulator[tag] = tag), accumulator), // eslint-disable-line no-sequences
@@ -246,7 +246,7 @@ export default class TagBulkAdd extends React.Component {
             <Button
               type={Button.TYPE.PRIMARY}
               disabled={
-                currentTagList.every(tag => tag === emptyTagPlaceholderKey) ||
+                currentTagList.every((tag) => tag === emptyTagPlaceholderKey) ||
                 loadingEntities.length > 0 ||
                 allSucceeded
               }
