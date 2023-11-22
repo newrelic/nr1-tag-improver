@@ -71,50 +71,56 @@ const SCHEMA = [
 ];
 
 const ENTITY_TYPES = [
-  // { id: "ALL", name: "All Entity Types", value: "ALL_ENTITIES" },
+  {
+    attribute: 'type',
+    id: 'CONDITION',
+    name: 'Alert Condition'
+  },
   {
     attribute: 'domain',
     id: 'APM',
-    name: 'Application',
-    value: 'APM_APPLICATION_ENTITY'
+    name: 'APM Service'
   },
   {
     attribute: 'domain',
     id: 'BROWSER',
-    name: 'Browser',
-    value: 'BROWSER_APPLICATION_ENTITY'
-  },
-  {
-    attribute: 'domain',
-    id: 'MOBILE',
-    name: 'Mobile',
-    value: 'MOBILE_APPLICATION_ENTITY'
-  },
-  {
-    attribute: 'domain',
-    id: 'INFRA',
-    name: 'Infrastructure',
-    value: 'INFRASTRUCTURE_HOST_ENTITY'
-  },
-  {
-    attribute: 'domain',
-    id: 'SYNTH',
-    name: 'Synthetic',
-    value: 'SYNTHETIC_MONITOR_ENTITY'
-  },
-  {
-    attribute: 'type',
-    id: 'CONDITION',
-    name: 'Alert Conditions',
-    value: 'GENERIC_ENTITY'
+    name: 'Browser'
   },
   {
     attribute: 'domain',
     id: 'VIZ',
-    name: 'Dashboard',
-    value: 'DASHBOARD_ENTITY'
+    name: 'Dashboard'
   },
-  { attribute: 'domain', id: 'NR1', name: 'Workload', value: 'WORKLOAD_ENTITY' }
+  {
+    attribute: 'domain',
+    id: 'INFRA',
+    name: 'Infrastructure'
+  },
+  {
+    attribute: 'domain',
+    id: 'MOBILE',
+    name: 'Mobile'
+  },
+  {
+    attribute: 'type',
+    id: 'SERVICE',
+    name: 'OTEL Service'
+  },
+  {
+    attribute: 'domain',
+    id: 'SYNTH',
+    name: 'Synthetic'
+  },
+  {
+    attribute: 'type',
+    id: 'WORKFLOW',
+    name: 'Workflow'
+  },
+  { 
+    attribute: 'domain', 
+    id: 'NR1', 
+    name: 'Workload'
+  }
 ];
 
 export {
