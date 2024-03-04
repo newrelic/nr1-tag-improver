@@ -8,7 +8,7 @@ import {
   Button,
   NerdGraphMutation,
   Select,
-  SelectItem
+  SelectItem,
 } from 'nr1';
 
 const emptyTagPlaceholderKey = '🏷️helloIAmTag';
@@ -17,21 +17,21 @@ const ENTITY_UPDATE_STATUS = {
   NONE: 0,
   UPDATING: 1,
   SUCCESS: 2,
-  ERROR: 3
+  ERROR: 3,
 };
 
 export default class TagBulkDelete extends React.Component {
   static propTypes = {
     selectedEntityIds: PropTypes.array,
     reloadTagsFn: PropTypes.func,
-    entityTagsMap: PropTypes.object
+    entityTagsMap: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       tagsToDelete: { [emptyTagPlaceholderKey]: 1 },
-      entityStatuses: {}
+      entityStatuses: {},
     };
   }
 
@@ -60,13 +60,13 @@ export default class TagBulkDelete extends React.Component {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
-    entitiesToUpdate.forEach(entityId => {
+    entitiesToUpdate.forEach((entityId) => {
       if (!statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.UPDATING;
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
+    await entitiesToUpdate.map(async (entityId) => {
       const variables = { entityGuid: entityId, entityTags: tagsForGql };
       try {
         const result = await NerdGraphMutation.mutate({ mutation, variables });
@@ -80,13 +80,13 @@ export default class TagBulkDelete extends React.Component {
             {
               entityStatuses: {
                 ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-              }
+                [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
+              },
             },
             () => {
               if (
                 Object.values(this.state.entityStatuses).every(
-                  status => status === ENTITY_UPDATE_STATUS.SUCCESS
+                  (status) => status === ENTITY_UPDATE_STATUS.SUCCESS
                 )
               ) {
                 this.props.reloadTagsFn(selectedEntityIds);
@@ -99,8 +99,8 @@ export default class TagBulkDelete extends React.Component {
         this.setState({
           entityStatuses: {
             ...previousStatuses,
-            [entityId]: ENTITY_UPDATE_STATUS.ERROR
-          }
+            [entityId]: ENTITY_UPDATE_STATUS.ERROR,
+          },
         });
       }
     });
@@ -114,7 +114,7 @@ export default class TagBulkDelete extends React.Component {
     this.setState({ tagsToDelete: newTags });
   };
 
-  removeTag = tag => {
+  removeTag = (tag) => {
     // eslint-disable-next-line react/no-access-state-in-setstate
     const newTags = { ...this.state.tagsToDelete };
     delete newTags[tag];
@@ -124,7 +124,7 @@ export default class TagBulkDelete extends React.Component {
   addNewTag = () => {
     const { tagsToDelete } = this.state;
     this.setState({
-      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 }
+      tagsToDelete: { ...tagsToDelete, [emptyTagPlaceholderKey]: 1 },
     });
   };
 
@@ -134,7 +134,7 @@ export default class TagBulkDelete extends React.Component {
     const currentTagList = Object.keys(tagsToDelete);
     const tagsOnEntities = Array.from(
       selectedEntityIds.reduce((accumulator, entityGuid) => {
-        (entityTagsMap[entityGuid] || []).forEach(tag =>
+        (entityTagsMap[entityGuid] || []).forEach((tag) =>
           accumulator.add(tag.tagKey)
         );
         return accumulator;
@@ -188,7 +188,7 @@ export default class TagBulkDelete extends React.Component {
                     <SelectItem disabled value={emptyTagPlaceholderKey}>
                       Select tag
                     </SelectItem>
-                    {tagsOnEntities.map(tag => {
+                    {tagsOnEntities.map((tag) => {
                       return (
                         <SelectItem
                           key={`current-tag-select-${tag}`}
@@ -243,7 +243,7 @@ export default class TagBulkDelete extends React.Component {
             <Button
               type={Button.TYPE.DESTRUCTIVE}
               disabled={
-                currentTagList.every(tag => tag === emptyTagPlaceholderKey) ||
+                currentTagList.every((tag) => tag === emptyTagPlaceholderKey) ||
                 loadingEntities.length > 0 ||
                 allSucceeded
               }

@@ -10,14 +10,14 @@ export default class ModalButton extends React.Component {
     buttonText: PropTypes.string,
     buttonType: PropTypes.string,
     className: PropTypes.string,
-    style: PropTypes.object
+    style: PropTypes.object,
   };
 
   constructor(props) {
     super(props);
     this.state = {
       shown: false,
-      mounted: false
+      mounted: false,
     };
   }
 
@@ -28,14 +28,8 @@ export default class ModalButton extends React.Component {
   onHidden = () => this.setState({ mounted: false });
 
   render() {
-    const {
-      style,
-      className,
-      children,
-      buttonText,
-      disabled,
-      buttonType
-    } = this.props;
+    const { style, className, children, buttonText, disabled, buttonType } =
+      this.props;
     const { shown, mounted } = this.state;
     return (
       <>

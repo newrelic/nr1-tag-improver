@@ -6,18 +6,18 @@ import {
   TableHeader,
   TableHeaderCell,
   TableRow,
-  TableRowCell
+  TableRowCell,
 } from 'nr1';
 
 export default class TagTable extends React.Component {
   static propTypes = {
     getTableData: PropTypes.func,
-    selectTag: PropTypes.func
+    selectTag: PropTypes.func,
   };
 
   state = {
     tag_column_0: TableHeaderCell.SORTING_TYPE.NONE,
-    tag_column_1: TableHeaderCell.SORTING_TYPE.DESCENDING
+    tag_column_1: TableHeaderCell.SORTING_TYPE.DESCENDING,
   };
 
   setSortingColumn = (columnId, event, sortingData) => {

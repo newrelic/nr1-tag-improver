@@ -7,7 +7,7 @@ import {
   Button,
   NerdGraphMutation,
   Select,
-  SelectItem
+  SelectItem,
 } from 'nr1';
 import Autocomplete from './autocomplete';
 
@@ -17,7 +17,7 @@ const ENTITY_UPDATE_STATUS = {
   ADD_ERROR: 2,
   REMOVING: 3,
   REMOVE_ERROR: 4,
-  SUCCESS: 5
+  SUCCESS: 5,
 };
 
 export default class TagBulkEdit extends React.Component {
@@ -25,7 +25,7 @@ export default class TagBulkEdit extends React.Component {
     selectedEntityIds: PropTypes.array,
     tagHierarchy: PropTypes.object,
     entityTagsMap: PropTypes.object,
-    reloadTagsFn: PropTypes.func
+    reloadTagsFn: PropTypes.func,
   };
 
   constructor(props) {
@@ -34,7 +34,7 @@ export default class TagBulkEdit extends React.Component {
       selectedCurrentTag: '',
       selectedCurrentTagValue: '',
       selectedNewTagValue: '',
-      entityStatuses: {}
+      entityStatuses: {},
     };
   }
 
@@ -46,7 +46,7 @@ export default class TagBulkEdit extends React.Component {
       selectedCurrentTag,
       selectedCurrentTagValue,
       selectedNewTagValue,
-      entityStatuses
+      entityStatuses,
     } = this.state;
     const addMutation = `mutation($entityGuid: EntityGuid!, $entityTags: [TaggingTagInput!]!) {
       taggingAddTagsToEntity(guid: $entityGuid, tags: $entityTags) {
@@ -74,27 +74,27 @@ export default class TagBulkEdit extends React.Component {
       entitiesToUpdate = selectedEntityIds;
     }
     const statusObject = { ...entityStatuses };
-    entitiesToUpdate.forEach(entityId => {
+    entitiesToUpdate.forEach((entityId) => {
       if (!statusObject[entityId]) {
         statusObject[entityId] = ENTITY_UPDATE_STATUS.ADDING;
       }
     });
     this.setState({ entityStatuses: statusObject });
-    await entitiesToUpdate.map(async entityId => {
+    await entitiesToUpdate.map(async (entityId) => {
       let addSuccess = false;
       if (statusObject[entityId] < ENTITY_UPDATE_STATUS.REMOVING) {
         try {
           const tagsVariable = {
             key: selectedCurrentTag,
-            values: [selectedNewTagValue]
+            values: [selectedNewTagValue],
           };
           const addVariables = {
             entityGuid: entityId,
-            entityTags: tagsVariable
+            entityTags: tagsVariable,
           };
           const result = await NerdGraphMutation.mutate({
             mutation: addMutation,
-            variables: addVariables
+            variables: addVariables,
           });
           if (result.error?.graphQLErrors.length) {
             throw result.error.graphQLErrors;
@@ -106,8 +106,8 @@ export default class TagBulkEdit extends React.Component {
             this.setState({
               entityStatuses: {
                 ...previousStatuses,
-                [entityId]: ENTITY_UPDATE_STATUS.REMOVING
-              }
+                [entityId]: ENTITY_UPDATE_STATUS.REMOVING,
+              },
             });
           }
         } catch (error) {
@@ -116,8 +116,8 @@ export default class TagBulkEdit extends React.Component {
           this.setState({
             entityStatuses: {
               ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR
-            }
+              [entityId]: ENTITY_UPDATE_STATUS.ADD_ERROR,
+            },
           });
         }
       } else {
@@ -133,23 +133,23 @@ export default class TagBulkEdit extends React.Component {
             : (
                 (
                   entityTagsMap[entityId].find(
-                    tag => tag.tagKey === selectedCurrentTag
+                    (tag) => tag.tagKey === selectedCurrentTag
                   ) || {}
                 ).tagValues || []
               )
-                .filter(tagValue => tagValue !== selectedNewTagValue)
-                .map(tagValue => ({
+                .filter((tagValue) => tagValue !== selectedNewTagValue)
+                .map((tagValue) => ({
                   key: selectedCurrentTag,
-                  value: tagValue
+                  value: tagValue,
                 }));
           if (tagsToDeleteForEntity.length) {
             const deleteVariables = {
               entityGuid: entityId,
-              entityTags: tagsToDeleteForEntity
+              entityTags: tagsToDeleteForEntity,
             };
             const result = await NerdGraphMutation.mutate({
               mutation: deleteMutation,
-              variables: deleteVariables
+              variables: deleteVariables,
             });
             if (result.error?.graphQLErrors.length) {
               throw result.error.graphQLErrors;
@@ -163,13 +163,13 @@ export default class TagBulkEdit extends React.Component {
                 {
                   entityStatuses: {
                     ...previousStatuses,
-                    [entityId]: ENTITY_UPDATE_STATUS.SUCCESS
-                  }
+                    [entityId]: ENTITY_UPDATE_STATUS.SUCCESS,
+                  },
                 },
                 () => {
                   if (
                     Object.values(this.state.entityStatuses).every(
-                      status => status === ENTITY_UPDATE_STATUS.SUCCESS
+                      (status) => status === ENTITY_UPDATE_STATUS.SUCCESS
                     )
                   ) {
                     this.props.reloadTagsFn(selectedEntityIds);
@@ -184,8 +184,8 @@ export default class TagBulkEdit extends React.Component {
           this.setState({
             entityStatuses: {
               ...previousStatuses,
-              [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR
-            }
+              [entityId]: ENTITY_UPDATE_STATUS.REMOVE_ERROR,
+            },
           });
         }
       }
@@ -205,11 +205,11 @@ export default class TagBulkEdit extends React.Component {
       entityStatuses,
       selectedCurrentTag,
       selectedCurrentTagValue,
-      selectedNewTagValue
+      selectedNewTagValue,
     } = this.state;
     const tagsOnEntities = Array.from(
       selectedEntityIds.reduce((accumulator, entityGuid) => {
-        (entityTagsMap[entityGuid] || []).forEach(tag =>
+        (entityTagsMap[entityGuid] || []).forEach((tag) =>
           accumulator.add(tag.tagKey)
         );
         return accumulator;
@@ -218,7 +218,7 @@ export default class TagBulkEdit extends React.Component {
     const currentValuesForTag = selectedCurrentTag
       ? Object.entries(tagHierarchy[selectedCurrentTag] || {})
           .filter(([, entities]) =>
-            entities.some(entity => selectedEntityIds.includes(entity.guid))
+            entities.some((entity) => selectedEntityIds.includes(entity.guid))
           )
           .map(([tagKey]) => tagKey)
       : [];
@@ -278,7 +278,7 @@ export default class TagBulkEdit extends React.Component {
             <SelectItem disabled value="">
               Current tag
             </SelectItem>
-            {tagsOnEntities.map(tag => {
+            {tagsOnEntities.map((tag) => {
               return (
                 <SelectItem key={`current-tag-select-${tag}`} value={tag}>
                   {tag}
@@ -294,7 +294,7 @@ export default class TagBulkEdit extends React.Component {
             disabled={!selectedCurrentTag}
           >
             <SelectItem value="">All values</SelectItem>
-            {currentValuesForTag.map(tag => {
+            {currentValuesForTag.map((tag) => {
               return (
                 <SelectItem key={`current-tag-value-select-${tag}`} value={tag}>
                   {tag}

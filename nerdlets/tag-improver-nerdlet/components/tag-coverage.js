@@ -7,7 +7,7 @@ import {
   DropdownItem,
   Grid,
   GridItem,
-  HeadingText
+  HeadingText,
 } from 'nr1';
 
 import { ENFORCEMENT_PRIORITY } from '../tag-schema';
@@ -23,29 +23,29 @@ export default class TagCoverageView extends React.Component {
     getTagKeys: PropTypes.array,
     height: PropTypes.number,
     onUpdateEntitiesFilter: PropTypes.func,
-    onShowEntities: PropTypes.func
+    onShowEntities: PropTypes.func,
   };
 
   state = {
-    currentTagGroup: 'account' // NOTE: this will always be present
+    currentTagGroup: 'account', // NOTE: this will always be present
   };
 
-  updateCurrentTagGroup = currentTagGroup => {
+  updateCurrentTagGroup = (currentTagGroup) => {
     this.props.onUpdateEntitiesFilter({
       tagKey: currentTagGroup,
-      tagValue: null
+      tagValue: null,
     });
     this.setState({ currentTagGroup });
   };
 
-  getSortedTagKeys = tags => {
+  getSortedTagKeys = (tags) => {
     return tags.sort((a, b) => {
       const pa = a.enforcementPriority || 99;
       const pb = b.enforcementPriority || 99;
       if (pa < pb) return 1;
       if (pa > pb) return -1;
       return a.tagKey.localeCompare(b.tagKey, undefined, {
-        sensitivity: 'base'
+        sensitivity: 'base',
       });
     });
   };
@@ -56,7 +56,7 @@ export default class TagCoverageView extends React.Component {
     const { currentTagGroup } = this.state;
 
     return getSortedTagKeys(
-      Object.keys(tagHierarchy).map(k => {
+      Object.keys(tagHierarchy).map((k) => {
         const count = Object.keys(tagHierarchy[k]).reduce(
           (acc, v) => acc + tagHierarchy[k][v].length,
           0
@@ -65,8 +65,8 @@ export default class TagCoverageView extends React.Component {
           ? 0
           : Math.floor((count * 100) / entityCount);
         const enforcement =
-          (taggingPolicy.find(schema => schema.key === k) || {}).enforcement ||
-          'non-policy';
+          (taggingPolicy.find((schema) => schema.key === k) || {})
+            .enforcement || 'non-policy';
         const enforcementPriority = enforcement
           ? ENFORCEMENT_PRIORITY[enforcement]
           : -1;
@@ -78,7 +78,7 @@ export default class TagCoverageView extends React.Component {
           cardinality: Object.keys(tagHierarchy[k]).length,
           entityCount: count,
           entityPercent: coverage,
-          selected: k === currentTagGroup ? true : false // eslint-disable-line no-unneeded-ternary
+          selected: k === currentTagGroup ? true : false, // eslint-disable-line no-unneeded-ternary
         };
       })
     );
@@ -89,23 +89,25 @@ export default class TagCoverageView extends React.Component {
     const { currentTagGroup } = this.state;
     // if (!tagHierarchy[currentTagGroup]) return [];
 
-    const valueTableData = Object.keys(tagHierarchy[currentTagGroup]).map(v => {
-      return {
-        tagKey: currentTagGroup,
-        tagValue: v,
-        entityCount: tagHierarchy[currentTagGroup][v].length
-      };
-    });
+    const valueTableData = Object.keys(tagHierarchy[currentTagGroup]).map(
+      (v) => {
+        return {
+          tagKey: currentTagGroup,
+          tagValue: v,
+          entityCount: tagHierarchy[currentTagGroup][v].length,
+        };
+      }
+    );
     const entityCount = valueTableData.reduce((acc, cur) => {
       return acc + cur.entityCount;
     }, 0);
     valueTableData.push({
       tagKey: currentTagGroup,
       enforcementPriority:
-        (taggingPolicy.find(tag => tag.key === currentTagGroup) || {})
+        (taggingPolicy.find((tag) => tag.key === currentTagGroup) || {})
           .enforcement || 'non-policy',
       tagValue: '<tag not defined>',
-      entityCount: this.props.entityCount - entityCount
+      entityCount: this.props.entityCount - entityCount,
     });
     return valueTableData;
   };
@@ -140,7 +142,7 @@ export default class TagCoverageView extends React.Component {
                 style={{
                   display: 'inline-block',
                   margin: '0 .5em',
-                  verticalAlign: 'middle'
+                  verticalAlign: 'middle',
                 }}
                 sectioned
               >
@@ -173,7 +175,7 @@ export default class TagCoverageView extends React.Component {
             <div className="left">
               <TagTable
                 getTableData={() => getTagTableData()}
-                selectTag={tagKey => updateCurrentTagGroup(tagKey)}
+                selectTag={(tagKey) => updateCurrentTagGroup(tagKey)}
               />
             </div>
           </GridItem>

@@ -11,7 +11,7 @@ export default class Autocomplete extends React.Component {
     placeholder: PropTypes.string,
     value: PropTypes.string,
     className: PropTypes.string,
-    style: PropTypes.object
+    style: PropTypes.object,
   };
 
   constructor(props) {
@@ -21,11 +21,11 @@ export default class Autocomplete extends React.Component {
       dropDownY: null,
       width: null,
       menuOpen: false,
-      justPicked: false
+      justPicked: false,
     };
   }
 
-  onFocusTextField = event => {
+  onFocusTextField = (event) => {
     if (this.props.disabled) return;
     const { x, y, width } = event.target.getBoundingClientRect();
     this.setState({ menuOpen: true, dropDownX: x, dropDownY: y, width });
@@ -35,7 +35,7 @@ export default class Autocomplete extends React.Component {
     this.setState({ menuOpen: false });
   };
 
-  onKeyDownTextField = event => {
+  onKeyDownTextField = (event) => {
     if (event.keyCode === 13) {
       this.setState({ menuOpen: false });
     }
@@ -55,14 +55,8 @@ export default class Autocomplete extends React.Component {
   };
 
   render() {
-    const {
-      choices,
-      disabled,
-      placeholder,
-      value,
-      className,
-      style
-    } = this.props;
+    const { choices, disabled, placeholder, value, className, style } =
+      this.props;
     const { menuOpen, dropDownX, dropDownY, justPicked, width } = this.state;
     const choiceEntries = Object.entries(choices).filter(
       ([, choice]) =>
@@ -77,7 +71,7 @@ export default class Autocomplete extends React.Component {
           className={className}
           style={style || {}}
           value={value}
-          onChange={e => this.updateValue(e, e.currentTarget.value, false)}
+          onChange={(e) => this.updateValue(e, e.currentTarget.value, false)}
           onFocus={this.onFocusTextField}
           onClick={this.onFocusTextField}
           onKeyDown={this.onKeyDownTextField}
@@ -95,7 +89,7 @@ export default class Autocomplete extends React.Component {
               <div
                 className="autocomplete-item"
                 key={`autocomplete-item-${choiceKey}`}
-                onClick={e => {
+                onClick={(e) => {
                   this.updateValue(e, choiceKey, true);
                   this.onBlurTextField();
                 }}
