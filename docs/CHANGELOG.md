@@ -1,3 +1,18 @@
+# [1.5.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.4.1...v1.5.0) (2024-03-04)
+
+
+### Bug Fixes
+
+* change helpModal log url + change default option for the pulldown entity type ([59d9448](https://github.com/newrelic/nr1-tag-improver/commit/59d94485cd2dd1678fe16891bd5dd33c7423ee4c))
+* eslint errors ([acbbb21](https://github.com/newrelic/nr1-tag-improver/commit/acbbb21e66263123a89d9de42462e4910c6a6f8b))
+* rebuild package-lock ([03557ca](https://github.com/newrelic/nr1-tag-improver/commit/03557caf635777bd95d85de589b1964d9c7a5f93))
+
+
+### Features
+
+* add HelpModal component ([f85e908](https://github.com/newrelic/nr1-tag-improver/commit/f85e90803ab86ddf51209c5b02ed16376e3025c0))
+* add Message component ([2004da6](https://github.com/newrelic/nr1-tag-improver/commit/2004da63fb13fbf3de9b6ccd0a613fa683acdb13))
+
 ## [1.4.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.4.0...v1.4.1) (2023-02-04)
 
 
