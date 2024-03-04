@@ -13,7 +13,7 @@
         "email": "opensource+nr1-tag-improver@newrelic.com"
     },
     "dependencies": {
-        "@newrelic/nr-labs-components": "^1.16.0",
+        "@newrelic/nr-labs-components": "^1.21.2",
         "prop-types": "^15.7.2",
         "react": "^17.0.2",
         "react-dom": "^17.0.2"
