@@ -46,6 +46,20 @@ const SCHEMA = [
       'able to identify if critical app or service',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
+  },
+  {
+    key: 'Owner',
+    purpose:
+        'able to identify squad responsible for service/app',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
+    allowedValues: [], // reserved for future use
+  },
+  {
+    key: 'DomainName',
+    purpose:
+        'able to identify the domain',
+    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
+    allowedValues: [], // reserved for future use
   }
 ];
 

@@ -45,9 +45,8 @@ Open a command prompt in the app's directory and run the following commands.
 
     nr1 profiles:list (should be linz-step by default and should be set at the earlier step when installing NR1)
     nr1 nerdpack:publish --profile=linz-step
-    nr1 nerdpack:publish --profile=linz-step
-    nr1 nerdpack:deploy [-c [DEV|BETA|STABLE]] --profile=linz-step
-    nr1 nerdpack:subscribe [-c [DEV|BETA|STABLE]] --profile=linz-step
+    nr1 nerdpack:deploy --profile=linz-step
+    nr1 nerdpack:subscribe --profile=linz-step 
 
 Visit https://one.newrelic.com, and launch your app in New Relic.
 
