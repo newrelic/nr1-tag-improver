@@ -21,53 +21,46 @@ const COMPLIANCEBANDS = {
 
 const SCHEMA = [
   {
-    key: 'team',
-    purpose: 'What is the team or squad that is responsible for this entity?',
+    key: 'ApplicationName',
+    purpose: 'able to identify affected apps',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
   },
   {
-    key: 'owner',
+    key: 'EnvironmentType',
     purpose:
-      'What is the email or primary identifier of the individual (ex. team lead or primary contributor) who owns this entity?',
+      'able to confirm if PROD environment or not',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
   },
   {
-    key: 'help-channel',
+    key: 'ServiceName',
     purpose:
-      'What is the identifier/URL of the primary communication channel for requesting help or additional info for this entity?',
+      'able to identify affected services',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
   },
   {
-    key: 'repository',
+    key: 'Priority',
     purpose:
-      'What is the identifier/URL of the repository for the source code, image, or configuration file for this entity?',
+      'able to identify if critical app or service',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
   },
   {
-    key: 'runbook',
+    key: 'Owner',
     purpose:
-      'What is the identifier/URL of the runbook or wiki that documents this entity and relevant/associated processes?',
+        'able to identify squad responsible for service/app',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
   },
   {
-    key: 'environment',
+    key: 'DomainName',
     purpose:
-      'What is the environment in which this entity exists? (ex. production, quality-assurance, development, etc.)',
+        'able to identify the domain',
     enforcement: TAG_SCHEMA_ENFORCEMENT.required,
     allowedValues: [], // reserved for future use
-  },
-  {
-    key: 'value-stream',
-    purpose:
-      'What is the larger value stream or business application that this entity is a part of, to deliver business value to users?',
-    enforcement: TAG_SCHEMA_ENFORCEMENT.required,
-    allowedValues: [], // reserved for future use
-  },
+  }
 ];
 
 const ENTITY_TYPES = [
