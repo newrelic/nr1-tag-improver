@@ -57,10 +57,13 @@ export default class TagCoverageView extends React.Component {
 
     return getSortedTagKeys(
       Object.keys(tagHierarchy).map((k) => {
-        const count = Object.keys(tagHierarchy[k]).reduce(
-          (acc, v) => acc + tagHierarchy[k][v].length,
-          0
-        );
+        const uniqueEntities = new Set();
+        Object.values(tagHierarchy[k]).forEach(entityList => {
+          entityList.forEach(entity => {
+            uniqueEntities.add(entity.guid);
+          });
+        });
+        const count = uniqueEntities.size;
         const coverage = !entityCount
           ? 0
           : Math.floor((count * 100) / entityCount);

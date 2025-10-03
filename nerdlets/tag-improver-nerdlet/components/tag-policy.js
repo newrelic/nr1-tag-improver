@@ -13,7 +13,9 @@ import {
   TableRowCell,
   TextField,
   Tooltip,
+  AccountStorageMutation,
   UserStorageMutation,
+  NerdGraphQuery,
 } from 'nr1';
 import { TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY } from '../tag-schema';
 import Autocomplete from './autocomplete';
@@ -34,12 +36,24 @@ const SCHEMA_ENFORCEMENT_LABELS = {
   [TAG_SCHEMA_ENFORCEMENT.optional]: 'Optional',
 };
 
+const STORAGE_TYPES = {
+  GLOBAL: 'global',
+  USER: 'user',
+};
+
+const STORAGE_TYPE_LABELS = {
+  [STORAGE_TYPES.GLOBAL]: 'Global (All Users)',
+  [STORAGE_TYPES.USER]: 'Private',
+};
+
 export default class TaggingPolicy extends React.Component {
   static propTypes = {
     updatePolicy: PropTypes.func,
     tagHierarchy: PropTypes.object,
     schema: PropTypes.array,
     entityCount: PropTypes.number,
+    storageType: PropTypes.string,
+    onStorageTypeChange: PropTypes.func,
   };
 
   constructor(props) {
@@ -58,15 +72,37 @@ export default class TaggingPolicy extends React.Component {
   }
 
   applyEdits = () => {
-    const { updatePolicy } = this.props;
+    const { updatePolicy, storageType } = this.props;
     const { workingSchema: policy, savedSchema } = this.state;
     this.setState({ savingPolicy: true });
-    UserStorageMutation.mutate({
-      actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-      collection: 'nr1-tag-improver',
-      documentId: 'tagging-policy',
-      document: { policy: policy },
-    })
+    
+    const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
+    
+    if (isGlobalStorage) {
+      NerdGraphQuery.query({
+        query: `
+          {
+            actor {
+              organization {
+                storageAccountId
+              }
+            }
+          }
+        `
+      })
+      .then(({ data }) => {
+        const storageAccountId = data?.actor?.organization?.storageAccountId;
+        if (!storageAccountId) {
+          throw new Error('Unable to get organization storage account ID');
+        }
+        return AccountStorageMutation.mutate({
+          accountId: storageAccountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+          collection: 'nr1-tag-improver',
+          documentId: 'tagging-policy',
+          document: { policy: policy },
+        });
+      })
       .then(() => {
         this.setState(
           {
@@ -81,6 +117,28 @@ export default class TaggingPolicy extends React.Component {
       .catch(() => {
         this.setState({ savingPolicy: false, policySaveErrored: true });
       });
+    } else {
+      UserStorageMutation.mutate({
+        actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+        collection: 'nr1-tag-improver',
+        documentId: 'tagging-policy',
+        document: { policy: policy },
+      })
+      .then(() => {
+        this.setState(
+          {
+            isEditMode: false,
+            workingSchema: null,
+            savingPolicy: false,
+            policySaveErrored: false,
+          },
+          () => updatePolicy(policy, savedSchema)
+        );
+      })
+      .catch(() => {
+        this.setState({ savingPolicy: false, policySaveErrored: true });
+      });
+    }
   };
 
   startEditing = () => {
@@ -171,7 +229,7 @@ export default class TaggingPolicy extends React.Component {
   };
 
   render() {
-    const { schema, tagHierarchy, entityCount } = this.props;
+    const { schema, tagHierarchy, entityCount, storageType, onStorageTypeChange } = this.props;
     const {
       workingSchema,
       isEditMode,
@@ -233,27 +291,44 @@ export default class TaggingPolicy extends React.Component {
         <div>
           <div
             className="button-section"
-            style={{ padding: 8, paddingRight: 16 }}
+            style={{ padding: 8, paddingRight: 16, display: 'flex', alignItems: 'center', gap: '16px' }}
           >
-            {isEditMode ? (
-              <>
-                {policySaveErrored && (
-                  <div style={{ marginRight: 8 }}>
-                    Error occurred saving policy.
-                  </div>
-                )}
-                <Button onClick={this.cancelEditing}>Cancel</Button>
-                <Button
-                  loading={savingPolicy}
-                  disabled={disableSaving}
-                  onClick={this.applyEdits}
-                >
-                  Apply Edits
-                </Button>
-              </>
-            ) : (
-              <Button onClick={this.startEditing}>Edit Policy</Button>
-            )}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span>Policy Type:</span>
+              <Select
+                value={storageType || STORAGE_TYPES.GLOBAL}
+                onChange={onStorageTypeChange}
+                disabled={isEditMode}
+                style={{ minWidth: '150px' }}
+              >
+                {Object.entries(STORAGE_TYPE_LABELS).map(([value, label]) => (
+                  <SelectItem key={value} value={value}>
+                    {label}
+                  </SelectItem>
+                ))}
+              </Select>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isEditMode ? (
+                <>
+                  {policySaveErrored && (
+                    <div style={{ marginRight: 8 }}>
+                      Error occurred saving policy.
+                    </div>
+                  )}
+                  <Button onClick={this.cancelEditing}>Cancel</Button>
+                  <Button
+                    loading={savingPolicy}
+                    disabled={disableSaving}
+                    onClick={this.applyEdits}
+                  >
+                    Apply Edits
+                  </Button>
+                </>
+              ) : (
+                <Button onClick={this.startEditing}>Edit Policy</Button>
+              )}
+            </div>
           </div>
         </div>
         <Table items={isEditMode ? workingSchema : schema}>

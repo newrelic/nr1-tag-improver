@@ -15,5 +15,5 @@
       "url": "https://github.com/newrelic/nr1-tag-improver/discussions"
     }
   },
-  "whatsNew": "First release!"
+  "whatsNew": "v1.6.0 - Added Public and Private Policy storage options. Users can now choose between organization-wide shared policies or personal user-specific policies."
 }
