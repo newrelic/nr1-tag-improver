@@ -182,7 +182,6 @@ export default class TagVisualizer extends React.Component {
     );
   };
 
-
   loadEntityBatch = () => {
     const {
       processEntityQueryResults,
@@ -213,11 +212,13 @@ export default class TagVisualizer extends React.Component {
     `;
     const variables = {
       // queryString: `domain in ('APM', 'MOBILE', 'BROWSER', 'DASHBOARD', 'WORKLOAD')${
-      queryString: `${selectedEntityType.attribute} = '${selectedEntityType.id
-        }' ${accountId && accountId !== 'cross-account'
+      queryString: `${selectedEntityType.attribute} = '${
+        selectedEntityType.id
+      }' ${
+        accountId && accountId !== 'cross-account'
           ? `AND accountId = '${accountId}'`
           : ''
-        }`,
+      }`,
     };
     if (queryCursor) {
       variables.nextCursor = queryCursor;
@@ -355,7 +356,7 @@ export default class TagVisualizer extends React.Component {
               }
             }
           }
-        `
+        `,
       })
         .then(({ data }) => {
           const storageAccountId = data?.actor?.organization?.storageAccountId;
@@ -370,23 +371,31 @@ export default class TagVisualizer extends React.Component {
           });
         })
         .then(({ data }) => {
-          const taggingPolicy = data && data.policy && data.policy.length ? data.policy : SCHEMA;
+          const taggingPolicy =
+            data && data.policy && data.policy.length ? data.policy : SCHEMA;
           return new Promise((resolve) => {
-            this.setState({
-              taggingPolicy: sortedPolicy(taggingPolicy),
-              mandatoryTagCount:
-                taggingPolicy.filter((tag) => tag.enforcement === 'required')
-                  .length || 0,
-            }, resolve);
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(taggingPolicy),
+                mandatoryTagCount:
+                  taggingPolicy.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
           });
         })
         .catch(() => {
           return new Promise((resolve) => {
-            this.setState({
-              taggingPolicy: sortedPolicy(SCHEMA),
-              mandatoryTagCount:
-                SCHEMA.filter((tag) => tag.enforcement === 'required').length || 0,
-            }, resolve);
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(SCHEMA),
+                mandatoryTagCount:
+                  SCHEMA.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
           });
         });
     } else {
@@ -395,23 +404,31 @@ export default class TagVisualizer extends React.Component {
         documentId: 'tagging-policy',
       })
         .then(({ data }) => {
-          const taggingPolicy = data && data.policy && data.policy.length ? data.policy : SCHEMA;
+          const taggingPolicy =
+            data && data.policy && data.policy.length ? data.policy : SCHEMA;
           return new Promise((resolve) => {
-            this.setState({
-              taggingPolicy: sortedPolicy(taggingPolicy),
-              mandatoryTagCount:
-                taggingPolicy.filter((tag) => tag.enforcement === 'required')
-                  .length || 0,
-            }, resolve);
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(taggingPolicy),
+                mandatoryTagCount:
+                  taggingPolicy.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
           });
         })
         .catch(() => {
           return new Promise((resolve) => {
-            this.setState({
-              taggingPolicy: sortedPolicy(SCHEMA),
-              mandatoryTagCount:
-                SCHEMA.filter((tag) => tag.enforcement === 'required').length || 0,
-            }, resolve);
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(SCHEMA),
+                mandatoryTagCount:
+                  SCHEMA.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
           });
         });
     }

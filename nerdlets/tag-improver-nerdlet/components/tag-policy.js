@@ -75,9 +75,9 @@ export default class TaggingPolicy extends React.Component {
     const { updatePolicy, storageType } = this.props;
     const { workingSchema: policy, savedSchema } = this.state;
     this.setState({ savingPolicy: true });
-    
+
     const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
-    
+
     if (isGlobalStorage) {
       NerdGraphQuery.query({
         query: `
@@ -88,35 +88,35 @@ export default class TaggingPolicy extends React.Component {
               }
             }
           }
-        `
+        `,
       })
-      .then(({ data }) => {
-        const storageAccountId = data?.actor?.organization?.storageAccountId;
-        if (!storageAccountId) {
-          throw new Error('Unable to get organization storage account ID');
-        }
-        return AccountStorageMutation.mutate({
-          accountId: storageAccountId,
-          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-          collection: 'nr1-tag-improver',
-          documentId: 'tagging-policy',
-          document: { policy: policy },
+        .then(({ data }) => {
+          const storageAccountId = data?.actor?.organization?.storageAccountId;
+          if (!storageAccountId) {
+            throw new Error('Unable to get organization storage account ID');
+          }
+          return AccountStorageMutation.mutate({
+            accountId: storageAccountId,
+            actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+            collection: 'nr1-tag-improver',
+            documentId: 'tagging-policy',
+            document: { policy: policy },
+          });
+        })
+        .then(() => {
+          this.setState(
+            {
+              isEditMode: false,
+              workingSchema: null,
+              savingPolicy: false,
+              policySaveErrored: false,
+            },
+            () => updatePolicy(policy, savedSchema)
+          );
+        })
+        .catch(() => {
+          this.setState({ savingPolicy: false, policySaveErrored: true });
         });
-      })
-      .then(() => {
-        this.setState(
-          {
-            isEditMode: false,
-            workingSchema: null,
-            savingPolicy: false,
-            policySaveErrored: false,
-          },
-          () => updatePolicy(policy, savedSchema)
-        );
-      })
-      .catch(() => {
-        this.setState({ savingPolicy: false, policySaveErrored: true });
-      });
     } else {
       UserStorageMutation.mutate({
         actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
@@ -124,20 +124,20 @@ export default class TaggingPolicy extends React.Component {
         documentId: 'tagging-policy',
         document: { policy: policy },
       })
-      .then(() => {
-        this.setState(
-          {
-            isEditMode: false,
-            workingSchema: null,
-            savingPolicy: false,
-            policySaveErrored: false,
-          },
-          () => updatePolicy(policy, savedSchema)
-        );
-      })
-      .catch(() => {
-        this.setState({ savingPolicy: false, policySaveErrored: true });
-      });
+        .then(() => {
+          this.setState(
+            {
+              isEditMode: false,
+              workingSchema: null,
+              savingPolicy: false,
+              policySaveErrored: false,
+            },
+            () => updatePolicy(policy, savedSchema)
+          );
+        })
+        .catch(() => {
+          this.setState({ savingPolicy: false, policySaveErrored: true });
+        });
     }
   };
 
@@ -229,7 +229,13 @@ export default class TaggingPolicy extends React.Component {
   };
 
   render() {
-    const { schema, tagHierarchy, entityCount, storageType, onStorageTypeChange } = this.props;
+    const {
+      schema,
+      tagHierarchy,
+      entityCount,
+      storageType,
+      onStorageTypeChange,
+    } = this.props;
     const {
       workingSchema,
       isEditMode,
@@ -291,7 +297,13 @@ export default class TaggingPolicy extends React.Component {
         <div>
           <div
             className="button-section"
-            style={{ padding: 8, paddingRight: 16, display: 'flex', alignItems: 'center', gap: '16px' }}
+            style={{
+              padding: 8,
+              paddingRight: 16,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '16px',
+            }}
           >
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span>Policy Type:</span>
