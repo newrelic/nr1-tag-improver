@@ -1,3 +1,10 @@
+## [1.5.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.0...v1.5.1) (2025-10-17)
+
+
+### Bug Fixes
+
+* eslint, remove version bump, workflow version updates ([aed7897](https://github.com/newrelic/nr1-tag-improver/commit/aed7897e879c0a14a381ed50c848a67c2a288b56))
+
 # [1.5.0](https://github.com/newrelic/nr1-tag-improver/compare/v1.4.1...v1.5.0) (2024-03-04)
 
 
