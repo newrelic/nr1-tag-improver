@@ -12,6 +12,7 @@ import {
   nerdlet,
   PlatformStateContext,
   NerdletStateContext,
+  AccountStorageQuery,
   UserStorageQuery,
   logger,
 } from 'nr1';
@@ -23,6 +24,11 @@ import { SCHEMA, ENFORCEMENT_PRIORITY, ENTITY_TYPES } from './tag-schema';
 import TagCoverageView from './components/tag-coverage';
 import TagEntityView from './components/tag-entity-view';
 import TaggingPolicy from './components/tag-policy';
+
+const STORAGE_TYPES = {
+  GLOBAL: 'global',
+  USER: 'user',
+};
 
 export default class TagVisualizer extends React.Component {
   static propTypes = {
@@ -48,6 +54,7 @@ export default class TagVisualizer extends React.Component {
     selectedTagKey: '',
     selectedTagValue: '',
     currentTab: 'policy-tab',
+    storageType: STORAGE_TYPES.GLOBAL,
   };
 
   componentDidMount() {
@@ -70,17 +77,32 @@ export default class TagVisualizer extends React.Component {
       ],
     });
     this.setState({ accountId: this.context.accountId }, () => {
-      this.getTaggingPolicy();
-      this.startLoadingEntityTags();
+      this.getTaggingPolicy().then(() => {
+        this.startLoadingEntityTags();
+      });
     });
   }
 
   componentDidUpdate() {
     if (this.context.accountId !== this.state.accountId) {
       this.setState(
-        { accountId: this.context.accountId, taggingPolicy: null },
-        () => this.getTaggingPolicy(),
-        this.startLoadingEntityTags()
+        {
+          accountId: this.context.accountId,
+          taggingPolicy: null,
+          tagHierarchy: {},
+          entityTagsMap: {},
+          entityCount: 0,
+          loadedEntities: 0,
+          doneLoading: false,
+          queryCursor: undefined,
+          selectedTagKey: '',
+          selectedTagValue: '',
+        },
+        () => {
+          this.getTaggingPolicy().then(() => {
+            this.startLoadingEntityTags();
+          });
+        }
       );
     }
   }
@@ -133,7 +155,6 @@ export default class TagVisualizer extends React.Component {
       mandatoryTagCount: 0,
     });
   };
-
   /**
    * Loading the tagset for all entities is a bit of a chore.
    *
@@ -265,7 +286,7 @@ export default class TagVisualizer extends React.Component {
     const { tagHierarchy, entityTagsMap, taggingPolicy, mandatoryTagCount } =
       this.state;
 
-    if (!Object.keys(tagHierarchy).length) {
+    if (!Object.keys(tagHierarchy).length && taggingPolicy) {
       for (const tag of taggingPolicy) {
         tagHierarchy[tag.key] = {};
       }
@@ -322,26 +343,95 @@ export default class TagVisualizer extends React.Component {
   }
 
   getTaggingPolicy = () => {
-    UserStorageQuery.query({
-      collection: 'nr1-tag-improver',
-      documentId: 'tagging-policy',
-    })
-      .then(({ data }) => {
-        const taggingPolicy = data.policy.length ? data.policy : SCHEMA;
-        this.setState({
-          taggingPolicy: sortedPolicy(taggingPolicy),
-          mandatoryTagCount:
-            taggingPolicy.filter((tag) => tag.enforcement === 'required')
-              .length || 0,
-        });
+    const { storageType } = this.state;
+    const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
+
+    if (isGlobalStorage) {
+      return NerdGraphQuery.query({
+        query: `
+          {
+            actor {
+              organization {
+                storageAccountId
+              }
+            }
+          }
+        `,
       })
-      .catch(() => {
-        this.setState({
-          taggingPolicy: sortedPolicy(SCHEMA),
-          mandatoryTagCount:
-            SCHEMA.filter((tag) => tag.enforcement === 'required').length || 0,
+        .then(({ data }) => {
+          const storageAccountId = data?.actor?.organization?.storageAccountId;
+          if (!storageAccountId) {
+            throw new Error('Unable to get organization storage account ID');
+          }
+
+          return AccountStorageQuery.query({
+            accountId: storageAccountId,
+            collection: 'nr1-tag-improver',
+            documentId: 'tagging-policy',
+          });
+        })
+        .then(({ data }) => {
+          const taggingPolicy =
+            data && data.policy && data.policy.length ? data.policy : SCHEMA;
+          return new Promise((resolve) => {
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(taggingPolicy),
+                mandatoryTagCount:
+                  taggingPolicy.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
+          });
+        })
+        .catch(() => {
+          return new Promise((resolve) => {
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(SCHEMA),
+                mandatoryTagCount:
+                  SCHEMA.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
+          });
         });
-      });
+    } else {
+      return UserStorageQuery.query({
+        collection: 'nr1-tag-improver',
+        documentId: 'tagging-policy',
+      })
+        .then(({ data }) => {
+          const taggingPolicy =
+            data && data.policy && data.policy.length ? data.policy : SCHEMA;
+          return new Promise((resolve) => {
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(taggingPolicy),
+                mandatoryTagCount:
+                  taggingPolicy.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
+          });
+        })
+        .catch(() => {
+          return new Promise((resolve) => {
+            this.setState(
+              {
+                taggingPolicy: sortedPolicy(SCHEMA),
+                mandatoryTagCount:
+                  SCHEMA.filter((tag) => tag.enforcement === 'required')
+                    .length || 0,
+              },
+              resolve
+            );
+          });
+        });
+    }
   };
 
   updatePolicy = (policy, prevPolicy) => {
@@ -391,6 +481,28 @@ export default class TagVisualizer extends React.Component {
     this.setState({ helpModalOpen });
   };
 
+  onStorageTypeChange = (_, newStorageType) => {
+    this.setState(
+      {
+        storageType: newStorageType,
+        taggingPolicy: null,
+        tagHierarchy: {},
+        entityTagsMap: {},
+        entityCount: 0,
+        loadedEntities: 0,
+        doneLoading: false,
+        queryCursor: undefined,
+        selectedTagKey: '',
+        selectedTagValue: '',
+      },
+      () => {
+        this.getTaggingPolicy().then(() => {
+          this.startLoadingEntityTags();
+        });
+      }
+    );
+  };
+
   render() {
     const {
       helpModalOpen,
@@ -405,6 +517,7 @@ export default class TagVisualizer extends React.Component {
       selectedTagKey,
       selectedTagValue,
       currentTab,
+      storageType,
     } = this.state;
 
     return (
@@ -462,6 +575,8 @@ export default class TagVisualizer extends React.Component {
                     doneLoading={doneLoading}
                     schema={taggingPolicy}
                     updatePolicy={this.updatePolicy}
+                    storageType={storageType}
+                    onStorageTypeChange={this.onStorageTypeChange}
                   />
                 </TabsItem>
                 <TabsItem value="coverage-tab" label="Tag analyzer">

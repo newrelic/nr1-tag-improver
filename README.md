@@ -37,7 +37,7 @@ In the Policy tab, you can define a policy for tag governance across your accoun
 
 ## Customizing the Tag Policy
 
-Users can edit the tagging policy in the New Relic UI but those changes are only visible to the individual user. To customize the default policy, follow these instructions before deploying the app to your account(s).
+Users can edit the tagging policy in the New Relic UI, either globally for all users, or just for your user (private policy). To customize the default policy in either case, follow these instructions before deploying the app to your account(s).
 
 The Policy report is driven by a policy schema defined in [tag-schema.js](./nerdlets/tag-improver-nerdlet/tag-schema.js)
 
