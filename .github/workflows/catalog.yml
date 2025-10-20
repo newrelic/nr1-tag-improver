@@ -23,16 +23,6 @@ on:
         description: "If action == `add`, must supply URL of repo"
         required: false
 jobs:
-  job-check-workflow-dispatch-inputs:
-    runs-on: ubuntu-latest
-    steps:
-      - run: |
-          echo "appName: ${{ github.event.inputs.appName }}"
-          echo "version: ${{ github.event.inputs.version }}"
-          echo "ref: ${{ github.event.inputs.ref }}"
-          echo "user: ${{ github.event.inputs.user }}"
-          echo "action: ${{ github.event.inputs.action }}"
-          echo "url: ${{ github.event.inputs.url }}"
 
   job-trigger-catalog-workflow:
     runs-on: ubuntu-latest

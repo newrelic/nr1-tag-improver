@@ -1,0 +1,11 @@
+version: 2
+
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: daily
+    ignore:
+      - dependency-name: ad-m/github-push-action
+      - dependency-name: ataylorme/eslint-annotate-action
+      - dependency-name: benc-uk/workflow-dispatch
