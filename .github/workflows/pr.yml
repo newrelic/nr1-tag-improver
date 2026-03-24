@@ -21,7 +21,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -33,7 +33,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Install NR1 CLI
         run: curl -s https://cli.nr-ext.net/installer.sh | sudo bash
@@ -55,7 +55,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -67,7 +67,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run eslint-check and generate report
         id: eslint-check
@@ -101,7 +101,7 @@ jobs:
       - name: Setup node
         uses: actions/setup-node@v4
         with:
-          node-version: 16
+          node-version: 20
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -113,7 +113,7 @@ jobs:
             ${{ runner.os }}-node-modules-
 
       - name: Install Dependencies
-        run: npm ci
+        run: npm ci --legacy-peer-deps
 
       - name: Run npm test
         run: npm test
