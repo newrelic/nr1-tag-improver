@@ -344,33 +344,18 @@ export default class TagVisualizer extends React.Component {
 
   getTaggingPolicy = () => {
     const { storageType } = this.state;
-    const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
 
-    if (isGlobalStorage) {
-      return NerdGraphQuery.query({
-        query: `
-          {
-            actor {
-              organization {
-                storageAccountId
-              }
-            }
-          }
-        `,
+    if (
+      storageType === STORAGE_TYPES.GLOBAL &&
+      this.state.accountId !== 'cross-account'
+    ) {
+      return AccountStorageQuery.query({
+        accountId: this.state.accountId,
+        collection: 'nr1-tag-improver',
+        documentId: 'tagging-policy',
       })
         .then(({ data }) => {
-          const storageAccountId = data?.actor?.organization?.storageAccountId;
-          if (!storageAccountId) {
-            throw new Error('Unable to get organization storage account ID');
-          }
-
-          return AccountStorageQuery.query({
-            accountId: storageAccountId,
-            collection: 'nr1-tag-improver',
-            documentId: 'tagging-policy',
-          });
-        })
-        .then(({ data }) => {
+          console.log('data', data);
           const taggingPolicy =
             data && data.policy && data.policy.length ? data.policy : SCHEMA;
           return new Promise((resolve) => {
@@ -398,7 +383,7 @@ export default class TagVisualizer extends React.Component {
             );
           });
         });
-    } else {
+    } else if (storageType === STORAGE_TYPES.USER) {
       return UserStorageQuery.query({
         collection: 'nr1-tag-improver',
         documentId: 'tagging-policy',
@@ -431,6 +416,18 @@ export default class TagVisualizer extends React.Component {
             );
           });
         });
+    } else {
+      return new Promise((resolve) => {
+        this.setState(
+          {
+            taggingPolicy: sortedPolicy(SCHEMA),
+            mandatoryTagCount:
+              SCHEMA.filter((tag) => tag.enforcement === 'required').length ||
+              0,
+          },
+          resolve
+        );
+      });
     }
   };
 
