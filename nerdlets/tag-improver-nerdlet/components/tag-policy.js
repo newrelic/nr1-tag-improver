@@ -15,7 +15,6 @@ import {
   Tooltip,
   AccountStorageMutation,
   UserStorageMutation,
-  NerdGraphQuery,
 } from 'nr1';
 import { TAG_SCHEMA_ENFORCEMENT, ENFORCEMENT_PRIORITY } from '../tag-schema';
 import Autocomplete from './autocomplete';
@@ -48,6 +47,7 @@ const STORAGE_TYPE_LABELS = {
 
 export default class TaggingPolicy extends React.Component {
   static propTypes = {
+    accountId: PropTypes.any,
     updatePolicy: PropTypes.func,
     tagHierarchy: PropTypes.object,
     schema: PropTypes.array,
@@ -63,6 +63,7 @@ export default class TaggingPolicy extends React.Component {
       savedSchema: null,
       isEditMode: false,
       savingPolicy: false,
+      pickAccountMsg: false,
       policySaveErrored: false,
       tableSorting: {
         enforcement: 'ascending',
@@ -72,52 +73,40 @@ export default class TaggingPolicy extends React.Component {
   }
 
   applyEdits = () => {
-    const { updatePolicy, storageType } = this.props;
+    const { updatePolicy, storageType, accountId } = this.props;
     const { workingSchema: policy, savedSchema } = this.state;
-    this.setState({ savingPolicy: true });
+    this.setState({ savingPolicy: true, pickAccountMsg: false });
 
     const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
 
-    if (isGlobalStorage) {
-      NerdGraphQuery.query({
-        query: `
-          {
-            actor {
-              organization {
-                storageAccountId
-              }
-            }
-          }
-        `,
-      })
-        .then(({ data }) => {
-          const storageAccountId = data?.actor?.organization?.storageAccountId;
-          if (!storageAccountId) {
-            throw new Error('Unable to get organization storage account ID');
-          }
-          return AccountStorageMutation.mutate({
-            accountId: storageAccountId,
-            actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-            collection: 'nr1-tag-improver',
-            documentId: 'tagging-policy',
-            document: { policy: policy },
-          });
-        })
-        .then(() => {
-          this.setState(
-            {
-              isEditMode: false,
-              workingSchema: null,
-              savingPolicy: false,
-              policySaveErrored: false,
-            },
-            () => updatePolicy(policy, savedSchema)
-          );
-        })
-        .catch(() => {
-          this.setState({ savingPolicy: false, policySaveErrored: true });
-        });
-    } else {
+    if (isGlobalStorage && accountId !== 'cross-account') {
+      return (
+        AccountStorageMutation.mutate({
+          accountId,
+          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+          collection: 'nr1-tag-improver',
+          documentId: 'tagging-policy',
+          document: { policy: policy },
+        }) //;
+          // })
+          .then(() => {
+            this.setState(
+              {
+                isEditMode: false,
+                workingSchema: null,
+                savingPolicy: false,
+                policySaveErrored: false,
+              },
+              () => updatePolicy(policy, savedSchema)
+            );
+          })
+          .catch(() => {
+            this.setState({ savingPolicy: false, policySaveErrored: true });
+          })
+      );
+    } else if (isGlobalStorage && accountId === 'cross-account') {
+      this.setState({ savingPolicy: false, pickAccountMsg: true });
+    } else if (storageType === STORAGE_TYPES.USER) {
       UserStorageMutation.mutate({
         actionType: UserStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
         collection: 'nr1-tag-improver',
@@ -239,6 +228,7 @@ export default class TaggingPolicy extends React.Component {
     const {
       workingSchema,
       isEditMode,
+      pickAccountMsg,
       policySaveErrored,
       savingPolicy,
       tableSorting,
@@ -323,6 +313,11 @@ export default class TaggingPolicy extends React.Component {
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               {isEditMode ? (
                 <>
+                  {pickAccountMsg && (
+                    <div style={{ marginRight: 8 }}>
+                      Pick an account to save.
+                    </div>
+                  )}
                   {policySaveErrored && (
                     <div style={{ marginRight: 8 }}>
                       Error occurred saving policy.
