@@ -1,3 +1,12 @@
+## [1.5.2](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.1...v1.5.2) (2026-03-24)
+
+
+### Bug Fixes
+
+* regenerated lock file ([2bf9606](https://github.com/newrelic/nr1-tag-improver/commit/2bf96066a54c6a177cbccde21d4632a4032006fd))
+* set account id to store and read for nerdstorage ([ea3a2fb](https://github.com/newrelic/nr1-tag-improver/commit/ea3a2fbd1b6eb7681392b5a96ce5ca035f2f404c))
+* workflow fixes ([3a47124](https://github.com/newrelic/nr1-tag-improver/commit/3a4712487d50c175a96488b460112d495b9b2acd))
+
 ## [1.5.1](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.0...v1.5.1) (2025-10-17)
 
 
