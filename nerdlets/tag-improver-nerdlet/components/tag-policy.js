@@ -80,30 +80,27 @@ export default class TaggingPolicy extends React.Component {
     const isGlobalStorage = storageType === STORAGE_TYPES.GLOBAL;
 
     if (isGlobalStorage && accountId !== 'cross-account') {
-      return (
-        AccountStorageMutation.mutate({
-          accountId,
-          actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
-          collection: 'nr1-tag-improver',
-          documentId: 'tagging-policy',
-          document: { policy: policy },
-        }) //;
-          // })
-          .then(() => {
-            this.setState(
-              {
-                isEditMode: false,
-                workingSchema: null,
-                savingPolicy: false,
-                policySaveErrored: false,
-              },
-              () => updatePolicy(policy, savedSchema)
-            );
-          })
-          .catch(() => {
-            this.setState({ savingPolicy: false, policySaveErrored: true });
-          })
-      );
+      return AccountStorageMutation.mutate({
+        accountId,
+        actionType: AccountStorageMutation.ACTION_TYPE.WRITE_DOCUMENT,
+        collection: 'nr1-tag-improver',
+        documentId: 'tagging-policy',
+        document: { policy: policy },
+      })
+        .then(() => {
+          this.setState(
+            {
+              isEditMode: false,
+              workingSchema: null,
+              savingPolicy: false,
+              policySaveErrored: false,
+            },
+            () => updatePolicy(policy, savedSchema)
+          );
+        })
+        .catch(() => {
+          this.setState({ savingPolicy: false, policySaveErrored: true });
+        });
     } else if (isGlobalStorage && accountId === 'cross-account') {
       this.setState({ savingPolicy: false, pickAccountMsg: true });
     } else if (storageType === STORAGE_TYPES.USER) {
