@@ -1,3 +1,10 @@
+## [1.5.3](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.2...v1.5.3) (2026-03-25)
+
+
+### Bug Fixes
+
+* package lock version; add npmrc; code cleanup ([a511d78](https://github.com/newrelic/nr1-tag-improver/commit/a511d78a3fd072309adba72fed5596e03e364993))
+
 ## [1.5.2](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.1...v1.5.2) (2026-03-24)
 
 
