@@ -355,7 +355,6 @@ export default class TagVisualizer extends React.Component {
         documentId: 'tagging-policy',
       })
         .then(({ data }) => {
-          console.log('data', data);
           const taggingPolicy =
             data && data.policy && data.policy.length ? data.policy : SCHEMA;
           return new Promise((resolve) => {
