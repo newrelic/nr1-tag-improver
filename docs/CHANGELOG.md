@@ -1,3 +1,10 @@
+## [1.5.4](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.3...v1.5.4) (2026-07-17)
+
+
+### Bug Fixes
+
+* issues in workflows ([f6294b0](https://github.com/newrelic/nr1-tag-improver/commit/f6294b08c86f616b24ae7b607c0bfcf5c91302b5))
+
 ## [1.5.3](https://github.com/newrelic/nr1-tag-improver/compare/v1.5.2...v1.5.3) (2026-03-25)
 
 
